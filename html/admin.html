@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel · QuickGanyu</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<nav class="navbar">
+  <a class="logo" href="../index.html">Quick<span>Ganyu</span> <i class="fas fa-bolt" style="color:#f5c842; font-size:1.2rem;"></i></a>
+  <div class="nav-links">
+    <a href="../index.html"><i class="fas fa-home"></i> Home</a>
+    <a href="providers.html"><i class="fas fa-search"></i> Browse</a>
+    <a href="profile.html"><i class="fas fa-user-tie"></i> Provider</a>
+    <a href="admin.html"><i class="fas fa-clipboard-list"></i> Admin</a>
+  </div>
+  <div class="nav-actions">
+    <a class="btn-outline-light" href="signup.html"><i class="fas fa-user-plus"></i> Sign up</a>
+    <a class="btn-light" href="login.html"><i class="fas fa-sign-in-alt"></i> Log in</a>
+  </div>
+</nav>
+
+<div class="container">
+  <section class="hero-card hero">
+    <div class="animated-feedback"><i class="fas fa-user-shield" style="color:#f5c842;"></i> Admin dashboard for marketplace operations</div>
+    <h1>Control the platform</h1>
+    <p>Manage users, content, analytics, notifications, security and data settings from one central view.</p>
+  </section>
+
+  <section class="stats-grid">
+    <div class="stat-card"><strong>142</strong><span>Users</span></div>
+    <div class="stat-card"><strong>+12%</strong><span>Sales growth</span></div>
+    <div class="stat-card"><strong>1.2k</strong><span>Visits</span></div>
+    <div class="stat-card"><strong>3</strong><span>Alerts</span></div>
+  </section>
+
+  <section class="admin-grid">
+    <div class="admin-card">
+      <h3><i class="fas fa-users" style="color:#f5c842;"></i> User Management</h3>
+      <div class="muted">Add, edit, delete users and assign roles like admin, editor and viewer.</div>
+      <div class="table-list">
+        <div class="table-row"><span>Chisomo</span><span>Admin</span></div>
+        <div class="table-row"><span>Grace</span><span>Editor</span></div>
+        <div class="table-row"><span>Mike</span><span>Viewer</span></div>
+      </div>
+    </div>
+    <div class="admin-card">
+      <h3><i class="fas fa-chart-line" style="color:#f5c842;"></i> Analytics & Reporting</h3>
+      <div class="chart-row"><span>Sales</span><div class="chart-bar"><span style="width:80%"></span></div></div>
+      <div class="chart-row"><span>Users</span><div class="chart-bar"><span style="width:70%"></span></div></div>
+      <div class="chart-row"><span>Traffic</span><div class="chart-bar"><span style="width:90%"></span></div></div>
+      <div class="muted">Export reports in PDF and Excel formats.</div>
+    </div>
+    <div class="admin-card">
+      <h3><i class="fas fa-file-alt" style="color:#f5c842;"></i> Content Management</h3>
+      <div class="muted">Create, edit and delete content, manage uploads and approvals.</div>
+      <div class="pill-list"><span>Posts</span><span>Pages</span><span>Media</span><span>Approval</span></div>
+    </div>
+    <div class="admin-card">
+      <h3><i class="fas fa-shield-alt" style="color:#f5c842;"></i> Security & Access Control</h3>
+      <div class="muted">Authentication, RBAC, 2FA and activity logs for audits.</div>
+      <div class="pill-list"><span>Login</span><span>Logout</span><span>2FA</span><span>Logs</span></div>
+    </div>
+    <div class="admin-card">
+      <h3><i class="fas fa-bell" style="color:#f5c842;"></i> Notifications System</h3>
+      <div class="activity-list">
+        <div class="activity-item"><span>New quote request</span><span>Now</span></div>
+        <div class="activity-item"><span>Profile completion reminder</span><span>1h ago</span></div>
+      </div>
+    </div>
+    <div class="admin-card">
+      <h3><i class="fas fa-database" style="color:#f5c842;"></i> Data Management</h3>
+      <div class="muted">Backup and restore, import/export data and advanced filtering.</div>
+      <div class="pill-list"><span>Backup</span><span>Restore</span><span>Search</span><span>Export</span></div>
+    </div>
+  </section>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-col">
+        <h4>QuickGanyu</h4>
+        <a href="../index.html">About</a>
+        <a href="providers.html">Services</a>
+        <a href="profile.html">Providers</a>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <a href="../index.html">Home</a>
+        <a href="providers.html">Browse</a>
+        <a href="admin.html">Admin</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <span>Malawi</span>
+        <span>Email: info@quickganyu.com</span>
+        <span>Phone: +265 999 000 000</span>
+      </div>
+      <div class="footer-col footer-newsletter">
+        <h4>Newsletter</h4>
+        <div class="newsletter-form">
+          <input type="email" placeholder="Email address">
+          <button type="button">Subscribe</button>
+        </div>
+        <div class="footer-social">
+          <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-brand">Quick<span>Ganyu</span></div>
+      <div class="footer-copy">&copy; 2026 QuickGanyu – built for Malawi</div>
+      <a class="footer-backtop" href="#top"><i class="fas fa-arrow-up"></i></a>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/script.js"></script>
+</body>
+</html>
+
