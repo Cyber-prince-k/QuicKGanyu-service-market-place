@@ -19,6 +19,9 @@ a {
 }
 
 .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
   background: #0b0b0b;
   padding: 0.9rem 2rem;
   display: flex;
