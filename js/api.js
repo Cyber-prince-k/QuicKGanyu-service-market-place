@@ -119,29 +119,57 @@
     try {
       const me = await fetchMe();
       if (me) {
-        const roleLabel   = me.role === 'admin' ? 'Admin' : me.role === 'provider' ? 'Provider' : 'Client';
-        const profileHref = me.role === 'admin' ? htmlUrl('admin.html') : htmlUrl('profile.html');
+        // Build initials from full name (up to 2 letters)
+        const initials = me.full_name
+          .trim()
+          .split(/\s+/)
+          .slice(0, 2)
+          .map(w => w[0].toUpperCase())
+          .join('');
+
+        const roleLabel = me.role === 'admin'
+          ? 'Admin'
+          : me.role === 'provider'
+            ? 'Provider'
+            : 'Client';
+
+        // Each role gets its own dashboard link
+        const dashHref = me.role === 'admin'
+          ? htmlUrl('admin.html')
+          : me.role === 'provider'
+            ? htmlUrl('provider-dashboard.html')
+            : htmlUrl('customer-dashboard.html');
+
+        // Colour the avatar ring by role
+        const roleColor = me.role === 'admin'
+          ? '#f5c842'
+          : me.role === 'provider'
+            ? '#4ade80'
+            : '#60a5fa';
 
         navActions.innerHTML = `
-          <span class="user-chip">
-            <i class="fas fa-user-circle"></i>
-            ${esc(me.username || me.full_name)}
-            <em>${roleLabel}</em>
-          </span>
-          <a class="btn-outline-light" href="${profileHref}">
-            <i class="fas fa-user-edit"></i> My account
+          <a class="nav-user-chip" href="${dashHref}" title="Go to my dashboard">
+            <span class="nav-avatar" style="background:${roleColor};">${esc(initials)}</span>
+            <span class="nav-user-info">
+              <span class="nav-user-name">${esc(me.username || me.full_name)}</span>
+              <span class="nav-user-role">${roleLabel}</span>
+            </span>
           </a>
-          <button class="btn-light" id="logout-btn" type="button">
+          <button class="btn-light nav-logout-btn" id="logout-btn" type="button">
             <i class="fas fa-sign-out-alt"></i> Log out
           </button>
         `;
+
         document.getElementById('logout-btn').addEventListener('click', async () => {
-          await apiFetch('logout.php', {});
+          try {
+            await apiFetch('logout.php', {});
+          } catch (_) { /* ignore network errors on logout */ }
           toast('You have been logged out.', 'info');
           setTimeout(() => { window.location.href = htmlUrl('login.html'); }, 600);
         });
+
       } else {
-        // Not logged in – show sign up / log in links.
+        // Not logged in — show sign up / log in links
         navActions.innerHTML = `
           <a class="btn-outline-light" href="${htmlUrl('signup.html')}">
             <i class="fas fa-user-plus"></i> Sign up
@@ -152,7 +180,7 @@
         `;
       }
     } catch (e) {
-      // Leave existing nav-actions content untouched on error.
+      // Session check failed — leave nav untouched
     }
   });
 })();

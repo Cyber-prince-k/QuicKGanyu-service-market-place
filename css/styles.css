@@ -806,6 +806,76 @@ a {
   font-weight: 700;
 }
 
+/* Clickable user chip with initials avatar */
+.nav-user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem 0.3rem 0.3rem;
+  transition: background 0.2s, border-color 0.2s;
+  cursor: pointer;
+}
+.nav-user-chip:hover {
+  background: #2a2a2a;
+  border-color: #f5c842;
+}
+
+/* Initials circle */
+.nav-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0b0b0b;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+/* Name + role stacked */
+.nav-user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.nav-user-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #f9f9f9;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nav-user-role {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Log out button — compact in navbar */
+.nav-logout-btn {
+  background: transparent !important;
+  border: 1px solid #555 !important;
+  color: #ccc !important;
+  font-size: 0.85rem !important;
+  padding: 0.45rem 0.9rem !important;
+}
+.nav-logout-btn:hover {
+  background: #b00020 !important;
+  border-color: #b00020 !important;
+  color: white !important;
+}
+
 /* ── Admin dashboard live styles ───────────────────────────────────────────── */
 .admin-page-guard {
   text-align: center;
