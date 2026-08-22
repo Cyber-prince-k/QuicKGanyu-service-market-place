@@ -133,11 +133,14 @@
 
     // Redirect based on role / status returned by the API
     setTimeout(() => {
-      const dest = res.redirect;
-      if (dest === 'admin')   { window.location.href = 'admin.html'; }
-      else if (dest === 'setup')  { window.location.href = 'setup.html'; }
-      else if (dest === 'profile') { window.location.href = 'profile.html'; }
-      else                         { window.location.href = '../index.html'; }
+      const map = {
+        'admin':              'admin.html',
+        'setup':              'setup.html',
+        'provider-dashboard': 'provider-dashboard.html',
+        'customer-dashboard': 'customer-dashboard.html',
+        'profile':            'profile.html',
+      };
+      window.location.href = map[res.redirect] || '../index.html';
     }, 600);
   });
 })();

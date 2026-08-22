@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Provider Dashboard · QuickGanyu</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="logo" href="../index.html">Quick<span>Ganyu</span> <i class="fas fa-bolt" style="color:#f5c842;font-size:1.2rem;"></i></a>
+  <div class="nav-links">
+    <a href="../index.html"><i class="fas fa-home"></i> Home</a>
+    <a href="providers.html"><i class="fas fa-search"></i> Browse</a>
+  </div>
+  <div class="nav-actions"><!-- filled by api.js --></div>
+</nav>
+
+<div class="container" id="page-root">
+  <div class="empty-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Loading your dashboard…</p>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-col"><h4>QuickGanyu</h4><a href="../index.html">Home</a><a href="providers.html">Browse</a></div>
+      <div class="footer-col"><h4>Contact</h4><span>info@quickganyu.com</span><span>+265 999 000 000</span></div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-brand">Quick<span>Ganyu</span></div>
+      <div class="footer-copy">&copy; 2026 QuickGanyu</div>
+      <a class="footer-backtop" href="#top"><i class="fas fa-arrow-up"></i></a>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/api.js"></script>
+<script>
+(function () {
+  const { fetchMe, esc } = window.QuickGanyu;
+  const root = document.getElementById('page-root');
+
+  const CATEGORIES = [
+    'Plumbing','Electrical','Carpentry','Painting','Cleaning',
+    'Photography','Catering','Tutoring','IT / Tech support',
+    'Tailoring','Gardening','Moving / Transport','Events','Other',
+  ];
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const me = await fetchMe();
+
+    if (!me) {
+      window.location.href = 'login.html';
+      return;
+    }
+    // Redirect to setup if not yet activated
+    if (me.status === 'needs_setup') {
+      window.location.href = 'setup.html';
+      return;
+    }
+    if (me.role !== 'provider') {
+      if (me.role === 'admin')  { window.location.href = 'admin.html'; return; }
+      if (me.role === 'client') { window.location.href = 'customer-dashboard.html'; return; }
+    }
+
+    // Profile completeness score
+    const fields   = ['phone','location','service_category','skills','about','experience_years'];
+    const filled   = fields.filter(f => me[f] && String(me[f]).trim() !== '').length;
+    const pct      = Math.round(((filled + 2) / (fields.length + 2)) * 100); // +2 for name+email always filled
+    const catOptions = CATEGORIES.map(c =>
+      `<option value="${esc(c)}" ${me.service_category === c ? 'selected' : ''}>${esc(c)}</option>`
+    ).join('');
+
+    root.innerHTML = `
+      <!-- Welcome hero -->
+      <section class="hero-card hero" style="margin-bottom:1.4rem;">
+        <div class="animated-feedback">
+          <i class="fas fa-briefcase" style="color:#f5c842;"></i> Provider dashboard
+        </div>
+        <h1>Hello, ${esc(me.full_name.split(' ')[0])}!</h1>
+        <p>Manage your profile, showcase your skills, and connect with clients across Malawi.</p>
+      </section>
+
+      <!-- Stats strip -->
+      <div class="stats-grid" style="margin-bottom:1.4rem;">
+        <div class="stat-card">
+          <strong>${esc(me.service_category || '—')}</strong>
+          <span>Service category</span>
+        </div>
+        <div class="stat-card">
+          <strong>${esc(me.location || '—')}</strong>
+          <span>Location</span>
+        </div>
+        <div class="stat-card">
+          <strong>${me.experience_years ? me.experience_years + ' yrs' : '—'}</strong>
+          <span>Experience</span>
+        </div>
+        <div class="stat-card">
+          <strong>${pct}%</strong>
+          <span>Profile completeness</span>
+        </div>
+      </div>
+
+      <!-- Profile completeness bar -->
+      <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
+        <h2 class="section-title"><i class="fas fa-chart-line" style="color:#f5c842;"></i> Profile completeness</h2>
+        <div class="progress-card">
+          <span>Complete your profile to attract more clients</span>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <strong>${pct}%</strong>
+        </div>
+        ${pct < 100 ? `<p class="muted" style="margin-top:0.5rem;">Fill in your skills, location, and about section below to reach 100%.</p>` : `<p class="muted" style="margin-top:0.5rem;color:#1a7f4b;"><i class="fas fa-check-circle"></i> Your profile is complete!</p>`}
+      </section>
+
+      <!-- Edit profile form -->
+      <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
+        <h2 class="section-title"><i class="fas fa-user-edit" style="color:#f5c842;"></i> My provider profile</h2>
+
+        <div id="profile-error"   class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
+        <div id="profile-success" class="form-banner form-banner--info"  style="display:none;margin-bottom:1rem;"></div>
+
+        <form id="profile-form" novalidate>
+          <div class="add-provider-form">
+            <div class="form-card">
+              <label>Full name *
+                <input type="text" name="full_name" value="${esc(me.full_name)}" required>
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Username *
+                <input type="text" name="username" value="${esc(me.username || '')}" required>
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Phone
+                <input type="tel" name="phone" value="${esc(me.phone || '')}" placeholder="+265 9xx xxx xxx">
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Location
+                <input type="text" name="location" value="${esc(me.location || '')}" placeholder="City or district">
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Service category
+                <select name="service_category">
+                  <option value="">— Select —</option>
+                  ${catOptions}
+                </select>
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Years of experience
+                <input type="number" name="experience_years" value="${esc(me.experience_years || '')}" min="0" max="80" placeholder="e.g. 5">
+              </label>
+            </div>
+            <div class="form-card full-col">
+              <label>Skills
+                <input type="text" name="skills" value="${esc(me.skills || '')}" placeholder="e.g. Tiling, burst pipes, piping">
+              </label>
+            </div>
+            <div class="form-card full-col">
+              <label>About me
+                <textarea name="about" placeholder="Tell clients about your work…">${esc(me.about || '')}</textarea>
+              </label>
+            </div>
+          </div>
+
+          <div class="auth-actions" style="margin-top:1.4rem;">
+            <button type="submit" class="btn-primary" id="save-btn">
+              <i class="fas fa-save"></i> Save profile
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Change password section -->
+      <section class="section-card" style="max-width:640px;margin:0 auto 1.4rem;">
+        <h2 class="section-title"><i class="fas fa-key" style="color:#f5c842;"></i> Change password</h2>
+        <div id="pw-error"   class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
+        <div id="pw-success" class="form-banner form-banner--info"  style="display:none;margin-bottom:1rem;"></div>
+        <form id="pw-form" novalidate>
+          <div class="form-grid" style="grid-template-columns:1fr;">
+            <div class="form-card">
+              <label>New password
+                <input type="password" name="password" placeholder="At least 8 characters" autocomplete="new-password">
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Confirm new password
+                <input type="password" name="confirm_password" placeholder="Repeat new password" autocomplete="new-password">
+              </label>
+            </div>
+          </div>
+          <div class="auth-actions" style="margin-top:1.2rem;">
+            <button type="submit" class="btn-primary" id="pw-btn">
+              <i class="fas fa-lock"></i> Update password
+            </button>
+          </div>
+        </form>
+      </section>
+    `;
+
+    // ── Profile form submit ────────────────────────────────────────────────────
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pErr  = document.getElementById('profile-error');
+      const pSucc = document.getElementById('profile-success');
+      const btn   = document.getElementById('save-btn');
+      pErr.style.display = pSucc.style.display = 'none';
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+
+      const form = e.target;
+      const res  = await window.QuickGanyu.apiFetch('profile.php', {
+        full_name:        form.full_name.value.trim(),
+        username:         form.username.value.trim(),
+        phone:            form.phone.value.trim(),
+        location:         form.location.value.trim(),
+        service_category: form.service_category.value,
+        experience_years: parseInt(form.experience_years.value) || 0,
+        skills:           form.skills.value.trim(),
+        about:            form.about.value.trim(),
+      });
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-save"></i> Save profile';
+
+      if (!res.ok) {
+        if (res.errors) window.QuickGanyu.showFormErrors(res.errors);
+        pErr.textContent   = res.errors ? Object.values(res.errors)[0] : (res.error || 'Could not save changes.');
+        pErr.style.display = 'block';
+        return;
+      }
+      pSucc.textContent   = 'Profile saved successfully!';
+      pSucc.style.display = 'block';
+      window.QuickGanyu.toast('Profile updated!', 'success');
+    });
+
+    // ── Password form submit ───────────────────────────────────────────────────
+    document.getElementById('pw-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pwErr  = document.getElementById('pw-error');
+      const pwSucc = document.getElementById('pw-success');
+      const btn    = document.getElementById('pw-btn');
+      pwErr.style.display = pwSucc.style.display = 'none';
+
+      const form = e.target;
+      if (form.password.value !== form.confirm_password.value) {
+        pwErr.textContent   = 'Passwords do not match.';
+        pwErr.style.display = 'block';
+        return;
+      }
+      if (form.password.value.length < 8) {
+        pwErr.textContent   = 'Password must be at least 8 characters.';
+        pwErr.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating…';
+
+      const res = await window.QuickGanyu.apiFetch('profile.php', {
+        password: form.password.value,
+      });
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-lock"></i> Update password';
+
+      if (!res.ok) {
+        pwErr.textContent   = res.error || 'Could not update password.';
+        pwErr.style.display = 'block';
+        return;
+      }
+      pwSucc.textContent   = 'Password updated successfully!';
+      pwSucc.style.display = 'block';
+      form.reset();
+      window.QuickGanyu.toast('Password updated!', 'success');
+    });
+  });
+})();
+</script>
+</body>
+</html>

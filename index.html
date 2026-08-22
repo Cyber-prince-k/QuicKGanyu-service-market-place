@@ -356,7 +356,7 @@
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
 
-    const res = await window.QuickGanyu.apiFetch('api/offer.php', {
+    const res = await window.QuickGanyu.apiFetch('offer.php', {
       full_name:        form.full_name.value.trim(),
       email:            form.email.value.trim(),
       phone:            form.phone.value.trim(),

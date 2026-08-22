@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Dashboard · QuickGanyu</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="logo" href="../index.html">Quick<span>Ganyu</span> <i class="fas fa-bolt" style="color:#f5c842;font-size:1.2rem;"></i></a>
+  <div class="nav-links">
+    <a href="../index.html"><i class="fas fa-home"></i> Home</a>
+    <a href="providers.html"><i class="fas fa-search"></i> Browse</a>
+  </div>
+  <div class="nav-actions"><!-- filled by api.js --></div>
+</nav>
+
+<div class="container" id="page-root">
+  <div class="empty-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Loading your dashboard…</p>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-col"><h4>QuickGanyu</h4><a href="../index.html">Home</a><a href="providers.html">Browse</a></div>
+      <div class="footer-col"><h4>Contact</h4><span>info@quickganyu.com</span><span>+265 999 000 000</span></div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-brand">Quick<span>Ganyu</span></div>
+      <div class="footer-copy">&copy; 2026 QuickGanyu</div>
+      <a class="footer-backtop" href="#top"><i class="fas fa-arrow-up"></i></a>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/api.js"></script>
+<script>
+(function () {
+  const { fetchMe, esc, htmlUrl } = window.QuickGanyu;
+  const root = document.getElementById('page-root');
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const me = await fetchMe();
+
+    if (!me) {
+      window.location.href = 'login.html';
+      return;
+    }
+    if (me.role !== 'client') {
+      // Wrong dashboard — redirect to the right one
+      if (me.role === 'admin')    { window.location.href = 'admin.html'; return; }
+      if (me.role === 'provider') { window.location.href = 'provider-dashboard.html'; return; }
+    }
+
+    root.innerHTML = `
+      <!-- Welcome hero -->
+      <section class="hero-card hero" style="margin-bottom:1.4rem;">
+        <div class="animated-feedback">
+          <i class="fas fa-hand-wave" style="color:#f5c842;"></i> Welcome back
+        </div>
+        <h1>Hello, ${esc(me.full_name.split(' ')[0])}!</h1>
+        <p>Discover trusted local service providers across Malawi. Browse by category, compare profiles, and get things done.</p>
+        <a class="btn-primary" href="providers.html" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none;">
+          <i class="fas fa-search"></i> Browse providers
+        </a>
+      </section>
+
+      <!-- Stats strip -->
+      <div class="stats-grid" style="margin-bottom:1.4rem;">
+        <div class="stat-card">
+          <strong><i class="fas fa-user-circle" style="color:#f5c842;"></i></strong>
+          <span>Customer account</span>
+        </div>
+        <div class="stat-card">
+          <strong>${esc(me.email)}</strong>
+          <span>Email address</span>
+        </div>
+        <div class="stat-card">
+          <strong>${esc(me.phone || '—')}</strong>
+          <span>Phone number</span>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
+        <h2 class="section-title"><i class="fas fa-bolt" style="color:#f5c842;"></i> Quick actions</h2>
+        <div class="step-list">
+          <div class="step-card">
+            <strong><i class="fas fa-search"></i> Browse services</strong>
+            Find and compare verified providers in your area.
+            <br><br>
+            <a href="providers.html" class="btn-secondary" style="display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;">
+              <i class="fas fa-arrow-right"></i> Go to browse
+            </a>
+          </div>
+          <div class="step-card">
+            <strong><i class="fas fa-user-edit"></i> Edit my profile</strong>
+            Update your contact details and location.
+            <br><br>
+            <button class="btn-secondary" id="edit-profile-btn" style="display:inline-flex;align-items:center;gap:0.4rem;">
+              <i class="fas fa-pencil-alt"></i> Edit profile
+            </button>
+          </div>
+          <div class="step-card">
+            <strong><i class="fas fa-tools"></i> Become a provider</strong>
+            Want to offer services? Submit an application.
+            <br><br>
+            <a href="../index.html#offer" class="btn-secondary" style="display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;">
+              <i class="fas fa-paper-plane"></i> Apply now
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Inline edit profile form (hidden by default) -->
+      <section class="section-card" id="edit-profile-section" style="max-width:640px;margin:0 auto 1.4rem;display:none;">
+        <h3 style="margin-bottom:1rem;"><i class="fas fa-user-edit" style="color:#f5c842;"></i> Edit profile</h3>
+        <div id="profile-error"  class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
+        <div id="profile-success" class="form-banner form-banner--info"  style="display:none;margin-bottom:1rem;"></div>
+        <form id="profile-form" novalidate>
+          <div class="form-grid" style="grid-template-columns:1fr;">
+            <div class="form-card">
+              <label>Full name
+                <input type="text" name="full_name" value="${esc(me.full_name)}" required>
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Phone number
+                <input type="tel" name="phone" value="${esc(me.phone || '')}">
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Location
+                <input type="text" name="location" value="${esc(me.location || '')}" placeholder="City or district">
+              </label>
+            </div>
+          </div>
+          <div class="auth-actions" style="margin-top:1.2rem;">
+            <button type="submit" class="btn-primary" id="save-profile-btn">
+              <i class="fas fa-save"></i> Save changes
+            </button>
+            <button type="button" class="btn-secondary" id="cancel-edit-btn">Cancel</button>
+          </div>
+        </form>
+      </section>
+    `;
+
+    // Toggle edit form
+    document.getElementById('edit-profile-btn').addEventListener('click', () => {
+      document.getElementById('edit-profile-section').style.display = 'block';
+      document.getElementById('edit-profile-section').scrollIntoView({ behavior: 'smooth' });
+    });
+    document.getElementById('cancel-edit-btn').addEventListener('click', () => {
+      document.getElementById('edit-profile-section').style.display = 'none';
+    });
+
+    // Profile save
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pErr  = document.getElementById('profile-error');
+      const pSucc = document.getElementById('profile-success');
+      const btn   = document.getElementById('save-profile-btn');
+      pErr.style.display = pSucc.style.display = 'none';
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+
+      const form = e.target;
+      const res  = await window.QuickGanyu.apiFetch('profile.php', {
+        full_name: form.full_name.value.trim(),
+        phone:     form.phone.value.trim(),
+        location:  form.location.value.trim(),
+      });
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-save"></i> Save changes';
+
+      if (!res.ok) {
+        pErr.textContent   = res.error || 'Could not save changes.';
+        pErr.style.display = 'block';
+        return;
+      }
+      pSucc.textContent   = 'Profile updated successfully!';
+      pSucc.style.display = 'block';
+      window.QuickGanyu.toast('Profile updated!', 'success');
+    });
+  });
+})();
+</script>
+</body>
+</html>
