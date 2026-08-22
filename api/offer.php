@@ -32,20 +32,20 @@ try {
 
     $pdo = db();
 
-    if (!email_available($pdo, $email, 'provider')) {
+    if (!full_name_available($pdo, $fullName)) {
         respond(['ok' => false, 'errors' => [
-            'email' => 'A provider account with this email already exists. Please log in instead.',
+            'full_name' => 'An account with this full name already exists. Please log in instead.',
         ]], 409);
     }
 
-    // Check for an existing pending request from the same email.
+    // Check for an existing pending request from the same full name.
     $dup = $pdo->prepare(
-        'SELECT id FROM provider_requests WHERE email = ? AND status = "pending" LIMIT 1'
+        'SELECT id FROM provider_requests WHERE full_name = ? AND status = "pending" LIMIT 1'
     );
-    $dup->execute([$email]);
+    $dup->execute([$fullName]);
     if ($dup->fetch() !== false) {
         respond(['ok' => false, 'errors' => [
-            'email' => 'You already have a pending request. Please wait for the admin to review it.',
+            'full_name' => 'You already have a pending request. Please wait for the admin to review it.',
         ]], 409);
     }
 

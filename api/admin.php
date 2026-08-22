@@ -67,8 +67,8 @@ if ($action === 'add_provider') {
         if ($expYears < 0 || $expYears > 80)       $errors['experience_years'] = 'Enter valid years (0–80).';
         if ($errors) respond(['ok' => false, 'errors' => $errors], 422);
 
-        if (!email_available($pdo, $email, 'provider')) {
-            respond(['ok' => false, 'errors' => ['email' => 'A provider account with this email already exists.']], 409);
+        if (!full_name_available($pdo, $fullName)) {
+            respond(['ok' => false, 'errors' => ['full_name' => 'An account with this full name already exists.']], 409);
         }
 
         $tempPassword = bin2hex(random_bytes(5));
@@ -110,8 +110,8 @@ if ($action === 'add_provider') {
              <p>Hello <strong>' . htmlspecialchars($fullName, ENT_QUOTES) . '</strong>,</p>
              <p>An admin has created a provider account for you on <strong>QuickGanyu</strong>.</p>
              <div class="info-box">
-               <div class="label">Login with your email</div>
-               <div class="value" style="font-size:15px;">' . htmlspecialchars($email, ENT_QUOTES) . '</div>
+               <div class="label">Login with your full name</div>
+               <div class="value" style="font-size:15px;">' . htmlspecialchars($fullName, ENT_QUOTES) . '</div>
                <div style="margin-top:14px;">
                  <div class="label">Temporary password</div>
                  <div class="value">' . htmlspecialchars($tempPassword, ENT_QUOTES) . '</div>
@@ -181,8 +181,8 @@ if ($action === 'decline') {
 if ($action !== 'approve') respond(['ok' => false, 'error' => 'Unknown action.'], 422);
 
 // ── APPROVE ───────────────────────────────────────────────────────────────────
-if (!email_available($pdo, $request['email'], 'provider')) {
-    respond(['ok' => false, 'error' => 'The applicant already has a provider account. Please decline this request.'], 409);
+if (!full_name_available($pdo, $request['full_name'])) {
+    respond(['ok' => false, 'error' => 'An account with this full name already exists. Please decline this request.'], 409);
 }
 
 $tempPassword = bin2hex(random_bytes(5));
@@ -231,14 +231,14 @@ send_mail($request['email'], 'Congratulations – Your QuickGanyu provider accou
      <p>Hello <strong>' . htmlspecialchars($request['full_name'], ENT_QUOTES) . '</strong>,</p>
      <p>Your application to offer services on <strong>QuickGanyu</strong> has been approved.</p>
      <div class="info-box">
-       <div class="label">Login with your email</div>
-       <div class="value" style="font-size:15px;">' . htmlspecialchars($request['email'], ENT_QUOTES) . '</div>
+       <div class="label">Login with your full name</div>
+       <div class="value" style="font-size:15px;">' . htmlspecialchars($request['full_name'], ENT_QUOTES) . '</div>
        <div style="margin-top:14px;">
          <div class="label">Temporary password</div>
          <div class="value">' . htmlspecialchars($tempPassword, ENT_QUOTES) . '</div>
        </div>
      </div>
-     <p>Log in with your email and the temporary password above, then set your own username and password.</p>
+     <p>Log in with your full name and the temporary password above, then set your own username and password.</p>
      <a class="cta-btn" href="http://localhost/roi/html/login.html">Log in &amp; complete your profile</a>
      <div class="notice"><strong>Keep this password safe.</strong> It expires once you complete setup.</div>'
 );

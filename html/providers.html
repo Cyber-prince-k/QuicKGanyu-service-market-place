@@ -60,7 +60,7 @@
 
   <section class="section-card">
     <h2 class="section-title"><i class="fas fa-user-tie" style="color:#f5c842;"></i> Providers near you</h2>
-    <div class="provider-grid">
+    <div class="provider-grid" id="provider-list">
       <div class="provider-card">
         <h3>Chisomo M. <span class="badge"><i class="fas fa-check-circle"></i> verified</span></h3>
         <div class="meta"><i class="fas fa-map-pin"></i> Lilongwe · 5 km</div>
@@ -133,7 +133,24 @@
   </div>
 </footer>
 
-<script src="../js/script.js"></script>
+<script src="../js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const list = document.getElementById('provider-list');
+  const res = await window.QuickGanyu.apiFetch('providers.php', null);
+  if (!res.ok) { list.innerHTML = '<div class="muted">Could not load providers right now.</div>'; return; }
+  if (!res.providers.length) { list.innerHTML = '<div class="muted">No providers are available yet. Providers appear here after completing their profile and evidence.</div>'; return; }
+  const esc = window.QuickGanyu.esc;
+  list.innerHTML = res.providers.map(provider => `
+    <div class="provider-card">
+      <h3>${esc(provider.full_name)} <span class="badge"><i class="fas fa-check-circle"></i> profile complete</span></h3>
+      <div class="meta"><i class="fas fa-map-pin"></i> ${esc(provider.location)}</div>
+      <div class="tags"><span>${esc(provider.service_category)}</span><span>${esc(provider.experience_years)} yrs</span></div>
+      <div class="muted"><i class="fas fa-tools"></i> Skills: ${esc(provider.skills)}</div>
+      <a class="btn-book" href="profile.html"><i class="fas fa-info-circle"></i> View services</a>
+    </div>`).join('');
+});
+</script>
 </body>
 </html>
 

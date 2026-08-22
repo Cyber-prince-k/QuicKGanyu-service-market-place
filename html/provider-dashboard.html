@@ -68,10 +68,14 @@
       if (me.role === 'client') { window.location.href = 'customer-dashboard.html'; return; }
     }
 
+    const evidenceRes = await window.QuickGanyu.apiFetch('profile.php', null);
+    const evidence = evidenceRes.ok ? evidenceRes.evidence : { portfolio: [], testimonials: [] };
+
     // Profile completeness score
-    const fields   = ['phone','location','service_category','skills','about','experience_years'];
+    const fields   = ['phone','location','service_category','skills','qualifications','about','experience_years'];
     const filled   = fields.filter(f => me[f] && String(me[f]).trim() !== '').length;
-    const pct      = Math.round(((filled + 2) / (fields.length + 2)) * 100); // +2 for name+email always filled
+    const evidenceFilled = (evidence.portfolio.length ? 1 : 0) + (evidence.testimonials.length ? 1 : 0);
+    const pct      = Math.round(((filled + evidenceFilled) / (fields.length + 2)) * 100);
     const catOptions = CATEGORIES.map(c =>
       `<option value="${esc(c)}" ${me.service_category === c ? 'selected' : ''}>${esc(c)}</option>`
     ).join('');
@@ -114,7 +118,7 @@
           <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
           <strong>${pct}%</strong>
         </div>
-        ${pct < 100 ? `<p class="muted" style="margin-top:0.5rem;">Fill in your skills, location, and about section below to reach 100%.</p>` : `<p class="muted" style="margin-top:0.5rem;color:#1a7f4b;"><i class="fas fa-check-circle"></i> Your profile is complete!</p>`}
+        ${me.profile_complete ? `<p class="muted" style="margin-top:0.5rem;color:#1a7f4b;"><i class="fas fa-check-circle"></i> Your profile is complete and can be shown to clients.</p>` : `<p class="muted" style="margin-top:0.5rem;"><i class="fas fa-lock"></i> You cannot be booked yet. Add every profile detail, at least one portfolio image/video, and one client testimonial.</p>`}
       </section>
 
       <!-- Edit profile form -->
@@ -165,8 +169,26 @@
               </label>
             </div>
             <div class="form-card full-col">
+              <label>Qualifications
+                <textarea name="qualifications" placeholder="e.g. Trade certificate, diploma, professional training…">${esc(me.qualifications || '')}</textarea>
+              </label>
+            </div>
+            <div class="form-card full-col">
               <label>About me
                 <textarea name="about" placeholder="Tell clients about your work…">${esc(me.about || '')}</textarea>
+              </label>
+            </div>
+          </div>
+
+          <div class="add-provider-form" style="margin-top:1rem;">
+            <div class="form-card">
+              <label>Client name for testimonial
+                <input type="text" name="testimonial_client" placeholder="e.g. Mary, Lilongwe">
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Client testimonial
+                <input type="text" name="testimonial" placeholder="What did the client say?">
               </label>
             </div>
           </div>
@@ -177,6 +199,25 @@
             </button>
           </div>
         </form>
+      </section>
+
+      <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
+        <h2 class="section-title"><i class="fas fa-images" style="color:#f5c842;"></i> Project proof</h2>
+        <p class="muted" style="margin-bottom:1rem;">Upload photos or videos of completed work. JPG, PNG, WEBP, MP4 and WebM files up to 25 MB are accepted.</p>
+        <div id="portfolio-error" class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
+        <form id="portfolio-form">
+          <div class="add-provider-form">
+            <div class="form-card"><label>Image or video *<input type="file" name="media" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" required></label></div>
+            <div class="form-card"><label>Project caption<input type="text" name="caption" maxlength="180" placeholder="e.g. Kitchen renovation"></label></div>
+          </div>
+          <div class="auth-actions" style="margin-top:1rem;"><button type="submit" class="btn-primary" id="portfolio-btn"><i class="fas fa-upload"></i> Upload project proof</button></div>
+        </form>
+        <div class="activity-list" style="margin-top:1rem;">
+          ${evidence.portfolio.length ? evidence.portfolio.map(item => `<div class="activity-item"><strong><i class="fas fa-${item.media_type === 'video' ? 'video' : 'image'}"></i> ${esc(item.caption || 'Project evidence')}</strong><span>${esc(item.media_type)}</span></div>`).join('') : '<div class="muted">No project evidence uploaded yet.</div>'}
+        </div>
+        <div class="activity-list" style="margin-top:1rem;">
+          ${evidence.testimonials.length ? evidence.testimonials.map(item => `<div class="activity-item"><strong>“${esc(item.testimonial)}”</strong><span>— ${esc(item.client_name)}</span></div>`).join('') : '<div class="muted">Add a client testimonial above to complete this requirement.</div>'}
+        </div>
       </section>
 
       <!-- Change password section -->
@@ -225,7 +266,10 @@
         service_category: form.service_category.value,
         experience_years: parseInt(form.experience_years.value) || 0,
         skills:           form.skills.value.trim(),
+        qualifications:   form.qualifications.value.trim(),
         about:            form.about.value.trim(),
+        testimonial_client: form.testimonial_client.value.trim(),
+        testimonial:      form.testimonial.value.trim(),
       });
 
       btn.disabled = false;
@@ -240,6 +284,30 @@
       pSucc.textContent   = 'Profile saved successfully!';
       pSucc.style.display = 'block';
       window.QuickGanyu.toast('Profile updated!', 'success');
+      setTimeout(() => window.location.reload(), 500);
+    });
+
+    document.getElementById('portfolio-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const error = document.getElementById('portfolio-error');
+      const btn = document.getElementById('portfolio-btn');
+      error.style.display = 'none';
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading…';
+      try {
+        const response = await fetch(window.QuickGanyu.apiUrl('portfolio.php'), {
+          method: 'POST', credentials: 'same-origin', body: new FormData(e.target),
+        });
+        const result = await response.json();
+        if (!result.ok) throw new Error(result.error || 'Upload failed.');
+        window.QuickGanyu.toast('Project proof uploaded!', 'success');
+        window.location.reload();
+      } catch (err) {
+        error.textContent = err.message || 'Upload failed.';
+        error.style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-upload"></i> Upload project proof';
+      }
     });
 
     // ── Password form submit ───────────────────────────────────────────────────

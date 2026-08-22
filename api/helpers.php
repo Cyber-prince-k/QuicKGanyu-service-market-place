@@ -42,23 +42,14 @@ function username_available(PDO $pdo, string $username, int $excludeId = 0): boo
     }
 }
 
-/** Is the email available for a given role? (same email can exist for different roles) */
-function email_available(PDO $pdo, string $email, string $role = '', int $excludeId = 0): bool {
+/** Is the full name available? (excluding a given user id) */
+function full_name_available(PDO $pdo, string $fullName, int $excludeId = 0): bool {
     try {
-        if ($role !== '') {
-            // Block duplicate email within the same role only
-            $stmt = $pdo->prepare(
-                'SELECT id FROM users WHERE email = ? AND role = ? AND id <> ? LIMIT 1'
-            );
-            $stmt->execute([$email, $role, $excludeId]);
-        } else {
-            // Legacy: check across all roles
-            $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ? AND id <> ? LIMIT 1');
-            $stmt->execute([$email, $excludeId]);
-        }
+        $stmt = $pdo->prepare('SELECT id FROM users WHERE full_name = ? AND id <> ? LIMIT 1');
+        $stmt->execute([$fullName, $excludeId]);
         return $stmt->fetch() === false;
     } catch (Throwable $e) {
-        error_log('QuickGanyu email_available error: ' . $e->getMessage());
+        error_log('QuickGanyu full_name_available error: ' . $e->getMessage());
         return false;
     }
 }
@@ -99,10 +90,56 @@ function fetch_user_by_id(PDO $pdo, int $id): ?array {
             $user = array_merge($user, $child);
         }
 
+        if ($user['role'] === 'provider') {
+            $user['profile_complete'] = provider_profile_complete($pdo, $id, $user);
+        }
+
         return $user;
     } catch (Throwable $e) {
         error_log('QuickGanyu fetch_user_by_id error: ' . $e->getMessage());
         return null;
+    }
+}
+
+/** Whether a provider has supplied all details required before being bookable. */
+function provider_profile_complete(PDO $pdo, int $providerId, array $provider = []): bool {
+    try {
+        if (!$provider) {
+            $provider = fetch_user_by_id($pdo, $providerId) ?? [];
+        }
+        foreach (['phone', 'location', 'service_category', 'skills', 'qualifications', 'about'] as $field) {
+            if (trim((string)($provider[$field] ?? '')) === '') return false;
+        }
+        if ((int)($provider['experience_years'] ?? 0) < 1) return false;
+
+        $portfolio = $pdo->prepare('SELECT 1 FROM provider_portfolio WHERE provider_id = ? LIMIT 1');
+        $portfolio->execute([$providerId]);
+        if ($portfolio->fetch() === false) return false;
+
+        $testimonials = $pdo->prepare('SELECT 1 FROM provider_testimonials WHERE provider_id = ? LIMIT 1');
+        $testimonials->execute([$providerId]);
+        return $testimonials->fetch() !== false;
+    } catch (Throwable $e) {
+        error_log('QuickGanyu provider_profile_complete error: ' . $e->getMessage());
+        return false;
+    }
+}
+
+/** Return provider-owned portfolio and testimonial records. */
+function provider_evidence(PDO $pdo, int $providerId): array {
+    try {
+        $portfolio = $pdo->prepare(
+            'SELECT id, media_type, file_path, caption, created_at FROM provider_portfolio WHERE provider_id=? ORDER BY created_at DESC'
+        );
+        $portfolio->execute([$providerId]);
+        $testimonials = $pdo->prepare(
+            'SELECT id, client_name, testimonial, created_at FROM provider_testimonials WHERE provider_id=? ORDER BY created_at DESC'
+        );
+        $testimonials->execute([$providerId]);
+        return ['portfolio' => $portfolio->fetchAll(), 'testimonials' => $testimonials->fetchAll()];
+    } catch (Throwable $e) {
+        error_log('QuickGanyu provider_evidence error: ' . $e->getMessage());
+        return ['portfolio' => [], 'testimonials' => []];
     }
 }
 

@@ -31,8 +31,8 @@ try {
 
     $pdo = db();
 
-    if (!email_available($pdo, $email, 'client')) {
-        respond(['ok' => false, 'errors' => ['email' => 'An account with this email already exists.']], 409);
+    if (!full_name_available($pdo, $fullName)) {
+        respond(['ok' => false, 'errors' => ['full_name' => 'An account with this full name already exists.']], 409);
     }
 
     // Auto-generate a unique username from the email local part.

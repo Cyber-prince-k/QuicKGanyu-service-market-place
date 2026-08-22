@@ -11,6 +11,13 @@ try {
         respond(['ok' => false, 'error' => 'You must be logged in to update your profile.'], 401);
     }
 
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        if ($user['role'] !== 'provider') {
+            respond(['ok' => false, 'error' => 'Provider access required.'], 403);
+        }
+        respond(['ok' => true, 'evidence' => provider_evidence($pdo, (int)$user['id'])]);
+    }
+
     $data = request_input();
     $uid  = (int)$user['id'];
 
@@ -43,6 +50,8 @@ try {
     $errors = [];
     if (mb_strlen($fullName) < 3) {
         $errors['full_name'] = 'Full name must be at least 3 characters.';
+    } elseif (!full_name_available($pdo, $fullName, $uid)) {
+        $errors['full_name'] = 'That full name is already taken.';
     }
     if ($username !== '') {
         if (!preg_match('/^[A-Za-z0-9_.]{3,60}$/', $username)) {
@@ -65,6 +74,7 @@ try {
         if ($user['role'] === 'provider') {
             $category = str_field($data, 'service_category', $user['service_category'] ?? '');
             $skills   = str_field($data, 'skills',           $user['skills']           ?? '');
+            $qualifications = str_field($data, 'qualifications', $user['qualifications'] ?? '');
             $about    = str_field($data, 'about',            $user['about']            ?? '');
             $expYears = isset($data['experience_years'])
                 ? (int)$data['experience_years']
@@ -77,13 +87,14 @@ try {
 
             $pdo->prepare(
                 'INSERT INTO service_providers
-                   (user_id, phone, location, service_category, skills, about, experience_years)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)
+                   (user_id, phone, location, service_category, skills, qualifications, about, experience_years)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                  ON DUPLICATE KEY UPDATE
                    phone            = VALUES(phone),
                    location         = VALUES(location),
                    service_category = VALUES(service_category),
                    skills           = VALUES(skills),
+                   qualifications   = VALUES(qualifications),
                    about            = VALUES(about),
                    experience_years = VALUES(experience_years)'
             )->execute([
@@ -92,9 +103,22 @@ try {
                 $location ?: null,
                 $category ?: null,
                 $skills   ?: null,
+                $qualifications ?: null,
                 $about    ?: null,
                 $expYears ?: null,
             ]);
+
+            $clientName = str_field($data, 'testimonial_client');
+            $testimonial = str_field($data, 'testimonial');
+            if ($clientName !== '' || $testimonial !== '') {
+                if ($clientName === '' || $testimonial === '') {
+                    $pdo->rollBack();
+                    respond(['ok' => false, 'errors' => ['testimonial' => 'Enter both the client name and testimonial.']], 422);
+                }
+                $pdo->prepare(
+                    'INSERT INTO provider_testimonials (provider_id, client_name, testimonial) VALUES (?, ?, ?)'
+                )->execute([$uid, $clientName, $testimonial]);
+            }
 
         } elseif ($user['role'] === 'client') {
             $pdo->prepare(

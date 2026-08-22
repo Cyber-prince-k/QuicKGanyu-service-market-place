@@ -12,13 +12,12 @@ USE quickganyu;
 -- BASE TABLE: users
 -- Holds the shared identity for every account regardless of role.
 -- Child tables (admins, service_providers, customers) all foreign-key into this.
--- NOTE: email is NOT unique — the same person can hold a customer account
---       and later also become an approved provider (different rows, same email).
---       Only username must be globally unique.
+-- NOTE: email is NOT unique — multiple accounts may use the same address.
+--       Full name and username are globally unique.
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS users (
   id            INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
-  full_name     VARCHAR(120)    NOT NULL,
+  full_name     VARCHAR(120)    NOT NULL UNIQUE,
   username      VARCHAR(60)     NULL UNIQUE,
   email         VARCHAR(190)    NOT NULL,           -- NOT unique on purpose
   password_hash VARCHAR(255)    NOT NULL,
@@ -26,6 +25,38 @@ CREATE TABLE IF NOT EXISTS users (
   status        ENUM('active','needs_setup','suspended') NOT NULL DEFAULT 'active',
   created_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Upgrade databases created with the former unique email index. These statements
+-- are conditional, so schema.sql remains safe to run again.
+SET @drop_email_index := (
+  SELECT IF(
+    EXISTS(
+      SELECT 1 FROM information_schema.statistics
+      WHERE table_schema = DATABASE() AND table_name = 'users'
+        AND index_name = 'email' AND non_unique = 0
+    ),
+    'ALTER TABLE users DROP INDEX email',
+    'SELECT 1'
+  )
+);
+PREPARE schema_statement FROM @drop_email_index;
+EXECUTE schema_statement;
+DEALLOCATE PREPARE schema_statement;
+
+SET @add_full_name_index := (
+  SELECT IF(
+    EXISTS(
+      SELECT 1 FROM information_schema.statistics
+      WHERE table_schema = DATABASE() AND table_name = 'users'
+        AND index_name = 'uq_users_full_name'
+    ),
+    'SELECT 1',
+    'ALTER TABLE users ADD CONSTRAINT uq_users_full_name UNIQUE (full_name)'
+  )
+);
+PREPARE schema_statement FROM @add_full_name_index;
+EXECUTE schema_statement;
+DEALLOCATE PREPARE schema_statement;
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- CHILD TABLE: admins
@@ -47,10 +78,50 @@ CREATE TABLE IF NOT EXISTS service_providers (
   location         VARCHAR(120)    NULL,
   service_category VARCHAR(80)     NULL,
   skills           TEXT            NULL,
+  qualifications   TEXT            NULL,
   about            TEXT            NULL,
   experience_years INT UNSIGNED    NULL,
   CONSTRAINT fk_provider_user
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Add qualifications when upgrading an older database created before this field.
+SET @add_qualifications := (
+  SELECT IF(
+    EXISTS(
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = DATABASE() AND table_name = 'service_providers'
+        AND column_name = 'qualifications'
+    ),
+    'SELECT 1',
+    'ALTER TABLE service_providers ADD COLUMN qualifications TEXT NULL AFTER skills'
+  )
+);
+PREPARE schema_statement FROM @add_qualifications;
+EXECUTE schema_statement;
+DEALLOCATE PREPARE schema_statement;
+
+-- Provider evidence. A provider needs at least one portfolio item and one
+-- testimonial, alongside their profile details, before becoming bookable.
+CREATE TABLE IF NOT EXISTS provider_portfolio (
+  id          INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+  provider_id INT UNSIGNED    NOT NULL,
+  media_type  ENUM('image','video') NOT NULL,
+  file_path   VARCHAR(255)    NOT NULL,
+  caption     VARCHAR(180)    NULL,
+  created_at  TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_portfolio_provider
+    FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS provider_testimonials (
+  id          INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+  provider_id INT UNSIGNED    NOT NULL,
+  client_name VARCHAR(120)    NOT NULL,
+  testimonial TEXT            NOT NULL,
+  created_at  TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_testimonial_provider
+    FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─────────────────────────────────────────────────────────────────────────────

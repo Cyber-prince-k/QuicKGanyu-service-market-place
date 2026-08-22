@@ -8,22 +8,21 @@ try {
     $password   = (string)($data['password'] ?? '');
 
     if ($identifier === '' || $password === '') {
-        respond(['ok' => false, 'error' => 'Enter both your username/email and password.'], 422);
+        respond(['ok' => false, 'error' => 'Enter both your username/full name and password.'], 422);
     }
 
     $pdo  = db();
     $stmt = $pdo->prepare(
         'SELECT * FROM users
           WHERE LOWER(username)  = ?
-             OR LOWER(email)     = ?
              OR LOWER(full_name) = ?
           LIMIT 1'
     );
-    $stmt->execute([$identifier, $identifier, $identifier]);
+    $stmt->execute([$identifier, $identifier]);
     $base = $stmt->fetch();
 
     if ($base === false || !password_verify($password, $base['password_hash'])) {
-        respond(['ok' => false, 'error' => 'Invalid login details. Check your username/email and password.'], 401);
+        respond(['ok' => false, 'error' => 'Invalid login details. Check your username/full name and password.'], 401);
     }
     if ($base['status'] === 'suspended') {
         respond(['ok' => false, 'error' => 'This account is suspended. Contact support.'], 403);
