@@ -13,8 +13,6 @@
   <div class="nav-links">
     <a href="../index.html"><i class="fas fa-home"></i> Home</a>
     <a href="providers.html"><i class="fas fa-search"></i> Browse</a>
-    <a href="profile.html"><i class="fas fa-user-tie"></i> Provider</a>
-    <a href="admin.html"><i class="fas fa-clipboard-list"></i> Admin</a>
   </div>
   <div class="nav-actions">
     <a class="btn-outline-light" href="signup.html"><i class="fas fa-user-plus"></i> Sign up</a>
@@ -27,27 +25,34 @@
     <div class="auth-split">
       <div class="auth-panel auth-panel--main">
         <div class="auth-tag"><i class="fas fa-lock"></i> Secure login</div>
-        <div class="form-grid">
-          <div class="form-card">
-            <label>Email address
-              <input type="email" placeholder="you@example.com">
-            </label>
-          </div>
-          <div class="form-card">
-            <label>Password
-              <input type="password" placeholder="Enter your password">
-            </label>
-          </div>
-        </div>
 
-        <div class="auth-actions">
-          <button class="btn-book"><i class="fas fa-sign-in-alt"></i> Sign in</button>
-        </div>
+        <div id="login-error" class="form-banner form-banner--error" style="display:none;"></div>
+
+        <form id="login-form" novalidate>
+          <div class="form-grid">
+            <div class="form-card form-card--full">
+              <label>Username or Email
+                <input type="text" name="identifier" placeholder="Username or email address" autocomplete="username" required>
+              </label>
+            </div>
+            <div class="form-card form-card--full">
+              <label>Password
+                <input type="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+              </label>
+            </div>
+          </div>
+
+          <div class="auth-actions">
+            <button type="submit" class="btn-primary" id="login-btn">
+              <i class="fas fa-sign-in-alt"></i> Sign in
+            </button>
+          </div>
+        </form>
       </div>
 
       <div class="auth-panel auth-panel--side">
         <h2>Welcome back!</h2>
-        <p>We are happy to see you again. Use your login details to access your profile, manage your bookings, and continue discovering trusted service providers.</p>
+        <p>Use your username or email and password to access your account. Admins and providers can log in here too.</p>
         <a class="btn-secondary btn-secondary--dark" href="signup.html">No account yet? Sign up.</a>
       </div>
     </div>
@@ -61,13 +66,11 @@
         <h4>QuickGanyu</h4>
         <a href="../index.html">About</a>
         <a href="providers.html">Services</a>
-        <a href="profile.html">Providers</a>
       </div>
       <div class="footer-col">
         <h4>Explore</h4>
         <a href="../index.html">Home</a>
         <a href="providers.html">Browse</a>
-        <a href="admin.html">Admin</a>
       </div>
       <div class="footer-col">
         <h4>Contact</h4>
@@ -98,7 +101,46 @@
   </div>
 </footer>
 
-<script src="../js/script.js"></script>
+<script src="../js/api.js"></script>
+<script>
+(function () {
+  const form    = document.getElementById('login-form');
+  const btn     = document.getElementById('login-btn');
+  const errBanner = document.getElementById('login-error');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errBanner.style.display = 'none';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in…';
+
+    const data = {
+      identifier: form.identifier.value.trim(),
+      password:   form.password.value,
+    };
+
+    const res = await window.QuickGanyu.apiFetch('login.php', data);
+
+    if (!res.ok) {
+      errBanner.textContent = res.error || 'Login failed. Please try again.';
+      errBanner.style.display = 'block';
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign in';
+      return;
+    }
+
+    window.QuickGanyu.toast('Welcome back, ' + res.user.full_name + '!', 'success');
+
+    // Redirect based on role / status returned by the API
+    setTimeout(() => {
+      const dest = res.redirect;
+      if (dest === 'admin')   { window.location.href = 'admin.html'; }
+      else if (dest === 'setup')  { window.location.href = 'setup.html'; }
+      else if (dest === 'profile') { window.location.href = 'profile.html'; }
+      else                         { window.location.href = '../index.html'; }
+    }, 600);
+  });
+})();
+</script>
 </body>
 </html>
-

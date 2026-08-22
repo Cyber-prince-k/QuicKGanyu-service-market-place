@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Setup · QuickGanyu</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<nav class="navbar">
+  <a class="logo" href="../index.html">Quick<span>Ganyu</span> <i class="fas fa-bolt" style="color:#f5c842; font-size:1.2rem;"></i></a>
+  <div class="nav-links">
+    <a href="../index.html"><i class="fas fa-home"></i> Home</a>
+  </div>
+  <div class="nav-actions">
+    <!-- filled by api.js -->
+  </div>
+</nav>
+
+<div class="container">
+  <section class="section-card setup-card">
+
+    <div id="guard-message" style="display:none;text-align:center;padding:2rem;">
+      <i class="fas fa-lock" style="font-size:2.5rem;color:#f5c842;display:block;margin-bottom:1rem;"></i>
+      <h2>Setup not available</h2>
+      <p style="color:#666;margin:1rem 0 1.5rem;" id="guard-text">Loading…</p>
+      <a href="login.html" class="btn-primary"><i class="fas fa-sign-in-alt"></i> Go to Login</a>
+    </div>
+
+    <div id="setup-content">
+      <div class="auth-tag" style="margin-bottom:1.2rem;">
+        <i class="fas fa-id-badge"></i> Complete your provider profile
+      </div>
+
+      <p style="color:#4d4d4d;line-height:1.7;margin-bottom:1.4rem;">
+        Welcome to QuickGanyu! You're logged in with a temporary password.
+        Choose a unique username and set your own password to activate your account.
+      </p>
+
+      <div id="setup-error" class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
+
+      <form id="setup-form" novalidate>
+        <div class="form-grid" style="grid-template-columns:1fr;">
+          <div class="form-card">
+            <label>Choose a username *
+              <input type="text" name="username" placeholder="e.g. chisomo_plumbing" autocomplete="username"
+                     pattern="[A-Za-z0-9_.]{3,60}" required>
+              <span style="font-size:0.82rem;color:#888;display:block;margin-top:0.3rem;">
+                3–60 characters · letters, numbers, _ and . only
+              </span>
+            </label>
+          </div>
+          <div class="form-card">
+            <label>New password *
+              <input type="password" name="password" placeholder="At least 8 characters" autocomplete="new-password" required>
+            </label>
+          </div>
+          <div class="form-card">
+            <label>Confirm new password *
+              <input type="password" name="confirm_password" placeholder="Repeat your password" autocomplete="new-password" required>
+            </label>
+          </div>
+          <div class="form-card">
+            <label>Phone <span class="muted">(optional)</span>
+              <input type="tel" name="phone" placeholder="+265 9xx xxx xxx" autocomplete="tel">
+            </label>
+          </div>
+          <div class="form-card">
+            <label>Location <span class="muted">(optional)</span>
+              <input type="text" name="location" placeholder="City or district">
+            </label>
+          </div>
+        </div>
+
+        <div class="auth-actions" style="margin-top:1.5rem;">
+          <button type="submit" class="btn-primary" id="setup-btn">
+            <i class="fas fa-check-circle"></i> Activate my account
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </section>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-col">
+        <h4>QuickGanyu</h4>
+        <a href="../index.html">About</a>
+        <a href="providers.html">Services</a>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <a href="../index.html">Home</a>
+        <a href="providers.html">Browse</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <span>Malawi</span>
+        <span>Email: info@quickganyu.com</span>
+        <span>Phone: +265 999 000 000</span>
+      </div>
+      <div class="footer-col footer-newsletter">
+        <h4>Newsletter</h4>
+        <div class="newsletter-form">
+          <input type="email" placeholder="Email address">
+          <button type="button">Subscribe</button>
+        </div>
+        <div class="footer-social">
+          <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-brand">Quick<span>Ganyu</span></div>
+      <div class="footer-copy">&copy; 2026 QuickGanyu – built for Malawi</div>
+      <a class="footer-backtop" href="#top"><i class="fas fa-arrow-up"></i></a>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/api.js"></script>
+<script>
+(function () {
+  const { apiFetch, fetchMe, toast, showFormErrors } = window.QuickGanyu;
+
+  const guardEl   = document.getElementById('guard-message');
+  const guardText = document.getElementById('guard-text');
+  const contentEl = document.getElementById('setup-content');
+  const form      = document.getElementById('setup-form');
+  const btn       = document.getElementById('setup-btn');
+  const errBanner = document.getElementById('setup-error');
+
+  function showGuard(msg) {
+    guardText.textContent = msg;
+    guardEl.style.display  = 'block';
+    contentEl.style.display = 'none';
+  }
+
+  // ── Check session on load ────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', async () => {
+    const me = await fetchMe();
+
+    if (!me) {
+      showGuard('You need to log in with your temporary password before completing setup.');
+      return;
+    }
+    if (me.role !== 'provider') {
+      showGuard('This setup page is only for service providers.');
+      return;
+    }
+    if (me.status !== 'needs_setup') {
+      // Already set up – redirect to profile
+      window.location.href = 'profile.html';
+      return;
+    }
+    // Show the form
+    contentEl.style.display = 'block';
+  });
+
+  // ── Submit handler ───────────────────────────────────────────────────────────
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errBanner.style.display = 'none';
+
+    const password        = form.password.value;
+    const confirmPassword = form.confirm_password.value;
+
+    if (password !== confirmPassword) {
+      errBanner.textContent = 'Passwords do not match.';
+      errBanner.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Activating…';
+
+    const data = {
+      username: form.username.value.trim(),
+      password,
+      phone:    form.phone.value.trim(),
+      location: form.location.value.trim(),
+    };
+
+    const res = await apiFetch('setup.php', data);
+
+    if (!res.ok) {
+      if (res.errors) showFormErrors(res.errors);
+      const first = res.errors ? Object.values(res.errors)[0] : (res.error || 'Setup failed. Please try again.');
+      errBanner.textContent = first;
+      errBanner.style.display = 'block';
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-check-circle"></i> Activate my account';
+      return;
+    }
+
+    toast('Account activated! Redirecting to your profile…', 'success');
+    setTimeout(() => { window.location.href = 'profile.html'; }, 900);
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -719,10 +719,225 @@ a {
   .navbar { flex-direction: column; gap: 0.8rem; align-items: stretch; }
   .footer-inner { align-items: stretch; }
   .footer-bottom { flex-direction: column; align-items: flex-start; }
-}
-
-
   .nav-links { justify-content: center; }
   .hero h1 { font-size: 2.3rem; }
   .hero { padding: 1.5rem; }
 }
+
+/* ── Form validation states ────────────────────────────────────────────────── */
+.input-error {
+  border-color: #b00020 !important;
+  box-shadow: 0 0 0 3px rgba(176, 0, 32, 0.12) !important;
+}
+
+.field-error {
+  color: #b00020;
+  font-size: 0.83rem;
+  font-weight: 600;
+  margin-top: 0.3rem;
+  display: block;
+}
+
+/* ── Form banners (info / error notices above forms) ───────────────────────── */
+.form-banner {
+  border-radius: 14px;
+  padding: 0.85rem 1.1rem;
+  font-size: 0.93rem;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+.form-banner--error {
+  background: #fff0f2;
+  border: 1px solid #f5c2ca;
+  color: #b00020;
+}
+.form-banner--info {
+  background: #fef9e7;
+  border: 1px solid #f5e4a0;
+  color: #5a4a00;
+}
+
+/* ── Primary button (used on auth forms) ───────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.7rem 1.8rem;
+  font-size: 1rem;
+  font-weight: 700;
+  background: #f5c842;
+  color: #0b0b0b;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn-primary:hover {
+  background: #e6b82e;
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Logged-in user chip in navbar ─────────────────────────────────────────── */
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #1e1e1e;
+  color: #f9f9f9;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.user-chip em {
+  font-style: normal;
+  font-size: 0.75rem;
+  background: #f5c842;
+  color: #0b0b0b;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  font-weight: 700;
+}
+
+/* ── Admin dashboard live styles ───────────────────────────────────────────── */
+.admin-page-guard {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #b00020;
+}
+
+.request-card {
+  background: white;
+  border: 1px solid #ebebeb;
+  border-radius: 18px;
+  padding: 1.2rem 1.4rem;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+}
+
+.request-card .rc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.request-card .rc-meta {
+  color: #5a5a5a;
+  font-size: 0.88rem;
+  margin: 0.15rem 0;
+}
+
+.request-card .rc-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.9rem;
+  align-items: center;
+}
+
+.btn-approve {
+  background: #1a7f4b;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.88rem;
+  transition: background 0.2s;
+}
+.btn-approve:hover { background: #155e38; }
+.btn-approve:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-decline {
+  background: #fff0f2;
+  color: #b00020;
+  border: 1px solid #f5c2ca;
+  border-radius: 999px;
+  padding: 0.5rem 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.88rem;
+  transition: background 0.2s;
+}
+.btn-decline:hover { background: #ffe0e5; }
+.btn-decline:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.status-pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.status-pill--pending  { background: #fff8e1; color: #8a5c00; border: 1px solid #f5e4a0; }
+.status-pill--approved { background: #e6f9ef; color: #1a7f4b; border: 1px solid #a8e6c3; }
+.status-pill--declined { background: #fff0f2; color: #b00020; border: 1px solid #f5c2ca; }
+
+.temp-password-box {
+  background: #fef9e7;
+  border: 1px solid #f5e4a0;
+  border-radius: 12px;
+  padding: 0.65rem 1rem;
+  font-size: 0.88rem;
+  color: #5a4a00;
+  margin-top: 0.5rem;
+  word-break: break-all;
+}
+.temp-password-box strong { color: #0b0b0b; }
+
+.admin-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.4rem;
+}
+.admin-tab {
+  background: #f2f2f2;
+  border: none;
+  border-radius: 999px;
+  padding: 0.55rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.93rem;
+  color: #333;
+  transition: background 0.2s;
+}
+.admin-tab:hover { background: #ffe9a0; }
+.admin-tab.active {
+  background: #f5c842;
+  color: #0b0b0b;
+}
+
+.add-provider-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.add-provider-form .full-col { grid-column: 1 / -1; }
+
+.empty-state {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #888;
+  font-size: 1rem;
+}
+.empty-state i { font-size: 2.5rem; color: #ddd; display: block; margin-bottom: 0.8rem; }
+
+.requests-list { display: grid; gap: 1rem; }
+
+/* ── Setup page ─────────────────────────────────────────────────────────────── */
+.setup-card {
+  max-width: 640px;
+  margin: 2rem auto;
+}
+

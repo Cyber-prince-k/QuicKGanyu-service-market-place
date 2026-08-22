@@ -13,69 +13,18 @@
   <div class="nav-links">
     <a href="../index.html"><i class="fas fa-home"></i> Home</a>
     <a href="providers.html"><i class="fas fa-search"></i> Browse</a>
-    <a href="profile.html"><i class="fas fa-user-tie"></i> Provider</a>
-    <a href="admin.html"><i class="fas fa-clipboard-list"></i> Admin</a>
   </div>
   <div class="nav-actions">
-    <a class="btn-outline-light" href="signup.html"><i class="fas fa-user-plus"></i> Sign up</a>
-    <a class="btn-light" href="login.html"><i class="fas fa-sign-in-alt"></i> Log in</a>
+    <!-- filled by api.js -->
   </div>
 </nav>
 
-<div class="container">
-  <section class="hero-card hero">
-    <div class="animated-feedback"><i class="fas fa-user-shield" style="color:#f5c842;"></i> Admin dashboard for marketplace operations</div>
-    <h1>Control the platform</h1>
-    <p>Manage users, content, analytics, notifications, security and data settings from one central view.</p>
-  </section>
-
-  <section class="stats-grid">
-    <div class="stat-card"><strong>142</strong><span>Users</span></div>
-    <div class="stat-card"><strong>+12%</strong><span>Sales growth</span></div>
-    <div class="stat-card"><strong>1.2k</strong><span>Visits</span></div>
-    <div class="stat-card"><strong>3</strong><span>Alerts</span></div>
-  </section>
-
-  <section class="admin-grid">
-    <div class="admin-card">
-      <h3><i class="fas fa-users" style="color:#f5c842;"></i> User Management</h3>
-      <div class="muted">Add, edit, delete users and assign roles like admin, editor and viewer.</div>
-      <div class="table-list">
-        <div class="table-row"><span>Chisomo</span><span>Admin</span></div>
-        <div class="table-row"><span>Grace</span><span>Editor</span></div>
-        <div class="table-row"><span>Mike</span><span>Viewer</span></div>
-      </div>
-    </div>
-    <div class="admin-card">
-      <h3><i class="fas fa-chart-line" style="color:#f5c842;"></i> Analytics & Reporting</h3>
-      <div class="chart-row"><span>Sales</span><div class="chart-bar"><span style="width:80%"></span></div></div>
-      <div class="chart-row"><span>Users</span><div class="chart-bar"><span style="width:70%"></span></div></div>
-      <div class="chart-row"><span>Traffic</span><div class="chart-bar"><span style="width:90%"></span></div></div>
-      <div class="muted">Export reports in PDF and Excel formats.</div>
-    </div>
-    <div class="admin-card">
-      <h3><i class="fas fa-file-alt" style="color:#f5c842;"></i> Content Management</h3>
-      <div class="muted">Create, edit and delete content, manage uploads and approvals.</div>
-      <div class="pill-list"><span>Posts</span><span>Pages</span><span>Media</span><span>Approval</span></div>
-    </div>
-    <div class="admin-card">
-      <h3><i class="fas fa-shield-alt" style="color:#f5c842;"></i> Security & Access Control</h3>
-      <div class="muted">Authentication, RBAC, 2FA and activity logs for audits.</div>
-      <div class="pill-list"><span>Login</span><span>Logout</span><span>2FA</span><span>Logs</span></div>
-    </div>
-    <div class="admin-card">
-      <h3><i class="fas fa-bell" style="color:#f5c842;"></i> Notifications System</h3>
-      <div class="activity-list">
-        <div class="activity-item"><span>New quote request</span><span>Now</span></div>
-        <div class="activity-item"><span>Profile completion reminder</span><span>1h ago</span></div>
-      </div>
-    </div>
-    <div class="admin-card">
-      <h3><i class="fas fa-database" style="color:#f5c842;"></i> Data Management</h3>
-      <div class="muted">Backup and restore, import/export data and advanced filtering.</div>
-      <div class="pill-list"><span>Backup</span><span>Restore</span><span>Search</span><span>Export</span></div>
-    </div>
-  </section>
+<div class="container" id="page-root">
+  <!-- Content injected by JS after auth check -->
+  <div class="empty-state" id="loading-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Loading dashboard…</p>
+  </div>
 </div>
 
 <footer class="footer">
@@ -85,13 +34,11 @@
         <h4>QuickGanyu</h4>
         <a href="../index.html">About</a>
         <a href="providers.html">Services</a>
-        <a href="profile.html">Providers</a>
       </div>
       <div class="footer-col">
         <h4>Explore</h4>
         <a href="../index.html">Home</a>
         <a href="providers.html">Browse</a>
-        <a href="admin.html">Admin</a>
       </div>
       <div class="footer-col">
         <h4>Contact</h4>
@@ -122,7 +69,390 @@
   </div>
 </footer>
 
-<script src="../js/script.js"></script>
+<script src="../js/api.js"></script>
+<script>
+(function () {
+  const { apiFetch, toast, esc, showFormErrors } = window.QuickGanyu;
+  const root = document.getElementById('page-root');
+
+  // ── State ────────────────────────────────────────────────────────────────────
+  let allRequests = [];
+  let activeTab   = 'pending'; // 'pending' | 'approved' | 'declined' | 'add'
+
+  // ── Boot: verify admin session ───────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', async () => {
+    const me = await window.QuickGanyu.fetchMe();
+    if (!me || me.role !== 'admin') {
+      root.innerHTML = `
+        <section class="section-card" style="max-width:520px;margin:3rem auto;text-align:center;padding:2.5rem;">
+          <i class="fas fa-lock" style="font-size:2.5rem;color:#f5c842;display:block;margin-bottom:1rem;"></i>
+          <h2>Admin access only</h2>
+          <p style="color:#666;margin:1rem 0 1.5rem;">You need to be logged in as an admin to view this page.</p>
+          <a href="login.html" class="btn-primary"><i class="fas fa-sign-in-alt"></i> Go to Login</a>
+        </section>`;
+      return;
+    }
+    await loadDashboard();
+  });
+
+  // ── Load data & render ───────────────────────────────────────────────────────
+  async function loadDashboard() {
+    const res = await apiFetch('admin.php', { action: 'list' });
+    if (!res.ok) {
+      toast(res.error || 'Failed to load dashboard data.', 'error');
+      return;
+    }
+    allRequests = res.requests || [];
+    renderDashboard(res.counts, res.users);
+  }
+
+  function renderDashboard(counts, users) {
+    root.innerHTML = `
+      <section class="hero-card hero" style="margin-bottom:1.4rem;">
+        <div class="animated-feedback">
+          <i class="fas fa-user-shield" style="color:#f5c842;"></i> Admin dashboard
+        </div>
+        <h1>Control the platform</h1>
+        <p>Manage service provider accounts, review applications, and monitor the marketplace.</p>
+      </section>
+
+      <section class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <strong>${users.client}</strong><span>Customers</span>
+        </div>
+        <div class="stat-card">
+          <strong>${users.provider}</strong><span>Providers</span>
+        </div>
+        <div class="stat-card">
+          <strong>${counts.pending}</strong><span>Pending requests</span>
+        </div>
+        <div class="stat-card">
+          <strong>${counts.approved}</strong><span>Approved</span>
+        </div>
+        <div class="stat-card">
+          <strong>${counts.declined}</strong><span>Declined</span>
+        </div>
+      </section>
+
+      <div class="admin-tabs" id="admin-tabs">
+        <button class="admin-tab ${activeTab === 'pending'  ? 'active' : ''}" data-tab="pending">
+          <i class="fas fa-clock"></i> Pending
+          <span class="badge" style="margin-left:0.3rem;">${counts.pending}</span>
+        </button>
+        <button class="admin-tab ${activeTab === 'approved' ? 'active' : ''}" data-tab="approved">
+          <i class="fas fa-check-circle"></i> Approved
+        </button>
+        <button class="admin-tab ${activeTab === 'declined' ? 'active' : ''}" data-tab="declined">
+          <i class="fas fa-times-circle"></i> Declined
+        </button>
+        <button class="admin-tab ${activeTab === 'add'      ? 'active' : ''}" data-tab="add">
+          <i class="fas fa-user-plus"></i> Add Provider
+        </button>
+      </div>
+
+      <div id="tab-content"></div>
+    `;
+
+    // Tab click handler
+    document.getElementById('admin-tabs').addEventListener('click', e => {
+      const btn = e.target.closest('.admin-tab');
+      if (!btn) return;
+      activeTab = btn.dataset.tab;
+      document.querySelectorAll('.admin-tab').forEach(b => b.classList.toggle('active', b === btn));
+      renderTabContent();
+    });
+
+    renderTabContent();
+  }
+
+  // ── Tab content renderer ─────────────────────────────────────────────────────
+  function renderTabContent() {
+    const el = document.getElementById('tab-content');
+    if (!el) return;
+
+    if (activeTab === 'add') {
+      renderAddProviderForm(el);
+      return;
+    }
+
+    const filtered = allRequests.filter(r => r.status === activeTab);
+    if (filtered.length === 0) {
+      el.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-inbox"></i>
+          <p>No ${activeTab} requests.</p>
+        </div>`;
+      return;
+    }
+
+    el.innerHTML = `<div class="requests-list" id="requests-list"></div>`;
+    const list = document.getElementById('requests-list');
+    filtered.forEach(req => list.appendChild(buildRequestCard(req)));
+  }
+
+  // ── Request card ─────────────────────────────────────────────────────────────
+  function buildRequestCard(req) {
+    const card = document.createElement('div');
+    card.className = 'request-card';
+    card.id = `req-${req.id}`;
+
+    const statusHtml = `<span class="status-pill status-pill--${req.status}">${req.status}</span>`;
+    const date = req.created_at ? new Date(req.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : '';
+
+    let actionsHtml = '';
+    if (req.status === 'pending') {
+      actionsHtml = `
+        <button class="btn-approve" data-action="approve" data-id="${req.id}">
+          <i class="fas fa-check"></i> Approve
+        </button>
+        <button class="btn-decline" data-action="decline" data-id="${req.id}">
+          <i class="fas fa-times"></i> Decline
+        </button>
+        <input type="text" class="note-input" data-id="${req.id}"
+          placeholder="Optional note to applicant…"
+          style="flex:1;min-width:180px;padding:0.45rem 0.8rem;border:1px solid #dde1e7;
+                 border-radius:999px;font-size:0.88rem;background:#fafafa;">`;
+    }
+
+    card.innerHTML = `
+      <div class="rc-header">
+        <div>
+          <strong style="font-size:1.05rem;">${esc(req.full_name)}</strong>
+          ${statusHtml}
+        </div>
+        <span style="color:#888;font-size:0.82rem;">${date}</span>
+      </div>
+      <p class="rc-meta"><i class="fas fa-envelope" style="width:14px;"></i> ${esc(req.email)}</p>
+      ${req.phone    ? `<p class="rc-meta"><i class="fas fa-phone" style="width:14px;"></i> ${esc(req.phone)}</p>` : ''}
+      ${req.location ? `<p class="rc-meta"><i class="fas fa-map-marker-alt" style="width:14px;"></i> ${esc(req.location)}</p>` : ''}
+      <p class="rc-meta"><i class="fas fa-briefcase" style="width:14px;"></i> ${esc(req.service_category)}
+        ${req.experience_years ? `· ${req.experience_years} yr${req.experience_years !== 1 ? 's' : ''} experience` : ''}
+      </p>
+      ${req.skills ? `<p class="rc-meta"><i class="fas fa-tools" style="width:14px;"></i> ${esc(req.skills)}</p>` : ''}
+      ${req.about   ? `<p class="rc-meta" style="margin-top:0.4rem;color:#444;">${esc(req.about)}</p>` : ''}
+      <div class="rc-actions" id="actions-${req.id}">${actionsHtml}</div>
+      <div id="result-${req.id}"></div>
+    `;
+
+    // Wire approve / decline buttons
+    card.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => handleDecision(btn.dataset.action, parseInt(btn.dataset.id)));
+    });
+
+    return card;
+  }
+
+  // ── Approve / Decline handler ────────────────────────────────────────────────
+  async function handleDecision(action, id) {
+    const actionsEl = document.getElementById(`actions-${id}`);
+    const resultEl  = document.getElementById(`result-${id}`);
+    const noteInput = actionsEl ? actionsEl.querySelector('.note-input') : null;
+    const note      = noteInput ? noteInput.value.trim() : '';
+
+    // Disable buttons while in flight
+    actionsEl && actionsEl.querySelectorAll('button').forEach(b => b.disabled = true);
+
+    const res = await apiFetch('admin.php', { action, id, admin_note: note });
+
+    if (!res.ok) {
+      toast(res.error || 'Action failed. Please try again.', 'error');
+      actionsEl && actionsEl.querySelectorAll('button').forEach(b => b.disabled = false);
+      return;
+    }
+
+    // Update local state
+    const idx = allRequests.findIndex(r => r.id === id);
+    if (idx !== -1) allRequests[idx].status = action === 'approve' ? 'approved' : 'declined';
+
+    toast(res.message, 'success');
+
+    // Show result in-card
+    let extra = '';
+    if (action === 'approve' && res.temp_password) {
+      extra = `
+        <div class="temp-password-box">
+          <i class="fas fa-key"></i>
+          Temporary password for <strong>${esc(allRequests[idx]?.full_name || '')}</strong>:
+          <strong style="font-size:1rem;letter-spacing:0.05em;">${esc(res.temp_password)}</strong>
+          <span style="color:#888;"> — relay this if the email does not arrive.</span>
+        </div>`;
+    }
+
+    if (actionsEl) actionsEl.innerHTML = '';
+    if (resultEl) {
+      resultEl.innerHTML = `
+        <div class="temp-password-box" style="${action === 'decline' ? 'background:#fff0f2;border-color:#f5c2ca;color:#b00020;' : ''}">
+          <i class="fas fa-${action === 'approve' ? 'check-circle' : 'times-circle'}"></i>
+          ${esc(res.message)}
+        </div>
+        ${extra}`;
+    }
+
+    // Refresh stats after a short delay
+    setTimeout(refreshStats, 1200);
+  }
+
+  // ── Refresh stat cards without full re-render ────────────────────────────────
+  async function refreshStats() {
+    const res = await apiFetch('admin.php', { action: 'list' });
+    if (!res.ok) return;
+    allRequests = res.requests || [];
+    const sg = document.getElementById('stats-grid');
+    if (sg) {
+      sg.innerHTML = `
+        <div class="stat-card"><strong>${res.users.client}</strong><span>Customers</span></div>
+        <div class="stat-card"><strong>${res.users.provider}</strong><span>Providers</span></div>
+        <div class="stat-card"><strong>${res.counts.pending}</strong><span>Pending requests</span></div>
+        <div class="stat-card"><strong>${res.counts.approved}</strong><span>Approved</span></div>
+        <div class="stat-card"><strong>${res.counts.declined}</strong><span>Declined</span></div>`;
+    }
+    // Update pending badge on tab
+    const pendingTab = document.querySelector('[data-tab="pending"] .badge');
+    if (pendingTab) pendingTab.textContent = res.counts.pending;
+  }
+
+  // ── Add Provider form ────────────────────────────────────────────────────────
+  function renderAddProviderForm(el) {
+    el.innerHTML = `
+      <section class="section-card" style="max-width:860px;margin:0 auto;">
+        <h3 style="margin-bottom:0.3rem;"><i class="fas fa-user-plus" style="color:#f5c842;"></i> Add a Service Provider</h3>
+        <p class="muted" style="margin-bottom:1.2rem;">
+          Create a provider account directly. A temporary password will be generated and shown here
+          (and emailed to the provider). They will set their own username and password on first login.
+        </p>
+
+        <div id="add-error" class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
+        <div id="add-success" style="display:none;"></div>
+
+        <form id="add-provider-form" novalidate>
+          <div class="add-provider-form">
+            <div class="form-card">
+              <label>Full name *
+                <input type="text" name="full_name" placeholder="Provider's full name" required>
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Email address *
+                <input type="email" name="email" placeholder="provider@example.com" required>
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Phone <span class="muted">(optional)</span>
+                <input type="tel" name="phone" placeholder="+265 9xx xxx xxx">
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Location <span class="muted">(optional)</span>
+                <input type="text" name="location" placeholder="City or district">
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Service category *
+                <select name="service_category" required>
+                  <option value="">— Select category —</option>
+                  <option>Plumbing</option>
+                  <option>Electrical</option>
+                  <option>Carpentry</option>
+                  <option>Painting</option>
+                  <option>Cleaning</option>
+                  <option>Photography</option>
+                  <option>Catering</option>
+                  <option>Tutoring</option>
+                  <option>IT / Tech support</option>
+                  <option>Tailoring</option>
+                  <option>Gardening</option>
+                  <option>Other</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Years of experience <span class="muted">(optional)</span>
+                <input type="number" name="experience_years" placeholder="e.g. 5" min="0" max="80">
+              </label>
+            </div>
+            <div class="form-card full-col">
+              <label>Skills <span class="muted">(optional)</span>
+                <input type="text" name="skills" placeholder="e.g. Tiling, piping, burst pipes">
+              </label>
+            </div>
+            <div class="form-card full-col">
+              <label>About <span class="muted">(optional)</span>
+                <textarea name="about" placeholder="Brief description of the provider…"></textarea>
+              </label>
+            </div>
+          </div>
+
+          <div class="auth-actions" style="margin-top:1.4rem;">
+            <button type="submit" class="btn-primary" id="add-btn">
+              <i class="fas fa-user-plus"></i> Create provider account
+            </button>
+          </div>
+        </form>
+      </section>
+    `;
+
+    const form    = document.getElementById('add-provider-form');
+    const btn     = document.getElementById('add-btn');
+    const errEl   = document.getElementById('add-error');
+    const succEl  = document.getElementById('add-success');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errEl.style.display = 'none';
+      succEl.style.display = 'none';
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating…';
+
+      const data = {
+        action:           'add_provider',
+        full_name:        form.full_name.value.trim(),
+        email:            form.email.value.trim(),
+        phone:            form.phone.value.trim(),
+        location:         form.location.value.trim(),
+        service_category: form.service_category.value,
+        experience_years: parseInt(form.experience_years.value) || 0,
+        skills:           form.skills.value.trim(),
+        about:            form.about.value.trim(),
+      };
+
+      const res = await apiFetch('admin.php', data);
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-user-plus"></i> Create provider account';
+
+      if (!res.ok) {
+        if (res.errors) showFormErrors(res.errors);
+        const first = res.errors ? Object.values(res.errors)[0] : (res.error || 'Failed to create provider.');
+        errEl.textContent = first;
+        errEl.style.display = 'block';
+        return;
+      }
+
+      toast(res.message, 'success');
+      form.reset();
+
+      succEl.style.display = 'block';
+      succEl.innerHTML = `
+        <div class="temp-password-box" style="margin-bottom:1rem;">
+          <i class="fas fa-check-circle" style="color:#1a7f4b;"></i>
+          Provider account created for <strong>${esc(data.full_name)}</strong> (${esc(data.email)}).
+          <br><br>
+          Temporary password:
+          <strong style="font-size:1.05rem;letter-spacing:0.06em;">${esc(res.temp_password)}</strong>
+          <br>
+          <span style="color:#888;font-size:0.85rem;">
+            This was emailed to the provider. Share it manually if the email does not arrive.
+            They will set a new password during first-login setup.
+          </span>
+        </div>`;
+
+      // Refresh stats
+      refreshStats();
+    });
+  }
+
+})();
+</script>
 </body>
 </html>
-

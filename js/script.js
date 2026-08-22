@@ -1,4 +1,5 @@
 (function() {
+  // Highlight suggestion chips when clicked.
   const quoteSpans = document.querySelectorAll('.message-suggestions span, .suggestions span');
   quoteSpans.forEach(el => {
     el.addEventListener('click', function() {
@@ -13,10 +14,13 @@
     });
   });
 
-  const bookBtns = document.querySelectorAll('.btn-book');
+  // "Book" buttons on provider cards only (not auth forms).
+  // Only attach to .btn-book inside a .provider-card so login/signup buttons are untouched.
+  const bookBtns = document.querySelectorAll('.provider-card .btn-book');
   bookBtns.forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.preventDefault();
+      e.stopPropagation();
       const original = this.innerHTML;
       this.innerHTML = '<i class="fas fa-check"></i> Request sent!';
       this.style.background = '#2a9d8f';
@@ -29,33 +33,27 @@
     });
   });
 
+  // Location filter toast.
   const locSelect = document.querySelector('.location-box select');
   if (locSelect) {
     locSelect.addEventListener('change', function() {
       const val = this.options[this.selectedIndex].text;
       const feedback = document.createElement('div');
-      feedback.style.position = 'fixed';
-      feedback.style.bottom = '30px';
-      feedback.style.right = '30px';
-      feedback.style.background = '#0b0b0b';
-      feedback.style.color = '#f5c842';
-      feedback.style.padding = '0.8rem 2rem';
-      feedback.style.borderRadius = '60px';
-      feedback.style.fontWeight = '500';
-      feedback.style.boxShadow = '0 6px 18px rgba(0,0,0,0.2)';
-      feedback.style.zIndex = '999';
+      feedback.style.cssText = 'position:fixed;bottom:30px;right:30px;background:#0b0b0b;color:#f5c842;'
+        + 'padding:0.8rem 2rem;border-radius:60px;font-weight:500;box-shadow:0 6px 18px rgba(0,0,0,0.2);z-index:999;';
       feedback.innerHTML = `<i class="fas fa-location-dot"></i> Showing services in ${val}`;
       document.body.appendChild(feedback);
       setTimeout(() => feedback.remove(), 2500);
     });
   }
 
+  // Provider card click-to-view (browse page).
   const providerCards = document.querySelectorAll('.provider-card');
   providerCards.forEach(card => {
     card.addEventListener('click', function(e) {
       if (e.target.closest('.btn-book')) return;
       const name = this.querySelector('h3')?.innerText || 'Provider';
-      alert(`🔍 Services by ${name}:\n• Plumbing, repairs, electrical\n• Portfolio with images/videos\n• Skills: certified, 5+ years\n• Location & testimonials available`);
+      alert(`Services by ${name}:\n• View full profile for details\n• Skills, portfolio & testimonials available`);
     });
   });
 
