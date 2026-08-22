@@ -15,36 +15,24 @@
     <a href="providers.html"><i class="fas fa-search"></i> Browse</a>
   </div>
   <div class="nav-actions">
-    <a class="btn-outline-light" href="signup.html"><i class="fas fa-user-plus"></i> Sign up</a>
-    <a class="btn-light" href="login.html"><i class="fas fa-sign-in-alt"></i> Log in</a>
+    <!-- filled by api.js -->
   </div>
 </nav>
 
 <div class="container">
   <section class="section-card auth-card">
     <div class="auth-split">
+
       <div class="auth-panel auth-panel--main">
         <div class="auth-tag"><i class="fas fa-user-plus"></i> Create your account</div>
-
-        <!-- Providers are added by admins only – direct visitors here -->
-        <div class="form-banner form-banner--info" style="margin-bottom:1rem;">
-          <i class="fas fa-info-circle"></i>
-          This form is for <strong>customers</strong>. Want to offer services?
-          <a href="providers.html" style="color:inherit;font-weight:700;">Apply here</a> and an admin will review your request.
-        </div>
 
         <div id="signup-error" class="form-banner form-banner--error" style="display:none;"></div>
 
         <form id="signup-form" novalidate>
-          <div class="form-grid form-grid--signup">
-            <div class="form-card form-card--full">
+          <div class="form-grid" style="grid-template-columns:1fr;">
+            <div class="form-card">
               <label>Full name
                 <input type="text" name="full_name" placeholder="Your full name" autocomplete="name" required>
-              </label>
-            </div>
-            <div class="form-card">
-              <label>Username
-                <input type="text" name="username" placeholder="e.g. john_doe" autocomplete="username" required>
               </label>
             </div>
             <div class="form-card">
@@ -53,13 +41,8 @@
               </label>
             </div>
             <div class="form-card">
-              <label>Phone <span class="muted">(optional)</span>
-                <input type="tel" name="phone" placeholder="+265 9xx xxx xxx" autocomplete="tel">
-              </label>
-            </div>
-            <div class="form-card">
-              <label>Location <span class="muted">(optional)</span>
-                <input type="text" name="location" placeholder="City or district">
+              <label>Phone number
+                <input type="tel" name="phone" placeholder="+265 9xx xxx xxx" autocomplete="tel" required>
               </label>
             </div>
             <div class="form-card">
@@ -67,14 +50,14 @@
                 <input type="password" name="password" placeholder="At least 8 characters" autocomplete="new-password" required>
               </label>
             </div>
-            <div class="form-card form-card--full">
+            <div class="form-card">
               <label>Confirm password
                 <input type="password" name="confirm_password" placeholder="Repeat your password" autocomplete="new-password" required>
               </label>
             </div>
           </div>
 
-          <div class="form-footer form-footer--simple">
+          <div class="auth-actions" style="margin-top:1.5rem;">
             <button type="submit" class="btn-primary" id="signup-btn">
               <i class="fas fa-user-plus"></i> Create account
             </button>
@@ -84,9 +67,15 @@
 
       <div class="auth-panel auth-panel--side">
         <h2>Join QuickGanyu</h2>
-        <p>Create a free customer account to request services and connect with trusted local providers across Malawi.</p>
+        <p>Create a free customer account to discover and request trusted local services across Malawi.</p>
+        <p style="color:#aaa;font-size:0.93rem;">
+          <i class="fas fa-tools" style="color:#f5c842;"></i>
+          Want to offer services instead?
+          <a href="../index.html#offer" style="color:#f5c842;font-weight:700;">Apply on the home page.</a>
+        </p>
         <a class="btn-secondary btn-secondary--dark" href="login.html">Already have an account? Log in.</a>
       </div>
+
     </div>
   </section>
 </div>
@@ -156,21 +145,15 @@
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account…';
 
-    const data = {
+    const res = await window.QuickGanyu.apiFetch('register.php', {
       full_name: form.full_name.value.trim(),
-      username:  form.username.value.trim(),
       email:     form.email.value.trim(),
       phone:     form.phone.value.trim(),
-      location:  form.location.value.trim(),
       password,
-    };
-
-    const res = await window.QuickGanyu.apiFetch('register.php', data);
+    });
 
     if (!res.ok) {
-      if (res.errors) {
-        window.QuickGanyu.showFormErrors(res.errors);
-      }
+      if (res.errors) window.QuickGanyu.showFormErrors(res.errors);
       const first = res.errors ? Object.values(res.errors)[0] : (res.error || 'Registration failed.');
       errBanner.textContent = first;
       errBanner.style.display = 'block';

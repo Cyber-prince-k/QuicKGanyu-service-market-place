@@ -137,6 +137,128 @@
     </div>
     <a class="btn-secondary" href="html/profile.html"><i class="fas fa-user-edit"></i> Complete my profile</a>
   </section>
+
+  <!-- ── Provider CTA ───────────────────────────────────────────────────────── -->
+  <section class="section-card provider-cta-section" id="offer">
+    <div class="provider-cta-inner">
+      <div class="provider-cta-text">
+        <div class="auth-tag" style="margin-bottom:1rem;">
+          <i class="fas fa-briefcase"></i> Are you a service provider?
+        </div>
+        <h2 style="font-size:2rem;font-weight:700;margin-bottom:0.8rem;line-height:1.2;">
+          Showcase your skills.<br>Get hired by clients.
+        </h2>
+        <p style="color:#4d4d4d;line-height:1.8;margin-bottom:1.2rem;max-width:520px;">
+          Join hundreds of trusted professionals on QuickGanyu. Whether you're a plumber, electrician,
+          photographer, tailor or event caterer — list your services, build a portfolio, and connect
+          with clients right across Malawi.
+        </p>
+        <ul class="provider-perks">
+          <li><i class="fas fa-check-circle"></i> Free to apply — no upfront fees</li>
+          <li><i class="fas fa-check-circle"></i> Reach clients in Lilongwe, Blantyre, Mzuzu &amp; more</li>
+          <li><i class="fas fa-check-circle"></i> Admin reviews and approves your profile</li>
+          <li><i class="fas fa-check-circle"></i> Log in with a temporary password once approved</li>
+        </ul>
+        <button class="btn-primary" id="open-offer-form" style="margin-top:1.4rem;">
+          <i class="fas fa-paper-plane"></i> Apply to join as a provider
+        </button>
+      </div>
+      <div class="provider-cta-visual" aria-hidden="true">
+        <div class="cta-icon-stack">
+          <i class="fas fa-wrench"></i>
+          <i class="fas fa-camera"></i>
+          <i class="fas fa-plug"></i>
+          <i class="fas fa-tshirt"></i>
+          <i class="fas fa-utensils"></i>
+          <i class="fas fa-laptop"></i>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Provider application modal ───────────────────────────────────────────── -->
+  <div id="offer-modal" class="modal-backdrop" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <button class="modal-close" id="close-offer-modal" aria-label="Close form">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <div class="auth-tag" style="margin-bottom:1rem;">
+        <i class="fas fa-paper-plane"></i> Provider application
+      </div>
+      <h3 id="modal-title" style="margin-bottom:0.3rem;">Tell us about yourself</h3>
+      <p class="muted" style="margin-bottom:1.2rem;line-height:1.7;">
+        Fill in your details below. An admin will review your request and, if approved,
+        you'll receive a temporary password to log in and complete your profile.
+      </p>
+
+      <div id="offer-success" style="display:none;text-align:center;padding:2rem 0;">
+        <i class="fas fa-check-circle" style="font-size:3rem;color:#1a7f4b;display:block;margin-bottom:1rem;"></i>
+        <h3 style="margin-bottom:0.5rem;">Request submitted!</h3>
+        <p class="muted">Your application is under review. We'll send your login details to your email once approved.</p>
+        <button class="btn-primary" id="close-after-success" style="margin-top:1.2rem;">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
+
+      <div id="offer-form-wrap">
+        <div id="offer-error" class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
+
+        <form id="offer-form" novalidate>
+          <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="form-card form-card--full">
+              <label>Full name *
+                <input type="text" name="full_name" placeholder="Your full name" autocomplete="name" required>
+              </label>
+            </div>
+            <div class="form-card form-card--full">
+              <label>Email address *
+                <input type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Phone <span class="muted">(optional)</span>
+                <input type="tel" name="phone" placeholder="+265 9xx xxx xxx">
+              </label>
+            </div>
+            <div class="form-card">
+              <label>Location <span class="muted">(optional)</span>
+                <input type="text" name="location" placeholder="e.g. Lilongwe">
+              </label>
+            </div>
+            <div class="form-card form-card--full">
+              <label>What services do you offer? *
+                <select name="service_category" required>
+                  <option value="">— Select a category —</option>
+                  <option>Plumbing</option>
+                  <option>Electrical</option>
+                  <option>Carpentry</option>
+                  <option>Painting</option>
+                  <option>Cleaning</option>
+                  <option>Photography</option>
+                  <option>Catering</option>
+                  <option>Tutoring</option>
+                  <option>IT / Tech support</option>
+                  <option>Tailoring</option>
+                  <option>Gardening</option>
+                  <option>Moving / Transport</option>
+                  <option>Events</option>
+                  <option>Other</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="auth-actions" style="margin-top:1.4rem;justify-content:flex-end;">
+            <button type="button" class="btn-secondary" id="cancel-offer-form">Cancel</button>
+            <button type="submit" class="btn-primary" id="offer-submit-btn">
+              <i class="fas fa-paper-plane"></i> Submit application
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 
 <footer class="footer">
@@ -183,6 +305,81 @@
   </div>
 </footer>
 
+<script src="./js/api.js"></script>
 <script src="./js/script.js"></script>
+<script>
+(function () {
+  const modal       = document.getElementById('offer-modal');
+  const formWrap    = document.getElementById('offer-form-wrap');
+  const successEl   = document.getElementById('offer-success');
+  const errBanner   = document.getElementById('offer-error');
+  const form        = document.getElementById('offer-form');
+  const submitBtn   = document.getElementById('offer-submit-btn');
+
+  function openModal() {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    // If coming from the #offer anchor, clear any leftover success state
+    formWrap.style.display  = 'block';
+    successEl.style.display = 'none';
+    errBanner.style.display = 'none';
+  }
+
+  function closeModal() {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    form.reset();
+    errBanner.style.display  = 'none';
+    formWrap.style.display   = 'block';
+    successEl.style.display  = 'none';
+  }
+
+  document.getElementById('open-offer-form').addEventListener('click', openModal);
+  document.getElementById('close-offer-modal').addEventListener('click', closeModal);
+  document.getElementById('cancel-offer-form').addEventListener('click', closeModal);
+  document.getElementById('close-after-success').addEventListener('click', closeModal);
+
+  // Close on backdrop click
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.style.display === 'flex') closeModal(); });
+
+  // Auto-open if the page was loaded with #offer in the URL
+  if (window.location.hash === '#offer') openModal();
+
+  // Submit handler
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errBanner.style.display = 'none';
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
+
+    const res = await window.QuickGanyu.apiFetch('api/offer.php', {
+      full_name:        form.full_name.value.trim(),
+      email:            form.email.value.trim(),
+      phone:            form.phone.value.trim(),
+      location:         form.location.value.trim(),
+      service_category: form.service_category.value,
+      agreed_to_terms:  true,
+    });
+
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit application';
+
+    if (!res.ok) {
+      if (res.errors) window.QuickGanyu.showFormErrors(res.errors);
+      const first = res.errors ? Object.values(res.errors)[0] : (res.error || 'Submission failed. Please try again.');
+      errBanner.textContent = first;
+      errBanner.style.display = 'block';
+      return;
+    }
+
+    formWrap.style.display  = 'none';
+    successEl.style.display = 'block';
+  });
+})();
+</script>
 </body>
 </html>

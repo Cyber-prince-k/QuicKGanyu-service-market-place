@@ -197,22 +197,17 @@
     card.id = `req-${req.id}`;
 
     const statusHtml = `<span class="status-pill status-pill--${req.status}">${req.status}</span>`;
-    const date = req.created_at ? new Date(req.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : '';
+    const date = req.created_at
+      ? new Date(req.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
+      : '';
 
-    let actionsHtml = '';
-    if (req.status === 'pending') {
-      actionsHtml = `
-        <button class="btn-approve" data-action="approve" data-id="${req.id}">
-          <i class="fas fa-check"></i> Approve
-        </button>
-        <button class="btn-decline" data-action="decline" data-id="${req.id}">
-          <i class="fas fa-times"></i> Decline
-        </button>
-        <input type="text" class="note-input" data-id="${req.id}"
-          placeholder="Optional note to applicant…"
-          style="flex:1;min-width:180px;padding:0.45rem 0.8rem;border:1px solid #dde1e7;
-                 border-radius:999px;font-size:0.88rem;background:#fafafa;">`;
-    }
+    const actionsHtml = req.status === 'pending' ? `
+      <button class="btn-approve" data-action="approve" data-id="${req.id}">
+        <i class="fas fa-check"></i> Approve
+      </button>
+      <button class="btn-decline" data-action="decline" data-id="${req.id}">
+        <i class="fas fa-times"></i> Reject
+      </button>` : '';
 
     card.innerHTML = `
       <div class="rc-header">
@@ -222,19 +217,12 @@
         </div>
         <span style="color:#888;font-size:0.82rem;">${date}</span>
       </div>
-      <p class="rc-meta"><i class="fas fa-envelope" style="width:14px;"></i> ${esc(req.email)}</p>
-      ${req.phone    ? `<p class="rc-meta"><i class="fas fa-phone" style="width:14px;"></i> ${esc(req.phone)}</p>` : ''}
-      ${req.location ? `<p class="rc-meta"><i class="fas fa-map-marker-alt" style="width:14px;"></i> ${esc(req.location)}</p>` : ''}
-      <p class="rc-meta"><i class="fas fa-briefcase" style="width:14px;"></i> ${esc(req.service_category)}
-        ${req.experience_years ? `· ${req.experience_years} yr${req.experience_years !== 1 ? 's' : ''} experience` : ''}
-      </p>
-      ${req.skills ? `<p class="rc-meta"><i class="fas fa-tools" style="width:14px;"></i> ${esc(req.skills)}</p>` : ''}
-      ${req.about   ? `<p class="rc-meta" style="margin-top:0.4rem;color:#444;">${esc(req.about)}</p>` : ''}
+      <p class="rc-meta"><i class="fas fa-briefcase" style="width:16px;color:#f5c842;"></i> ${esc(req.service_category)}</p>
+      <p class="rc-meta"><i class="fas fa-envelope"  style="width:16px;color:#f5c842;"></i> ${esc(req.email)}</p>
       <div class="rc-actions" id="actions-${req.id}">${actionsHtml}</div>
       <div id="result-${req.id}"></div>
     `;
 
-    // Wire approve / decline buttons
     card.querySelectorAll('[data-action]').forEach(btn => {
       btn.addEventListener('click', () => handleDecision(btn.dataset.action, parseInt(btn.dataset.id)));
     });
@@ -246,13 +234,11 @@
   async function handleDecision(action, id) {
     const actionsEl = document.getElementById(`actions-${id}`);
     const resultEl  = document.getElementById(`result-${id}`);
-    const noteInput = actionsEl ? actionsEl.querySelector('.note-input') : null;
-    const note      = noteInput ? noteInput.value.trim() : '';
 
     // Disable buttons while in flight
     actionsEl && actionsEl.querySelectorAll('button').forEach(b => b.disabled = true);
 
-    const res = await apiFetch('admin.php', { action, id, admin_note: note });
+    const res = await apiFetch('admin.php', { action, id });
 
     if (!res.ok) {
       toast(res.error || 'Action failed. Please try again.', 'error');

@@ -44,8 +44,8 @@
         <div class="form-grid" style="grid-template-columns:1fr;">
           <div class="form-card">
             <label>Choose a username *
-              <input type="text" name="username" placeholder="e.g. chisomo_plumbing" autocomplete="username"
-                     pattern="[A-Za-z0-9_.]{3,60}" required>
+              <input type="text" name="username" placeholder="e.g. chisomo_plumbing"
+                     autocomplete="username" pattern="[A-Za-z0-9_.]{3,60}" required>
               <span style="font-size:0.82rem;color:#888;display:block;margin-top:0.3rem;">
                 3–60 characters · letters, numbers, _ and . only
               </span>
@@ -53,12 +53,14 @@
           </div>
           <div class="form-card">
             <label>New password *
-              <input type="password" name="password" placeholder="At least 8 characters" autocomplete="new-password" required>
+              <input type="password" name="password" placeholder="At least 8 characters"
+                     autocomplete="new-password" required>
             </label>
           </div>
           <div class="form-card">
             <label>Confirm new password *
-              <input type="password" name="confirm_password" placeholder="Repeat your password" autocomplete="new-password" required>
+              <input type="password" name="confirm_password" placeholder="Repeat your password"
+                     autocomplete="new-password" required>
             </label>
           </div>
           <div class="form-card">
@@ -139,17 +141,15 @@
   const errBanner = document.getElementById('setup-error');
 
   function showGuard(msg) {
-    guardText.textContent = msg;
-    guardEl.style.display  = 'block';
+    guardText.textContent   = msg;
+    guardEl.style.display   = 'block';
     contentEl.style.display = 'none';
   }
 
-  // ── Check session on load ────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async () => {
     const me = await fetchMe();
-
     if (!me) {
-      showGuard('You need to log in with your temporary password before completing setup.');
+      showGuard('Please log in with your temporary password before completing setup.');
       return;
     }
     if (me.role !== 'provider') {
@@ -157,24 +157,18 @@
       return;
     }
     if (me.status !== 'needs_setup') {
-      // Already set up – redirect to profile
       window.location.href = 'profile.html';
       return;
     }
-    // Show the form
     contentEl.style.display = 'block';
   });
 
-  // ── Submit handler ───────────────────────────────────────────────────────────
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errBanner.style.display = 'none';
 
-    const password        = form.password.value;
-    const confirmPassword = form.confirm_password.value;
-
-    if (password !== confirmPassword) {
-      errBanner.textContent = 'Passwords do not match.';
+    if (form.password.value !== form.confirm_password.value) {
+      errBanner.textContent   = 'Passwords do not match.';
       errBanner.style.display = 'block';
       return;
     }
@@ -182,21 +176,19 @@
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Activating…';
 
-    const data = {
+    const res = await apiFetch('setup.php', {
       username: form.username.value.trim(),
-      password,
+      password: form.password.value,
       phone:    form.phone.value.trim(),
       location: form.location.value.trim(),
-    };
-
-    const res = await apiFetch('setup.php', data);
+    });
 
     if (!res.ok) {
       if (res.errors) showFormErrors(res.errors);
       const first = res.errors ? Object.values(res.errors)[0] : (res.error || 'Setup failed. Please try again.');
-      errBanner.textContent = first;
+      errBanner.textContent   = first;
       errBanner.style.display = 'block';
-      btn.disabled = false;
+      btn.disabled  = false;
       btn.innerHTML = '<i class="fas fa-check-circle"></i> Activate my account';
       return;
     }
@@ -204,7 +196,6 @@
     toast('Account activated! Redirecting to your profile…', 'success');
     setTimeout(() => { window.location.href = 'profile.html'; }, 900);
   });
-
 })();
 </script>
 </body>
