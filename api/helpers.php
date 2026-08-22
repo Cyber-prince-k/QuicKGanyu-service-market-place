@@ -61,23 +61,31 @@ function current_user(PDO $pdo): ?array {
 }
 
 /**
- * Send an email.
- * Writes a copy to /mailbox so it works in local dev without an SMTP server,
- * and also attempts a real mail() send for production.
+ * Send a branded HTML email via Gmail SMTP.
+ * Falls back to writing a file in /mailbox if the SMTP send fails (useful in local dev).
+ *
+ * @param string $to       Recipient address.
+ * @param string $subject  Email subject.
+ * @param string $htmlBody Inner HTML content (will be wrapped in the branded template).
  */
 function send_mail(string $to, string $subject, string $htmlBody): void {
+    require_once __DIR__ . '/mailer.php';
+
+    $full = email_template($subject, $htmlBody);
+
+    $sent = smtp_send($to, $subject, $full);
+
+    // Always save a local copy so you can inspect the output during development.
     $dir = __DIR__ . '/../mailbox';
     if (!is_dir($dir)) {
-        mkdir($dir, 0777, true);
+        @mkdir($dir, 0777, true);
     }
     $filename = $dir . '/sent-' . date('Ymd-His') . '-' . substr(md5($to . microtime()), 0, 8) . '.html';
-    $full = "<h2 style='font-family:sans-serif'>$subject</h2><p>To: " . htmlspecialchars($to, ENT_QUOTES) . "</p><hr>" . $htmlBody;
     @file_put_contents($filename, $full);
 
-    $headers = "MIME-Version: 1.0\r\n"
-        . "Content-Type: text/html; charset=UTF-8\r\n"
-        . "From: QuickGanyu <no-reply@quickganyu.com>\r\n";
-    @mail($to, $subject, $htmlBody, $headers);
+    if (!$sent) {
+        error_log("QuickGanyu mailer: SMTP failed for $to – $subject");
+    }
 }
 
 /** Public view of a user (never expose password hashes). */

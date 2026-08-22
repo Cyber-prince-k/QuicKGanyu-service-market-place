@@ -95,16 +95,40 @@ if ($action === 'add_provider') {
 
     send_mail(
         $email,
-        'QuickGanyu – Your provider account has been created',
-        '<p>Hello <strong>' . htmlspecialchars($fullName, ENT_QUOTES) . '</strong>,</p>
-         <p>An admin has created a provider account for you on <strong>QuickGanyu</strong>.</p>
-         <p>Your temporary login details are:</p>
-         <ul>
-           <li>Login identifier: <strong>' . htmlspecialchars($fullName, ENT_QUOTES) . '</strong> (or your email)</li>
-           <li>Temporary password: <strong>' . $tempPassword . '</strong></li>
-         </ul>
-         <p>Log in and complete your profile setup to choose a username and set your own password.</p>
-         <p style="color:#666">Keep this password safe. It will work until you update it during setup.</p>'
+        'Welcome to QuickGanyu – Your provider account is ready',
+        '
+        <h1>Your provider account is ready!</h1>
+        <p>Hello <strong>' . htmlspecialchars($fullName, ENT_QUOTES) . '</strong>,</p>
+        <p>
+          An admin has set up a provider account for you on <strong>QuickGanyu</strong>.
+          Use the temporary password below to log in and complete your profile setup.
+        </p>
+
+        <div class="info-box">
+          <div class="label">Login identifier</div>
+          <div class="value" style="font-size:16px;">' . htmlspecialchars($fullName, ENT_QUOTES) . '</div>
+          <div style="margin-top:14px;">
+            <div class="label">Temporary password</div>
+            <div class="value">' . htmlspecialchars($tempPassword, ENT_QUOTES) . '</div>
+          </div>
+        </div>
+
+        <p>
+          You can log in using your <strong>full name</strong> or <strong>email address</strong>
+          together with the temporary password above.
+          Once logged in you will be asked to choose a username and set your own password.
+        </p>
+
+        <a class="cta-btn" href="http://localhost/roi/html/login.html">
+          &#128274; Log in to QuickGanyu
+        </a>
+
+        <div class="notice">
+          <strong>Keep this password safe.</strong>
+          It will only work until you complete your account setup.
+          Never share it with anyone.
+        </div>
+        '
     );
 
     respond([
@@ -143,12 +167,29 @@ if ($action === 'decline') {
 
     send_mail(
         $request['email'],
-        'QuickGanyu – Application update',
-        '<p>Hello <strong>' . htmlspecialchars($request['full_name'], ENT_QUOTES) . '</strong>,</p>
-         <p>Thank you for your interest in offering services on QuickGanyu.</p>
-         <p>Unfortunately, your application was <strong style="color:#b00020">not approved</strong> at this time.'
-         . ($note !== '' ? ' Reason: ' . htmlspecialchars($note, ENT_QUOTES) : '')
-         . '</p><p>You are welcome to apply again in the future.</p>'
+        'QuickGanyu – We reviewed your application',
+        '
+        <h1>Application update</h1>
+        <p>Hello <strong>' . htmlspecialchars($request['full_name'], ENT_QUOTES) . '</strong>,</p>
+        <p>Thank you for your interest in offering services on <strong>QuickGanyu</strong>.</p>
+
+        <div class="declined-box">
+          <div class="label">Application status</div>
+          <div class="value">Not approved at this time</div>
+        </div>
+
+        ' . ($note !== '' ? '<p><strong>Reason:</strong> ' . htmlspecialchars($note, ENT_QUOTES) . '</p>' : '') . '
+
+        <p>
+          We appreciate your time and encourage you to apply again in the future.
+          If you have any questions, feel free to reach out to us.
+        </p>
+
+        <div class="notice">
+          You are always welcome to reapply once you feel ready.
+          Visit the QuickGanyu home page to submit a new application.
+        </div>
+        '
     );
 
     respond(['ok' => true, 'message' => 'Request declined. The applicant has been emailed.']);
@@ -203,17 +244,49 @@ try {
 
 send_mail(
     $request['email'],
-    'QuickGanyu – Your provider account is approved',
-    '<p>Hello <strong>' . htmlspecialchars($request['full_name'], ENT_QUOTES) . '</strong>,</p>
-     <p>Congratulations! Your request to offer services on <strong>QuickGanyu</strong> has been approved.</p>
-     <p>Your temporary login details are:</p>
-     <ul>
-       <li>Login identifier: <strong>' . htmlspecialchars($request['full_name'], ENT_QUOTES) . '</strong> (or your email)</li>
-       <li>Temporary password: <strong>' . $tempPassword . '</strong></li>
-     </ul>
-     <p>Log in with your name or email and this temporary password, then choose a username and
-        set your own password when you complete your profile.</p>
-     <p style="color:#666">For your security, keep this password safe. Update it after your first login.</p>'
+    'Congratulations – Your QuickGanyu provider account is approved! &#127881;',
+    '
+    <h1>You&rsquo;re approved! &#127881;</h1>
+    <p>Hello <strong>' . htmlspecialchars($request['full_name'], ENT_QUOTES) . '</strong>,</p>
+    <p>
+      Great news! Your application to offer services on <strong>QuickGanyu</strong> has been
+      <span class="pill">Approved</span>.
+      Your account is ready &mdash; use the temporary login details below to get started.
+    </p>
+
+    <div class="info-box">
+      <div class="label">Login identifier</div>
+      <div class="value" style="font-size:16px;">' . htmlspecialchars($request['full_name'], ENT_QUOTES) . '</div>
+      <div style="margin-top:14px;">
+        <div class="label">Temporary password</div>
+        <div class="value">' . htmlspecialchars($tempPassword, ENT_QUOTES) . '</div>
+      </div>
+    </div>
+
+    <p>
+      Log in using your <strong>full name</strong> or <strong>email address</strong>
+      with the temporary password above. You will then be guided to choose your own
+      username and set a permanent password.
+    </p>
+
+    <a class="cta-btn" href="http://localhost/roi/html/login.html">
+      &#9889; Log in &amp; complete your profile
+    </a>
+
+    <div class="divider"></div>
+
+    <p style="font-size:14px;color:#666;">
+      <strong>What happens next?</strong><br>
+      After logging in, complete your profile &mdash; add your skills, location, and a short bio
+      so clients can discover and hire you.
+    </p>
+
+    <div class="notice">
+      <strong>Keep this password safe.</strong>
+      It is valid for one-time use until you set your own password during profile setup.
+      Never share it with anyone.
+    </div>
+    '
 );
 
 respond([
