@@ -9,7 +9,7 @@ function respond(array $payload, int $status = 200): void {
     exit;
 }
 
-/** Read JSON body or form data into an array. */
+/** Read JSON body or $_POST into an array. */
 function request_input(): array {
     $raw  = file_get_contents('php://input');
     $json = json_decode($raw, true);
@@ -32,60 +32,69 @@ function str_field(array $data, string $key, string $default = ''): string {
 
 /** Is the username available? (excluding a given user id) */
 function username_available(PDO $pdo, string $username, int $excludeId = 0): bool {
-    $stmt = $pdo->prepare('SELECT id FROM users WHERE username = ? AND id <> ? LIMIT 1');
-    $stmt->execute([$username, $excludeId]);
-    return $stmt->fetch() === false;
+    try {
+        $stmt = $pdo->prepare('SELECT id FROM users WHERE username = ? AND id <> ? LIMIT 1');
+        $stmt->execute([$username, $excludeId]);
+        return $stmt->fetch() === false;
+    } catch (Throwable $e) {
+        error_log('QuickGanyu username_available error: ' . $e->getMessage());
+        return false; // treat as taken on error — safer than allowing duplicates
+    }
 }
 
 /** Is the email available? (excluding a given user id) */
 function email_available(PDO $pdo, string $email, int $excludeId = 0): bool {
-    $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ? AND id <> ? LIMIT 1');
-    $stmt->execute([$email, $excludeId]);
-    return $stmt->fetch() === false;
+    try {
+        $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ? AND id <> ? LIMIT 1');
+        $stmt->execute([$email, $excludeId]);
+        return $stmt->fetch() === false;
+    } catch (Throwable $e) {
+        error_log('QuickGanyu email_available error: ' . $e->getMessage());
+        return false;
+    }
 }
 
 /**
  * Fetch a fully-merged user row by id.
- *
- * JOINs the correct child table depending on the role stored in users:
- *   admin    → LEFT JOIN admins           ON admins.user_id = users.id
- *   provider → LEFT JOIN service_providers ON service_providers.user_id = users.id
- *   client   → LEFT JOIN customers         ON customers.user_id = users.id
- *
- * The merged row exposes every column from both tables so the rest of the
- * application can treat it like a single flat record.
+ * Reads users (base) then LEFT JOINs the correct child table based on role:
+ *   admin    → admins
+ *   provider → service_providers
+ *   client   → customers
  */
 function fetch_user_by_id(PDO $pdo, int $id): ?array {
-    // First get the base row to know the role.
-    $base = $pdo->prepare('SELECT * FROM users WHERE id = ? LIMIT 1');
-    $base->execute([$id]);
-    $user = $base->fetch();
-    if ($user === false) {
+    try {
+        $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ? LIMIT 1');
+        $stmt->execute([$id]);
+        $user = $stmt->fetch();
+        if ($user === false) {
+            return null;
+        }
+
+        $child = [];
+        if ($user['role'] === 'admin') {
+            $s = $pdo->prepare('SELECT * FROM admins WHERE user_id = ? LIMIT 1');
+            $s->execute([$id]);
+            $child = $s->fetch() ?: [];
+        } elseif ($user['role'] === 'provider') {
+            $s = $pdo->prepare('SELECT * FROM service_providers WHERE user_id = ? LIMIT 1');
+            $s->execute([$id]);
+            $child = $s->fetch() ?: [];
+        } elseif ($user['role'] === 'client') {
+            $s = $pdo->prepare('SELECT * FROM customers WHERE user_id = ? LIMIT 1');
+            $s->execute([$id]);
+            $child = $s->fetch() ?: [];
+        }
+
+        if ($child) {
+            unset($child['user_id']); // don't overwrite users.id
+            $user = array_merge($user, $child);
+        }
+
+        return $user;
+    } catch (Throwable $e) {
+        error_log('QuickGanyu fetch_user_by_id error: ' . $e->getMessage());
         return null;
     }
-
-    $child = null;
-    if ($user['role'] === 'admin') {
-        $s = $pdo->prepare('SELECT * FROM admins WHERE user_id = ? LIMIT 1');
-        $s->execute([$id]);
-        $child = $s->fetch() ?: [];
-    } elseif ($user['role'] === 'provider') {
-        $s = $pdo->prepare('SELECT * FROM service_providers WHERE user_id = ? LIMIT 1');
-        $s->execute([$id]);
-        $child = $s->fetch() ?: [];
-    } elseif ($user['role'] === 'client') {
-        $s = $pdo->prepare('SELECT * FROM customers WHERE user_id = ? LIMIT 1');
-        $s->execute([$id]);
-        $child = $s->fetch() ?: [];
-    }
-
-    // Merge: child columns win on conflict (e.g. both have user_id — keep users.id).
-    if ($child) {
-        unset($child['user_id']); // avoid overwriting users.id
-        $user = array_merge($user, $child);
-    }
-
-    return $user;
 }
 
 /** Return the currently logged-in user (merged with child table), or null. */
@@ -96,25 +105,26 @@ function current_user(PDO $pdo): ?array {
     return fetch_user_by_id($pdo, (int)$_SESSION['user_id']);
 }
 
-/**
- * Send a branded HTML email via Gmail SMTP.
- * Also saves a local copy to /mailbox for dev inspection.
- */
+/** Send a branded HTML email. */
 function send_mail(string $to, string $subject, string $htmlBody): void {
-    require_once __DIR__ . '/mailer.php';
+    try {
+        require_once __DIR__ . '/mailer.php';
+        $full = email_template($subject, $htmlBody);
+        $sent = smtp_send($to, $subject, $full);
 
-    $full = email_template($subject, $htmlBody);
-    $sent = smtp_send($to, $subject, $full);
+        $dir = __DIR__ . '/../mailbox';
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0777, true);
+        }
+        $fname = $dir . '/sent-' . date('Ymd-His') . '-' . substr(md5($to . microtime()), 0, 8) . '.html';
+        @file_put_contents($fname, $full);
 
-    $dir = __DIR__ . '/../mailbox';
-    if (!is_dir($dir)) {
-        @mkdir($dir, 0777, true);
-    }
-    $fname = $dir . '/sent-' . date('Ymd-His') . '-' . substr(md5($to . microtime()), 0, 8) . '.html';
-    @file_put_contents($fname, $full);
-
-    if (!$sent) {
-        error_log("QuickGanyu mailer: SMTP failed for $to – $subject");
+        if (!$sent) {
+            error_log("QuickGanyu mailer: SMTP failed for $to – $subject");
+        }
+    } catch (Throwable $e) {
+        error_log("QuickGanyu send_mail exception for $to: " . $e->getMessage());
+        // Email failure must never crash the main flow
     }
 }
 

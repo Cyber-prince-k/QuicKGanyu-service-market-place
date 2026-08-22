@@ -147,54 +147,69 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    const me = await fetchMe();
-    if (!me) {
-      showGuard('Please log in with your temporary password before completing setup.');
+    // ── Session guard ──────────────────────────────────────────────────────────
+    try {
+      const me = await fetchMe();
+      if (!me) {
+        showGuard('Please log in with your temporary password before completing setup.');
+        return;
+      }
+      if (me.role !== 'provider') {
+        showGuard('This setup page is only for service providers.');
+        return;
+      }
+      if (me.status !== 'needs_setup') {
+        window.location.href = 'provider-dashboard.html';
+        return;
+      }
+    } catch (e) {
+      showGuard('Could not verify your session. Please try refreshing the page.');
       return;
     }
-    if (me.role !== 'provider') {
-      showGuard('This setup page is only for service providers.');
-      return;
-    }
-    if (me.status !== 'needs_setup') {
-      window.location.href = 'profile.html';
-      return;
-    }
+
     contentEl.style.display = 'block';
-  });
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    errBanner.style.display = 'none';
+    // ── Form submit ────────────────────────────────────────────────────────────
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errBanner.style.display = 'none';
 
-    if (form.password.value !== form.confirm_password.value) {
-      errBanner.textContent   = 'Passwords do not match.';
-      errBanner.style.display = 'block';
-      return;
-    }
+      if (form.password.value !== form.confirm_password.value) {
+        errBanner.textContent   = 'Passwords do not match.';
+        errBanner.style.display = 'block';
+        return;
+      }
 
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Activating…';
+      btn.disabled  = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Activating…';
 
-    const res = await apiFetch('setup.php', {
-      username: form.username.value.trim(),
-      password: form.password.value,
-      phone:    form.phone.value.trim(),
-      location: form.location.value.trim(),
+      try {
+        const res = await apiFetch('setup.php', {
+          username: form.username.value.trim(),
+          password: form.password.value,
+          phone:    form.phone.value.trim(),
+          location: form.location.value.trim(),
+        });
+
+        if (!res.ok) {
+          if (res.errors) showFormErrors(res.errors);
+          errBanner.textContent   = res.errors ? Object.values(res.errors)[0] : (res.error || 'Setup failed.');
+          errBanner.style.display = 'block';
+          btn.disabled  = false;
+          btn.innerHTML = '<i class="fas fa-check-circle"></i> Activate my account';
+          return;
+        }
+
+        toast('Account activated! Redirecting…', 'success');
+        setTimeout(() => { window.location.href = 'provider-dashboard.html'; }, 900);
+
+      } catch (err) {
+        errBanner.textContent   = 'An unexpected error occurred. Please try again.';
+        errBanner.style.display = 'block';
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> Activate my account';
+      }
     });
-
-    if (!res.ok) {
-      if (res.errors) showFormErrors(res.errors);
-      const first = res.errors ? Object.values(res.errors)[0] : (res.error || 'Setup failed. Please try again.');
-      errBanner.textContent   = first;
-      errBanner.style.display = 'block';
-      btn.disabled  = false;
-      btn.innerHTML = '<i class="fas fa-check-circle"></i> Activate my account';
-      return;
-    }
-
-    toast('Account activated! Redirecting to your profile…', 'success');
-    setTimeout(() => { window.location.href = 'profile.html'; }, 900);
   });
 })();
 </script>

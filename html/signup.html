@@ -137,33 +137,40 @@
     const confirmPassword = form.confirm_password.value;
 
     if (password !== confirmPassword) {
-      errBanner.textContent = 'Passwords do not match.';
+      errBanner.textContent   = 'Passwords do not match.';
       errBanner.style.display = 'block';
       return;
     }
 
-    btn.disabled = true;
+    btn.disabled  = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account…';
 
-    const res = await window.QuickGanyu.apiFetch('register.php', {
-      full_name: form.full_name.value.trim(),
-      email:     form.email.value.trim(),
-      phone:     form.phone.value.trim(),
-      password,
-    });
+    try {
+      const res = await window.QuickGanyu.apiFetch('register.php', {
+        full_name: form.full_name.value.trim(),
+        email:     form.email.value.trim(),
+        phone:     form.phone.value.trim(),
+        password,
+      });
 
-    if (!res.ok) {
-      if (res.errors) window.QuickGanyu.showFormErrors(res.errors);
-      const first = res.errors ? Object.values(res.errors)[0] : (res.error || 'Registration failed.');
-      errBanner.textContent = first;
+      if (!res.ok) {
+        if (res.errors) window.QuickGanyu.showFormErrors(res.errors);
+        errBanner.textContent   = res.errors ? Object.values(res.errors)[0] : (res.error || 'Registration failed.');
+        errBanner.style.display = 'block';
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fas fa-user-plus"></i> Create account';
+        return;
+      }
+
+      window.QuickGanyu.toast('Account created! Welcome to QuickGanyu.', 'success');
+      setTimeout(() => { window.location.href = 'customer-dashboard.html'; }, 800);
+
+    } catch (err) {
+      errBanner.textContent   = 'An unexpected error occurred. Please try again.';
       errBanner.style.display = 'block';
-      btn.disabled = false;
+      btn.disabled  = false;
       btn.innerHTML = '<i class="fas fa-user-plus"></i> Create account';
-      return;
     }
-
-    window.QuickGanyu.toast('Account created! Welcome to QuickGanyu.', 'success');
-    setTimeout(() => { window.location.href = 'customer-dashboard.html'; }, 800);
   });
 })();
 </script>

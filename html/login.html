@@ -114,34 +114,39 @@
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in…';
 
-    const data = {
-      identifier: form.identifier.value.trim(),
-      password:   form.password.value,
-    };
+    try {
+      const res = await window.QuickGanyu.apiFetch('login.php', {
+        identifier: form.identifier.value.trim(),
+        password:   form.password.value,
+      });
 
-    const res = await window.QuickGanyu.apiFetch('login.php', data);
+      if (!res.ok) {
+        errBanner.textContent   = res.error || 'Login failed. Please try again.';
+        errBanner.style.display = 'block';
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign in';
+        return;
+      }
 
-    if (!res.ok) {
-      errBanner.textContent = res.error || 'Login failed. Please try again.';
+      window.QuickGanyu.toast('Welcome back, ' + res.user.full_name + '!', 'success');
+
+      setTimeout(() => {
+        const map = {
+          'admin':              'admin.html',
+          'setup':              'setup.html',
+          'provider-dashboard': 'provider-dashboard.html',
+          'customer-dashboard': 'customer-dashboard.html',
+          'profile':            'profile.html',
+        };
+        window.location.href = map[res.redirect] || '../index.html';
+      }, 600);
+
+    } catch (err) {
+      errBanner.textContent   = 'An unexpected error occurred. Please try again.';
       errBanner.style.display = 'block';
-      btn.disabled = false;
+      btn.disabled  = false;
       btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign in';
-      return;
     }
-
-    window.QuickGanyu.toast('Welcome back, ' + res.user.full_name + '!', 'success');
-
-    // Redirect based on role / status returned by the API
-    setTimeout(() => {
-      const map = {
-        'admin':              'admin.html',
-        'setup':              'setup.html',
-        'provider-dashboard': 'provider-dashboard.html',
-        'customer-dashboard': 'customer-dashboard.html',
-        'profile':            'profile.html',
-      };
-      window.location.href = map[res.redirect] || '../index.html';
-    }, 600);
   });
 })();
 </script>

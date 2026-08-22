@@ -356,28 +356,35 @@
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
 
-    const res = await window.QuickGanyu.apiFetch('offer.php', {
-      full_name:        form.full_name.value.trim(),
-      email:            form.email.value.trim(),
-      phone:            form.phone.value.trim(),
-      location:         form.location.value.trim(),
-      service_category: form.service_category.value,
-      agreed_to_terms:  true,
-    });
+    try {
+      const res = await window.QuickGanyu.apiFetch('offer.php', {
+        full_name:        form.full_name.value.trim(),
+        email:            form.email.value.trim(),
+        phone:            form.phone.value.trim(),
+        location:         form.location.value.trim(),
+        service_category: form.service_category.value,
+        agreed_to_terms:  true,
+      });
 
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit application';
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit application';
 
-    if (!res.ok) {
-      if (res.errors) window.QuickGanyu.showFormErrors(res.errors);
-      const first = res.errors ? Object.values(res.errors)[0] : (res.error || 'Submission failed. Please try again.');
-      errBanner.textContent = first;
+      if (!res.ok) {
+        if (res.errors) window.QuickGanyu.showFormErrors(res.errors);
+        errBanner.textContent   = res.errors ? Object.values(res.errors)[0] : (res.error || 'Submission failed. Please try again.');
+        errBanner.style.display = 'block';
+        return;
+      }
+
+      formWrap.style.display  = 'none';
+      successEl.style.display = 'block';
+
+    } catch (err) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit application';
+      errBanner.textContent   = 'An unexpected error occurred. Please try again.';
       errBanner.style.display = 'block';
-      return;
     }
-
-    formWrap.style.display  = 'none';
-    successEl.style.display = 'block';
   });
 })();
 </script>

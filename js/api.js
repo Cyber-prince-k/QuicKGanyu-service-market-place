@@ -28,13 +28,22 @@
     } else {
       options.body = JSON.stringify(data);
     }
-    const res = await fetch(apiUrl(endpoint), options);
-    let payload;
+
+    let res, payload;
+    try {
+      res = await fetch(apiUrl(endpoint), options);
+    } catch (networkErr) {
+      // fetch() itself threw — server unreachable, CORS blocked, etc.
+      return { ok: false, error: 'Could not reach the server. Check your connection and try again.' };
+    }
+
     try {
       payload = await res.json();
     } catch {
-      payload = { ok: false, error: 'The server returned an invalid response.' };
+      // Server replied but not with valid JSON (e.g. a PHP fatal error page)
+      return { ok: false, error: `Server error (HTTP ${res.status}). Check the PHP error log.` };
     }
+
     if (!res.ok && !payload.error && !payload.errors) {
       payload.error = `Request failed (HTTP ${res.status}).`;
     }
