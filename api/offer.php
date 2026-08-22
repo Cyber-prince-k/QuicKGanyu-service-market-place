@@ -32,9 +32,9 @@ try {
 
     $pdo = db();
 
-    if (!email_available($pdo, $email)) {
+    if (!email_available($pdo, $email, 'provider')) {
         respond(['ok' => false, 'errors' => [
-            'email' => 'An account with this email already exists. Please log in instead.',
+            'email' => 'A provider account with this email already exists. Please log in instead.',
         ]], 409);
     }
 

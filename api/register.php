@@ -31,7 +31,7 @@ try {
 
     $pdo = db();
 
-    if (!email_available($pdo, $email)) {
+    if (!email_available($pdo, $email, 'client')) {
         respond(['ok' => false, 'errors' => ['email' => 'An account with this email already exists.']], 409);
     }
 

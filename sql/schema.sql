@@ -12,12 +12,15 @@ USE quickganyu;
 -- BASE TABLE: users
 -- Holds the shared identity for every account regardless of role.
 -- Child tables (admins, service_providers, customers) all foreign-key into this.
+-- NOTE: email is NOT unique — the same person can hold a customer account
+--       and later also become an approved provider (different rows, same email).
+--       Only username must be globally unique.
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS users (
   id            INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
   full_name     VARCHAR(120)    NOT NULL,
   username      VARCHAR(60)     NULL UNIQUE,
-  email         VARCHAR(190)    NOT NULL UNIQUE,
+  email         VARCHAR(190)    NOT NULL,           -- NOT unique on purpose
   password_hash VARCHAR(255)    NOT NULL,
   role          ENUM('admin','provider','client') NOT NULL,
   status        ENUM('active','needs_setup','suspended') NOT NULL DEFAULT 'active',
@@ -26,8 +29,6 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- CHILD TABLE: admins
--- Inherits from users WHERE role = 'admin'.
--- Stores admin-specific data (office location, contact phone, etc.).
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS admins (
   user_id       INT UNSIGNED    NOT NULL PRIMARY KEY,
@@ -39,8 +40,6 @@ CREATE TABLE IF NOT EXISTS admins (
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- CHILD TABLE: service_providers
--- Inherits from users WHERE role = 'provider'.
--- Holds the professional profile data for each provider.
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS service_providers (
   user_id          INT UNSIGNED    NOT NULL PRIMARY KEY,
@@ -56,8 +55,6 @@ CREATE TABLE IF NOT EXISTS service_providers (
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- CHILD TABLE: customers
--- Inherits from users WHERE role = 'client'.
--- Stores customer-specific contact and location info.
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS customers (
   user_id       INT UNSIGNED    NOT NULL PRIMARY KEY,
@@ -69,8 +66,6 @@ CREATE TABLE IF NOT EXISTS customers (
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- CHILD TABLE: provider_requests
--- Applications from people who want to become service providers.
--- Admin reviews these and either approves (creating a provider account) or declines.
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS provider_requests (
   id                 INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
@@ -97,7 +92,6 @@ CREATE TABLE IF NOT EXISTS provider_requests (
 -- SEED: two default administrators
 --   RoiAdmin  / Pk711908
 --   Admin1    / PK711909
--- INSERT IGNORE keeps this safe to re-run.
 -- ─────────────────────────────────────────────────────────────────────────────
 INSERT IGNORE INTO users
   (full_name, username, email, password_hash, role, status)
@@ -109,9 +103,8 @@ VALUES
    '$2y$10$GFZk/5eV1V75IDq6l7CpG.6f53LBypIlz3m3B7r5qdTwINO8BU2hC',
    'admin', 'active');
 
--- Seed admin child rows (use subquery to resolve ids safely).
 INSERT IGNORE INTO admins (user_id, phone, location)
 SELECT id, '+265 999 000 001', 'Lilongwe' FROM users WHERE username = 'RoiAdmin';
 
 INSERT IGNORE INTO admins (user_id, phone, location)
-SELECT id, '+265 999 000 002', 'Blantyre' FROM users WHERE username = 'Admin1';
+SELECT id, '+265 999 000 002', 'Blantyre'  FROM users WHERE username = 'Admin1';

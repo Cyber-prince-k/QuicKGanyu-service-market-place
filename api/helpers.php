@@ -42,11 +42,20 @@ function username_available(PDO $pdo, string $username, int $excludeId = 0): boo
     }
 }
 
-/** Is the email available? (excluding a given user id) */
-function email_available(PDO $pdo, string $email, int $excludeId = 0): bool {
+/** Is the email available for a given role? (same email can exist for different roles) */
+function email_available(PDO $pdo, string $email, string $role = '', int $excludeId = 0): bool {
     try {
-        $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ? AND id <> ? LIMIT 1');
-        $stmt->execute([$email, $excludeId]);
+        if ($role !== '') {
+            // Block duplicate email within the same role only
+            $stmt = $pdo->prepare(
+                'SELECT id FROM users WHERE email = ? AND role = ? AND id <> ? LIMIT 1'
+            );
+            $stmt->execute([$email, $role, $excludeId]);
+        } else {
+            // Legacy: check across all roles
+            $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ? AND id <> ? LIMIT 1');
+            $stmt->execute([$email, $excludeId]);
+        }
         return $stmt->fetch() === false;
     } catch (Throwable $e) {
         error_log('QuickGanyu email_available error: ' . $e->getMessage());

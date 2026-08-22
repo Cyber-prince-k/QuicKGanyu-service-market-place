@@ -67,8 +67,8 @@ if ($action === 'add_provider') {
         if ($expYears < 0 || $expYears > 80)       $errors['experience_years'] = 'Enter valid years (0–80).';
         if ($errors) respond(['ok' => false, 'errors' => $errors], 422);
 
-        if (!email_available($pdo, $email)) {
-            respond(['ok' => false, 'errors' => ['email' => 'An account with this email already exists.']], 409);
+        if (!email_available($pdo, $email, 'provider')) {
+            respond(['ok' => false, 'errors' => ['email' => 'A provider account with this email already exists.']], 409);
         }
 
         $tempPassword = bin2hex(random_bytes(5));
@@ -181,8 +181,8 @@ if ($action === 'decline') {
 if ($action !== 'approve') respond(['ok' => false, 'error' => 'Unknown action.'], 422);
 
 // ── APPROVE ───────────────────────────────────────────────────────────────────
-if (!email_available($pdo, $request['email'])) {
-    respond(['ok' => false, 'error' => 'The applicant already has an account. Please decline this request.'], 409);
+if (!email_available($pdo, $request['email'], 'provider')) {
+    respond(['ok' => false, 'error' => 'The applicant already has a provider account. Please decline this request.'], 409);
 }
 
 $tempPassword = bin2hex(random_bytes(5));
