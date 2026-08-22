@@ -1,7 +1,6 @@
 <?php
 // Customer self-registration.
-// Collects: full_name, email, phone, password.
-// Username is auto-generated from the email local part to keep signup simple.
+// Inserts into: users (base) then customers (child).
 require_once __DIR__ . '/helpers.php';
 header('Content-Type: application/json; charset=utf-8');
 
@@ -24,7 +23,6 @@ if (mb_strlen($phone) < 7) {
 if (strlen($password) < 8) {
     $errors['password'] = 'Password must be at least 8 characters.';
 }
-
 if ($errors) {
     respond(['ok' => false, 'errors' => $errors], 422);
 }
@@ -35,7 +33,7 @@ if (!email_available($pdo, $email)) {
     respond(['ok' => false, 'errors' => ['email' => 'An account with this email already exists.']], 409);
 }
 
-// Derive a unique username from the email local part (e.g. john.doe@… → john_doe).
+// Auto-generate a unique username from the email local part.
 $base     = preg_replace('/[^A-Za-z0-9]/', '_', explode('@', $email)[0]);
 $base     = trim($base, '_');
 $base     = preg_replace('/_+/', '_', $base) ?: 'user';
@@ -45,22 +43,38 @@ while (!username_available($pdo, $username)) {
     $username = $base . '_' . $suffix++;
 }
 
-$stmt = $pdo->prepare(
-    'INSERT INTO users (full_name, username, email, phone, password_hash, role, status)
-     VALUES (?, ?, ?, ?, ?, "client", "active")'
-);
-$stmt->execute([
-    $fullName,
-    $username,
-    $email,
-    $phone ?: null,
-    password_hash($password, PASSWORD_DEFAULT),
-]);
+$pdo->beginTransaction();
+try {
+    // 1. Base row
+    $stmt = $pdo->prepare(
+        'INSERT INTO users (full_name, username, email, password_hash, role, status)
+         VALUES (?, ?, ?, ?, "client", "active")'
+    );
+    $stmt->execute([
+        $fullName,
+        $username,
+        $email,
+        password_hash($password, PASSWORD_DEFAULT),
+    ]);
+    $userId = (int)$pdo->lastInsertId();
 
-$_SESSION['user_id'] = (int)$pdo->lastInsertId();
+    // 2. Child row in customers
+    $stmt = $pdo->prepare(
+        'INSERT INTO customers (user_id, phone) VALUES (?, ?)'
+    );
+    $stmt->execute([$userId, $phone ?: null]);
+
+    $pdo->commit();
+} catch (Throwable $e) {
+    $pdo->rollBack();
+    respond(['ok' => false, 'error' => 'Could not create account. Please try again.'], 500);
+}
+
+$_SESSION['user_id'] = $userId;
 
 respond([
     'ok'      => true,
     'message' => 'Account created. Welcome to QuickGanyu!',
-    'user'    => public_user(current_user($pdo)),
+    'user'    => public_user(fetch_user_by_id($pdo, $userId)),
+    'redirect' => 'customer-dashboard',
 ]);
