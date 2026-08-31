@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment · QuickGanyu</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    body { background: #f4f1ea; }
+
+    .payment-wrap {
+      max-width: 560px;
+      margin: 2rem auto;
+      padding: 0 1rem 3rem;
+    }
+
+    /* ── Brand header strip ────────────────────────────────────────────── */
+    .pay-header {
+      background: #0b0b0b;
+      border-radius: 18px 18px 0 0;
+      padding: 1.4rem 1.8rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .pay-header__logo {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #f5c842;
+      text-decoration: none;
+    }
+    .pay-header__logo span { color: white; font-weight: 300; }
+    .pay-header__secure {
+      font-size: 0.75rem;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .pay-header__secure i { color: #4ade80; }
+
+    /* ── Summary card ──────────────────────────────────────────────────── */
+    .pay-summary {
+      background: white;
+      padding: 1.4rem 1.8rem;
+      border-bottom: 1px solid #f0eeeb;
+    }
+    .pay-summary__label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #aaa;
+      margin-bottom: 0.3rem;
+    }
+    .pay-summary__service {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0b0b0b;
+      margin-bottom: 0.2rem;
+    }
+    .pay-summary__parties {
+      font-size: 0.82rem;
+      color: #888;
+      margin-bottom: 0.9rem;
+    }
+    .pay-summary__amount {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+    .pay-summary__amount .currency {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #666;
+    }
+    .pay-summary__amount .value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #0b0b0b;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    /* ── Form card ─────────────────────────────────────────────────────── */
+    .pay-form-card {
+      background: white;
+      padding: 1.6rem 1.8rem 2rem;
+      border-radius: 0 0 18px 18px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+    }
+
+    .pay-section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #aaa;
+      margin-bottom: 0.9rem;
+    }
+
+    /* Method tabs */
+    .method-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.4rem;
+    }
+    .method-tab {
+      border: 2px solid #e8e0d0;
+      background: #fafaf8;
+      border-radius: 12px;
+      padding: 0.75rem 0.5rem;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.15s, background 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .method-tab:hover { border-color: #f5c842; background: #fffbe6; }
+    .method-tab.active {
+      border-color: #f5c842;
+      background: #fffbe6;
+      box-shadow: 0 0 0 3px rgba(245,200,66,0.18);
+    }
+    .method-tab i { font-size: 1.4rem; color: #0b0b0b; }
+    .method-tab .tab-label { font-size: 0.76rem; font-weight: 700; color: #333; }
+    .method-tab .tab-sub   { font-size: 0.68rem; color: #999; }
+
+    /* Field group */
+    .pay-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+    }
+    .pay-field label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #444;
+    }
+    .pay-field input {
+      border: 1.5px solid #e0d8c8;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: #fffdf8;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .pay-field input:focus {
+      outline: none;
+      border-color: #0b0b0b;
+      box-shadow: 0 0 0 3px rgba(11,11,11,0.08);
+    }
+    .pay-field input::placeholder { color: #bbb; }
+    .pay-field .hint {
+      font-size: 0.73rem;
+      color: #aaa;
+    }
+
+    .card-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    /* Method panels */
+    .method-panel { display: none; }
+    .method-panel.active { display: block; }
+
+    /* Error banner */
+    .pay-error {
+      background: #fff0f2;
+      border: 1px solid #f5c2ca;
+      color: #b00020;
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      font-size: 0.88rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    /* Submit button */
+    .pay-btn {
+      width: 100%;
+      background: #0b0b0b;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 0.5rem;
+    }
+    .pay-btn:hover:not(:disabled) { background: #1e1e1e; transform: translateY(-1px); }
+    .pay-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .pay-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #bbb;
+      margin-top: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+    }
+
+    /* ── Pending / polling state ───────────────────────────────────────── */
+    .pay-pending {
+      text-align: center;
+      padding: 2.5rem 1rem;
+    }
+    .pay-pending__spinner {
+      width: 64px;
+      height: 64px;
+      border: 5px solid #f0eeeb;
+      border-top-color: #f5c842;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 1.2rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .pay-pending h3 { font-size: 1.1rem; color: #0b0b0b; margin-bottom: 0.4rem; }
+    .pay-pending p  { color: #888; font-size: 0.88rem; line-height: 1.6; }
+    .pay-pending .poll-hint {
+      font-size: 0.78rem;
+      color: #bbb;
+      margin-top: 1.2rem;
+    }
+    .btn-check-manually {
+      background: transparent;
+      border: 1.5px solid #e0d8c8;
+      border-radius: 999px;
+      padding: 0.5rem 1.2rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: #555;
+      margin-top: 0.8rem;
+      transition: background 0.15s;
+    }
+    .btn-check-manually:hover { background: #f5f0e8; }
+
+    /* ── Success state ─────────────────────────────────────────────────── */
+    .pay-success {
+      text-align: center;
+      padding: 2.5rem 1rem;
+    }
+    .pay-success__icon {
+      width: 72px;
+      height: 72px;
+      background: #e8f5ee;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem;
+      font-size: 2rem;
+      color: #1a7f4b;
+      animation: popIn 0.4s cubic-bezier(0.22,1,0.36,1);
+    }
+    @keyframes popIn { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .pay-success h3     { font-size: 1.3rem; font-weight: 800; color: #0b0b0b; margin-bottom: 0.4rem; }
+    .pay-success p      { color: #666; font-size: 0.9rem; line-height: 1.7; }
+    .pay-success__ref   {
+      display: inline-block;
+      background: #f0eeeb;
+      border-radius: 8px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.78rem;
+      color: #666;
+      font-family: monospace;
+      margin: 0.8rem 0 1.4rem;
+    }
+    .btn-back-chat {
+      background: #0b0b0b;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 0.8rem 2rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.15s;
+    }
+    .btn-back-chat:hover { background: #1e1e1e; }
+
+    /* ── Failed state ──────────────────────────────────────────────────── */
+    .pay-failed {
+      text-align: center;
+      padding: 2.5rem 1rem;
+    }
+    .pay-failed__icon {
+      width: 72px;
+      height: 72px;
+      background: #fff0f2;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem;
+      font-size: 2rem;
+      color: #b00020;
+    }
+    .pay-failed h3  { font-size: 1.2rem; font-weight: 800; color: #0b0b0b; margin-bottom: 0.4rem; }
+    .pay-failed p   { color: #666; font-size: 0.88rem; line-height: 1.7; margin-bottom: 1.2rem; }
+    .btn-retry {
+      background: #f5c842;
+      color: #0b0b0b;
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 2rem;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.15s;
+    }
+    .btn-retry:hover { background: #e6b82e; }
+  </style>
+</head>
+<body>
+
+<div class="payment-wrap">
+
+  <!-- Header -->
+  <div class="pay-header">
+    <a class="pay-header__logo" href="../index.html">Quick<span>Ganyu</span></a>
+    <span class="pay-header__secure">
+      <i class="fas fa-lock"></i> Secure payment
+    </span>
+  </div>
+
+  <!-- Loading -->
+  <div id="pay-loading" style="background:white;padding:2.5rem;text-align:center;border-radius:0 0 18px 18px;">
+    <div style="width:40px;height:40px;border:4px solid #f0eeeb;border-top-color:#f5c842;border-radius:50%;animation:spin 0.9s linear infinite;margin:0 auto 1rem;"></div>
+    <p style="color:#aaa;font-size:0.88rem;">Loading payment details…</p>
+  </div>
+
+  <!-- Summary + form (hidden until data loads) -->
+  <div id="pay-body" style="display:none;">
+
+    <div class="pay-summary" id="pay-summary">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="pay-form-card">
+
+      <!-- Error banner -->
+      <div class="pay-error" id="pay-error"></div>
+
+      <!-- ── FORM VIEW ───────────────────────────────────────────────── -->
+      <div id="view-form">
+        <p class="pay-section-title">Select payment method</p>
+
+        <div class="method-tabs">
+          <div class="method-tab active" data-method="airtel">
+            <i class="fas fa-mobile-alt"></i>
+            <span class="tab-label">Airtel Money</span>
+            <span class="tab-sub">Mobile money</span>
+          </div>
+          <div class="method-tab" data-method="tnm">
+            <i class="fas fa-mobile-alt"></i>
+            <span class="tab-label">TNM Mpamba</span>
+            <span class="tab-sub">Mobile money</span>
+          </div>
+          <div class="method-tab" data-method="card">
+            <i class="fas fa-credit-card"></i>
+            <span class="tab-label">Card</span>
+            <span class="tab-sub">Visa / Mastercard</span>
+          </div>
+        </div>
+
+        <!-- Airtel Money -->
+        <div class="method-panel active" id="panel-airtel">
+          <p class="pay-section-title">Airtel Money details</p>
+          <div class="pay-field">
+            <label>Airtel Money phone number</label>
+            <input type="tel" id="airtel-phone" placeholder="+265 99 xxx xxxx" inputmode="tel" autocomplete="tel">
+            <span class="hint">You will receive a payment prompt on this number.</span>
+          </div>
+        </div>
+
+        <!-- TNM Mpamba -->
+        <div class="method-panel" id="panel-tnm">
+          <p class="pay-section-title">TNM Mpamba details</p>
+          <div class="pay-field">
+            <label>TNM Mpamba phone number</label>
+            <input type="tel" id="tnm-phone" placeholder="+265 88 xxx xxxx" inputmode="tel" autocomplete="tel">
+            <span class="hint">You will receive a payment prompt on this number.</span>
+          </div>
+        </div>
+
+        <!-- Card -->
+        <div class="method-panel" id="panel-card">
+          <p class="pay-section-title">Card details</p>
+          <div class="pay-field">
+            <label>Name on card</label>
+            <input type="text" id="card-name" placeholder="As it appears on the card" autocomplete="cc-name">
+          </div>
+          <div class="pay-field">
+            <label>Card number</label>
+            <input type="text" id="card-number" placeholder="1234 5678 9012 3456"
+              inputmode="numeric" maxlength="19" autocomplete="cc-number">
+          </div>
+          <div class="card-row">
+            <div class="pay-field">
+              <label>Expiry date</label>
+              <input type="text" id="card-expiry" placeholder="MM / YY"
+                inputmode="numeric" maxlength="7" autocomplete="cc-exp">
+            </div>
+            <div class="pay-field">
+              <label>CVV / CVC</label>
+              <input type="text" id="card-cvv" placeholder="123"
+                inputmode="numeric" maxlength="4" autocomplete="cc-csc">
+            </div>
+          </div>
+        </div>
+
+        <button class="pay-btn" id="pay-btn" type="button">
+          <i class="fas fa-lock"></i>
+          <span id="pay-btn-label">Pay now</span>
+        </button>
+
+        <p class="pay-note">
+          <i class="fas fa-shield-alt"></i>
+          Payments are processed securely by PayChangu. QuickGanyu does not store your card details.
+        </p>
+      </div>
+
+      <!-- ── PENDING / POLLING VIEW ──────────────────────────────────── -->
+      <div id="view-pending" class="pay-pending" style="display:none;">
+        <div class="pay-pending__spinner"></div>
+        <h3>Processing payment…</h3>
+        <p id="pending-msg">Please approve the payment prompt on your phone.<br>Keep this page open.</p>
+        <p class="poll-hint" id="poll-hint">Checking status automatically…</p>
+        <br>
+        <button class="btn-check-manually" id="btn-check-manually" type="button">
+          <i class="fas fa-sync-alt"></i> Check status now
+        </button>
+      </div>
+
+      <!-- ── SUCCESS VIEW ────────────────────────────────────────────── -->
+      <div id="view-success" class="pay-success" style="display:none;">
+        <div class="pay-success__icon"><i class="fas fa-check"></i></div>
+        <h3>Payment confirmed!</h3>
+        <p>Your booking is complete. The provider has been notified and will be in touch shortly.</p>
+        <div class="pay-success__ref" id="success-ref"></div>
+        <br>
+        <a class="btn-back-chat" href="messages.html" id="back-to-chat">
+          <i class="fas fa-comments"></i> Back to chat
+        </a>
+      </div>
+
+      <!-- ── FAILED VIEW ─────────────────────────────────────────────── -->
+      <div id="view-failed" class="pay-failed" style="display:none;">
+        <div class="pay-failed__icon"><i class="fas fa-times"></i></div>
+        <h3>Payment failed</h3>
+        <p id="failed-msg">The payment could not be processed. Please try again or choose a different method.</p>
+        <button class="btn-retry" id="btn-retry" type="button">
+          <i class="fas fa-redo"></i> Try again
+        </button>
+      </div>
+
+    </div><!-- /.pay-form-card -->
+  </div><!-- /#pay-body -->
+
+</div><!-- /.payment-wrap -->
+
+<script src="../js/api.js"></script>
+<script>
+(function () {
+  const { apiFetch, fetchMe, esc, toast } = window.QuickGanyu;
+
+  const params    = new URLSearchParams(location.search);
+  const requestId = Number(params.get('request_id'));
+
+  // ── DOM refs ──────────────────────────────────────────────────────────────
+  const loadingEl   = document.getElementById('pay-loading');
+  const bodyEl      = document.getElementById('pay-body');
+  const summaryEl   = document.getElementById('pay-summary');
+  const errorEl     = document.getElementById('pay-error');
+  const viewForm    = document.getElementById('view-form');
+  const viewPending = document.getElementById('view-pending');
+  const viewSuccess = document.getElementById('view-success');
+  const viewFailed  = document.getElementById('view-failed');
+  const payBtn      = document.getElementById('pay-btn');
+  const payBtnLabel = document.getElementById('pay-btn-label');
+
+  let activeMethod  = 'airtel';
+  let pollTimer     = null;
+  let requestData   = null;
+  let chargeId      = null;
+
+  // ── Show / hide helpers ───────────────────────────────────────────────────
+  function showView(name) {
+    [viewForm, viewPending, viewSuccess, viewFailed].forEach(el => el.style.display = 'none');
+    document.getElementById('view-' + name).style.display = 'block';
+  }
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.style.display = 'block';
+    errorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function hideError() { errorEl.style.display = 'none'; }
+
+  // ── Boot ──────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Auth
+    const me = await fetchMe();
+    if (!me) { location.href = 'login.html'; return; }
+    if (me.role !== 'client') { location.href = 'customer-dashboard.html'; return; }
+    if (!requestId) { location.href = 'messages.html'; return; }
+
+    // If returning from a PayChangu hosted checkout page
+    if (params.get('payment') === 'return' || params.get('payment') === 'cancel') {
+      showView('pending');
+      loadingEl.style.display = 'none';
+      bodyEl.style.display    = 'block';
+      document.getElementById('pending-msg').textContent =
+        'Verifying payment with our gateway…';
+      pollStatus();
+      return;
+    }
+
+    // Load the service request details
+    try {
+      const res = await apiFetch('engagements.php', null);
+      if (!res.ok) throw new Error(res.error || 'Could not load payment details.');
+
+      requestData = (res.requests || []).find(r => Number(r.id) === requestId);
+      if (!requestData) throw new Error('Service request not found.');
+
+      // If already booked, show success immediately
+      if (requestData.status === 'booked') {
+        renderSummary(requestData, me);
+        showSuccess(requestData.charge_id || '');
+        loadingEl.style.display = 'none';
+        bodyEl.style.display    = 'block';
+        return;
+      }
+
+      // If payment was already initiated, go to polling
+      if (requestData.status === 'payment_pending') {
+        renderSummary(requestData, me);
+        loadingEl.style.display = 'none';
+        bodyEl.style.display    = 'block';
+        showView('pending');
+        pollStatus();
+        return;
+      }
+
+      if (requestData.status !== 'awaiting_payment') {
+        throw new Error('This request is not ready for payment.');
+      }
+
+      renderSummary(requestData, me);
+      prefillPhone(me);
+      loadingEl.style.display = 'none';
+      bodyEl.style.display    = 'block';
+
+    } catch (err) {
+      loadingEl.innerHTML = `
+        <div style="text-align:center;padding:2rem;color:#b00020;">
+          <i class="fas fa-exclamation-circle" style="font-size:2rem;display:block;margin-bottom:0.8rem;"></i>
+          <p>${esc(err.message)}</p>
+          <a href="messages.html" style="color:#0b0b0b;font-weight:700;text-decoration:underline;">Back to messages</a>
+        </div>`;
+    }
+  });
+
+  // ── Render summary ────────────────────────────────────────────────────────
+  function renderSummary(req, me) {
+    const amount = parseFloat(req.agreed_amount || 0)
+      .toLocaleString('en-MW', { minimumFractionDigits: 2 });
+    summaryEl.innerHTML = `
+      <div class="pay-summary__label">You are paying for</div>
+      <div class="pay-summary__service">${esc(req.service_title)}</div>
+      <div class="pay-summary__parties">
+        <i class="fas fa-user-tie" style="color:#aaa;"></i> ${esc(req.provider_name || 'Provider')}
+        &nbsp;&bull;&nbsp;
+        <i class="fas fa-user" style="color:#aaa;"></i> ${esc(me.full_name)}
+      </div>
+      <div class="pay-summary__amount">
+        <span class="currency">MWK</span>
+        <span class="value">${esc(amount)}</span>
+      </div>`;
+
+    // Update pay button label
+    payBtnLabel.textContent = `Pay MWK ${amount}`;
+  }
+
+  function prefillPhone(me) {
+    if (me.phone) {
+      document.getElementById('airtel-phone').value = me.phone;
+      document.getElementById('tnm-phone').value    = me.phone;
+    }
+    if (me.full_name) {
+      document.getElementById('card-name').value = me.full_name;
+    }
+  }
+
+  // ── Method tab switching ──────────────────────────────────────────────────
+  document.querySelectorAll('.method-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.method-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      activeMethod = tab.dataset.method;
+      document.getElementById('panel-' + activeMethod).classList.add('active');
+      hideError();
+    });
+  });
+
+  // ── Card number formatting ────────────────────────────────────────────────
+  document.getElementById('card-number').addEventListener('input', function () {
+    let v = this.value.replace(/\D/g, '').slice(0, 16);
+    this.value = v.replace(/(.{4})/g, '$1 ').trim();
+  });
+  document.getElementById('card-expiry').addEventListener('input', function () {
+    let v = this.value.replace(/\D/g, '').slice(0, 4);
+    if (v.length >= 3) v = v.slice(0, 2) + ' / ' + v.slice(2);
+    this.value = v;
+  });
+
+  // ── Pay button ────────────────────────────────────────────────────────────
+  payBtn.addEventListener('click', async () => {
+    hideError();
+
+    const payload = {
+      action:         'start_payment',
+      request_id:     requestId,
+      payment_method: activeMethod,
+    };
+
+    if (activeMethod === 'airtel') {
+      payload.phone = document.getElementById('airtel-phone').value.trim();
+      if (!payload.phone) { showError('Enter your Airtel Money phone number.'); return; }
+    } else if (activeMethod === 'tnm') {
+      payload.phone = document.getElementById('tnm-phone').value.trim();
+      if (!payload.phone) { showError('Enter your TNM Mpamba phone number.'); return; }
+    } else {
+      payload.card_name   = document.getElementById('card-name').value.trim();
+      payload.card_number = document.getElementById('card-number').value.replace(/\s/g, '');
+      payload.card_expiry = document.getElementById('card-expiry').value.replace(/\s/g, '');
+      payload.card_cvv    = document.getElementById('card-cvv').value.trim();
+      if (!payload.card_number || !payload.card_expiry || !payload.card_cvv) {
+        showError('Please fill in all card details.');
+        return;
+      }
+    }
+
+    // Loading state
+    payBtn.disabled = true;
+    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
+
+    try {
+      const res = await apiFetch('engagements.php', payload);
+
+      if (!res.ok) {
+        if (res.errors) {
+          const first = Object.values(res.errors)[0];
+          showError(first);
+        } else {
+          showError(res.error || 'Payment failed. Please try again.');
+        }
+        payBtn.disabled = false;
+        payBtn.innerHTML = `<i class="fas fa-lock"></i> <span id="pay-btn-label">${payBtnLabel.textContent}</span>`;
+        return;
+      }
+
+      // Immediate success (e.g. direct card charge approved)
+      if (res.status === 'successful') {
+        showSuccess(res.charge_id || '');
+        return;
+      }
+
+      // PayChangu hosted checkout redirect
+      if (res.checkout_url) {
+        showView('pending');
+        document.getElementById('pending-msg').textContent =
+          'Redirecting to secure payment page…';
+        document.getElementById('poll-hint').textContent = '';
+        setTimeout(() => { window.location.href = res.checkout_url; }, 800);
+        return;
+      }
+
+      // Mobile money — waiting for phone prompt approval
+      chargeId = res.charge_id || null;
+      showView('pending');
+      startPolling();
+
+    } catch (err) {
+      showError('Could not connect to the payment server. Please try again.');
+      payBtn.disabled = false;
+      payBtn.innerHTML = `<i class="fas fa-lock"></i> Pay now`;
+    }
+  });
+
+  // ── Polling ───────────────────────────────────────────────────────────────
+  let pollCount = 0;
+
+  function startPolling() {
+    pollCount = 0;
+    clearTimeout(pollTimer);
+    pollTimer = setTimeout(pollStatus, 4000);
+  }
+
+  async function pollStatus() {
+    clearTimeout(pollTimer);
+    pollCount++;
+
+    const hint = document.getElementById('poll-hint');
+    if (hint) hint.textContent = `Checking status… (attempt ${pollCount})`;
+
+    try {
+      const res = await apiFetch('engagements.php', {
+        action: 'check_payment', request_id: requestId,
+      });
+
+      if (res.status === 'successful') {
+        showSuccess(res.charge_id || '');
+        return;
+      }
+      if (res.status === 'failed') {
+        showFailed(res.message || 'Payment failed.');
+        return;
+      }
+
+      // Still pending — keep polling (max 20 times = ~2 min)
+      if (pollCount < 20) {
+        pollTimer = setTimeout(pollStatus, 6000);
+        if (hint) hint.textContent = 'Still waiting — check your phone for the payment prompt.';
+      } else {
+        if (hint) hint.textContent = 'Taking longer than expected. Tap "Check status now" to retry.';
+      }
+    } catch (_) {
+      if (pollCount < 20) pollTimer = setTimeout(pollStatus, 8000);
+    }
+  }
+
+  document.getElementById('btn-check-manually').addEventListener('click', pollStatus);
+
+  // ── Success ───────────────────────────────────────────────────────────────
+  function showSuccess(ref) {
+    clearTimeout(pollTimer);
+    const refEl = document.getElementById('success-ref');
+    if (refEl && ref) refEl.textContent = 'Reference: ' + ref;
+    const backLink = document.getElementById('back-to-chat');
+    if (backLink) backLink.href = `messages.html?request_id=${requestId}`;
+    showView('success');
+  }
+
+  // ── Failed ────────────────────────────────────────────────────────────────
+  function showFailed(msg) {
+    clearTimeout(pollTimer);
+    const el = document.getElementById('failed-msg');
+    if (el) el.textContent = msg;
+    showView('failed');
+  }
+
+  document.getElementById('btn-retry').addEventListener('click', () => {
+    showView('form');
+    payBtn.disabled = false;
+    payBtn.innerHTML = `<i class="fas fa-lock"></i> Pay now`;
+    hideError();
+  });
+
+})();
+</script>
+</body>
+</html>

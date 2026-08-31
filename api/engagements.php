@@ -297,11 +297,17 @@ try {
             throw $e;
         }
 
-        respond(['ok' => true, 'message' => 'Price accepted! You can now pay to confirm the booking.']);
+        $base = site_base();
+        respond([
+            'ok'           => true,
+            'message'      => 'Price accepted! Proceed to payment.',
+            'redirect_url' => $base . '/html/payment.html?request_id=' . $requestId,
+        ]);
     }
 
-    // ── START_PAYMENT: create a PayChangu hosted-checkout session ─────────
-    // Returns a checkout_url the frontend redirects the customer to.
+    // ── START_PAYMENT: initiate PayChangu direct mobile-money charge ──────
+    // Collects: payment_method (airtel|tnm|card), phone (for mobile money),
+    //           card_number, card_expiry, card_cvv (for card).
     if ($action === 'start_payment') {
         if ($user['role'] !== 'client' || (int) $request['customer_id'] !== $userId) {
             respond(['ok' => false, 'error' => 'Only the customer can pay for this booking.'], 403);
@@ -310,47 +316,84 @@ try {
             respond(['ok' => false, 'error' => 'Accept the provider\'s price before paying.'], 409);
         }
 
+        $method   = str_field($data, 'payment_method'); // airtel | tnm | card
+        $phone    = str_field($data, 'phone');
         $chargeId = 'QG-' . $requestId . '-' . bin2hex(random_bytes(6));
         $base     = site_base();
         $nameParts = preg_split('/\s+/', trim($user['full_name']), 2);
+        $amount   = (float) $request['agreed_amount'];
 
-        // PayChangu hosted checkout — customer is redirected to their secure page
-        $gateway = paychangu_request('/payment', 'POST', [
-            'amount'       => (string) $request['agreed_amount'],
+        // Build the PayChangu payload — supports both mobile money and card
+        $payload = [
+            'amount'       => number_format($amount, 2, '.', ''),
             'currency'     => 'MWK',
             'email'        => $user['email'],
             'first_name'   => $nameParts[0],
             'last_name'    => $nameParts[1] ?? '',
-            'callback_url' => $base . '/html/messages.html?request_id=' . $requestId . '&payment=return',
-            'return_url'   => $base . '/html/messages.html?request_id=' . $requestId . '&payment=return',
-            'cancel_url'   => $base . '/html/messages.html?request_id=' . $requestId . '&payment=cancel',
             'tx_ref'       => $chargeId,
+            'callback_url' => $base . '/html/payment.html?request_id=' . $requestId . '&payment=return',
+            'return_url'   => $base . '/html/payment.html?request_id=' . $requestId . '&payment=return',
+            'cancel_url'   => $base . '/html/payment.html?request_id=' . $requestId . '&payment=cancel',
             'customization' => [
                 'title'       => 'QuickGanyu – ' . $request['service_title'],
-                'description' => 'Payment for service: ' . $request['service_title'],
+                'description' => 'Payment for: ' . $request['service_title'],
+                'logo'        => $base . '/css/logo.png',
             ],
-        ]);
+        ];
 
-        // Extract the hosted checkout URL from the gateway response
+        // Attach method-specific details
+        if (in_array($method, ['airtel', 'tnm'], true)) {
+            if (mb_strlen($phone) < 9) {
+                respond(['ok' => false, 'errors' => ['phone' => 'Enter a valid mobile number.']], 422);
+            }
+            $payload['mobile_money'] = [
+                'network' => strtoupper($method), // AIRTEL or TNM
+                'phone'   => preg_replace('/\D/', '', $phone),
+            ];
+        } elseif ($method === 'card') {
+            $cardNumber = preg_replace('/\s/', '', str_field($data, 'card_number'));
+            $cardExpiry = str_field($data, 'card_expiry');  // MM/YY
+            $cardCvv    = str_field($data, 'card_cvv');
+            $cardName   = str_field($data, 'card_name') ?: $user['full_name'];
+
+            if (strlen($cardNumber) < 13 || strlen($cardCvv) < 3 || strlen($cardExpiry) < 4) {
+                respond(['ok' => false, 'errors' => ['card_number' => 'Enter valid card details.']], 422);
+            }
+            [$expM, $expY] = array_pad(explode('/', $cardExpiry), 2, '');
+            $payload['card'] = [
+                'number'      => $cardNumber,
+                'cvv'         => $cardCvv,
+                'expiry_month'=> ltrim($expM, '0') ?: '1',
+                'expiry_year' => strlen($expY) === 2 ? '20' . $expY : $expY,
+                'name'        => $cardName,
+            ];
+        } else {
+            respond(['ok' => false, 'errors' => ['payment_method' => 'Select a payment method.']], 422);
+        }
+
+        // Call PayChangu
+        $gateway = paychangu_request('/payment', 'POST', $payload);
+
+        // PayChangu may return a checkout URL (hosted) or a direct charge status
         $checkoutUrl = $gateway['data']['checkout_url']
             ?? $gateway['checkout_url']
             ?? $gateway['data']['link']
             ?? $gateway['link']
             ?? null;
 
-        if (!$checkoutUrl) {
-            throw new RuntimeException('PayChangu did not return a checkout URL.');
-        }
+        $directStatus = strtolower((string)(
+            $gateway['data']['status'] ?? $gateway['status'] ?? ''
+        ));
 
         // Record the pending payment
         $pdo->prepare(
-            'INSERT INTO service_payments
-               (request_id, charge_id, amount, phone, gateway_data)
-             VALUES (?, ?, ?, "", ?)'
+            'INSERT INTO service_payments (request_id, charge_id, amount, phone, gateway_data)
+             VALUES (?, ?, ?, ?, ?)'
         )->execute([
             $requestId,
             $chargeId,
             $request['agreed_amount'],
+            $phone ?: '',
             json_encode($gateway),
         ]);
 
@@ -358,10 +401,35 @@ try {
             'UPDATE service_requests SET status = "payment_pending" WHERE id = ?'
         )->execute([$requestId]);
 
+        // If it's a direct charge that already succeeded, mark it immediately
+        if (in_array($directStatus, ['success', 'successful', 'paid'], true)) {
+            $pdo->prepare('UPDATE service_payments SET status = "successful" WHERE charge_id = ?')
+                ->execute([$chargeId]);
+            $pdo->prepare('UPDATE service_requests SET status = "booked" WHERE id = ?')
+                ->execute([$requestId]);
+            $pdo->prepare(
+                'INSERT INTO service_request_messages (request_id, sender_id, message, message_type)
+                 VALUES (?, ?, ?, "payment_confirmed")'
+            )->execute([$requestId, $userId, number_format($amount, 2)]);
+
+            respond([
+                'ok'      => true,
+                'status'  => 'successful',
+                'message' => 'Payment confirmed! Your booking is complete.',
+            ]);
+        }
+
+        // Mobile money — customer must approve prompt on their phone; poll for result
+        if ($checkoutUrl) {
+            respond(['ok' => true, 'status' => 'pending', 'checkout_url' => $checkoutUrl,
+                     'message' => 'Redirecting to secure payment page…']);
+        }
+
         respond([
-            'ok'           => true,
-            'checkout_url' => $checkoutUrl,
-            'message'      => 'Redirecting to secure payment page…',
+            'ok'      => true,
+            'status'  => 'pending',
+            'charge_id' => $chargeId,
+            'message' => 'Payment initiated. Please approve the prompt on your phone.',
         ]);
     }
 

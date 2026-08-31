@@ -1012,17 +1012,32 @@ document.addEventListener('DOMContentLoaded', async () => {
       render();
     }
 
-    // Customer accepts the provider's price offer
+    // Customer accepts the provider's price offer — redirects to payment page
     if (accept) {
+      accept.disabled = true;
+      accept.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Accepting…';
       try {
         const res = await apiFetch('engagements.php', {
           action:     'accept_price',
           request_id: Number(accept.dataset.requestId),
         });
-        if (!res.ok) return toast(res.error || 'Could not accept price.', 'error');
+        if (!res.ok) {
+          toast(res.error || 'Could not accept price.', 'error');
+          accept.disabled = false;
+          accept.innerHTML = '<i class="fas fa-check"></i> Accept price';
+          return;
+        }
         toast(res.message, 'success');
-        await load();
-      } catch (err) { toast('Connection error.', 'error'); }
+        // Redirect to the dedicated payment page
+        setTimeout(() => {
+          window.location.href = res.redirect_url ||
+            `payment.html?request_id=${accept.dataset.requestId}`;
+        }, 500);
+      } catch (err) {
+        toast('Connection error. Please try again.', 'error');
+        accept.disabled = false;
+        accept.innerHTML = '<i class="fas fa-check"></i> Accept price';
+      }
     }
 
     // Customer pays — redirected to PayChangu hosted checkout
