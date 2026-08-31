@@ -335,8 +335,154 @@
     .chat-status-banner--done     { background: #e6f9ef; border-color: #a8e6c3; color: #1a7f4b; }
     .chat-status-banner--cancelled{ background: #fff0f2; border-color: #f5c2ca; color: #b00020; }
 
-    /* Empty messages hint */
-    .chat-no-messages {
+    /* ── Price offer card bubble ─────────────────────────────────────────── */
+    .chat-price-card {
+      align-self: flex-start;
+      max-width: 72%;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .chat-price-card--mine { align-self: flex-end; }
+
+    .chat-price-card__inner {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      background: #fff8e1;
+      border: 2px solid #f5c842;
+      border-radius: 16px;
+      padding: 0.7rem 1rem;
+    }
+    .chat-price-card--mine .chat-price-card__inner {
+      background: #5a1111;
+      border-color: #f5c842;
+    }
+    .chat-price-card__inner i {
+      color: #f5c842;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .chat-price-card__label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .chat-price-card--mine .chat-price-card__label { color: #f5c842; }
+    .chat-price-card__amount {
+      display: block;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0b0b0b;
+    }
+    .chat-price-card--mine .chat-price-card__amount { color: white; }
+    .chat-price-card small {
+      font-size: 0.71rem;
+      color: #bbb;
+      padding: 0 4px;
+    }
+    .chat-price-card--mine small { text-align: right; }
+
+    /* ── Event bubbles (price accepted, payment confirmed) ───────────────── */
+    .chat-event-bubble {
+      align-self: center;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 0.84rem;
+      font-weight: 600;
+      border-radius: 999px;
+      padding: 0.45rem 1.1rem;
+      max-width: 90%;
+      text-align: center;
+    }
+    .chat-event-bubble small {
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: inherit;
+      opacity: 0.7;
+      width: 100%;
+      text-align: center;
+    }
+    .chat-event-bubble--accepted {
+      background: #e6f9ef;
+      border: 1px solid #a8e6c3;
+      color: #1a7f4b;
+    }
+    .chat-event-bubble--paid {
+      background: #fff3c4;
+      border: 1px solid #f5c842;
+      color: #7a5c00;
+    }
+
+    /* ── Action banners above composer ───────────────────────────────────── */
+    .chat-action-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      padding: 0.65rem 1.1rem;
+      font-size: 0.88rem;
+      border-top: 1px solid transparent;
+    }
+    .chat-action-banner--offer {
+      background: #fff9e0;
+      border-color: #e8d890;
+      color: #5a4a00;
+    }
+    .chat-action-banner--pay {
+      background: #f0fff4;
+      border-color: #a8e6c3;
+      color: #1a4a30;
+    }
+    .chat-action-banner--pending {
+      background: #fff9e0;
+      border-color: #e8d890;
+      color: #7a5c00;
+    }
+    .chat-action-banner--done {
+      background: #e6f9ef;
+      border-color: #a8e6c3;
+      color: #1a7f4b;
+      font-weight: 600;
+    }
+    .chat-action-banner--cancelled {
+      background: #fff0f2;
+      border-color: #f5c2ca;
+      color: #b00020;
+      font-weight: 600;
+    }
+
+    .btn-accept-offer,
+    .btn-pay-now,
+    .btn-check-payment {
+      border: none;
+      border-radius: 999px;
+      padding: 0.4rem 1.1rem;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn-accept-offer  { background: #1a7f4b; color: white; }
+    .btn-accept-offer:hover  { background: #155e38; }
+    .btn-pay-now       { background: #8b1a1a; color: white; }
+    .btn-pay-now:hover { background: #6b1212; transform: scale(1.03); }
+    .btn-pay-now:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-check-payment { background: transparent; color: #7a5c00;
+                         border: 1px solid #e8d890; padding: 0.3rem 0.8rem;
+                         font-size: 0.8rem; }
+    .btn-check-payment:hover { background: #fff3c4; }
       text-align: center;
       color: #ccc;
       font-size: 0.88rem;
@@ -466,6 +612,48 @@
   </div>
 </main>
 
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-col">
+        <h4>QuickGanyu</h4>
+        <a href="../index.html">About</a>
+        <a href="providers.html">Services</a>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <a href="../index.html">Home</a>
+        <a href="providers.html">Browse</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <span>Malawi</span>
+        <span>Email: info@quickganyu.com</span>
+        <span>Phone: +265 999 000 000</span>
+      </div>
+      <div class="footer-col footer-newsletter">
+        <h4>Newsletter</h4>
+        <div class="newsletter-form">
+          <input type="email" placeholder="Email address">
+          <button type="button">Subscribe</button>
+        </div>
+        <div class="footer-social">
+          <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-brand">Quick<span>Ganyu</span></div>
+      <div class="footer-copy">&copy; 2026 QuickGanyu – built for Malawi</div>
+      <a class="footer-backtop" href="#top"><i class="fas fa-arrow-up"></i></a>
+    </div>
+  </div>
+</footer>
+
 <script src="../js/api.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
@@ -579,9 +767,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         </section>`;
     }
 
+    // Render each message bubble — special types get special styling
     const bubbles = (request.messages || []).map(m => {
       const mine = Number(m.sender_id) === Number(me.id);
       const who  = mine ? 'You' : esc(counterpart(request));
+      const type = m.message_type || 'text';
+
+      if (type === 'price_offer') {
+        // Special price-offer card — shown to both sides
+        const amount = parseFloat(m.message).toLocaleString('en-MW', { minimumFractionDigits: 2 });
+        const isProvider = Number(m.sender_id) === Number(request.provider_id);
+        return `
+          <div class="chat-price-card ${mine ? 'chat-price-card--mine' : ''}">
+            <div class="chat-price-card__inner">
+              <i class="fas fa-tag"></i>
+              <div>
+                <span class="chat-price-card__label">${isProvider ? 'Price offer' : 'Counter-offer'}</span>
+                <span class="chat-price-card__amount">MWK ${esc(amount)}</span>
+              </div>
+            </div>
+            <small>${who} &bull; ${fmt(m.created_at)}</small>
+          </div>`;
+      }
+
+      if (type === 'price_accepted') {
+        const amount = parseFloat(m.message).toLocaleString('en-MW', { minimumFractionDigits: 2 });
+        return `
+          <div class="chat-event-bubble chat-event-bubble--accepted">
+            <i class="fas fa-handshake"></i>
+            Price agreed: <strong>MWK ${esc(amount)}</strong>
+            <small>${fmt(m.created_at)}</small>
+          </div>`;
+      }
+
+      if (type === 'payment_confirmed') {
+        const amount = parseFloat(m.message).toLocaleString('en-MW', { minimumFractionDigits: 2 });
+        return `
+          <div class="chat-event-bubble chat-event-bubble--paid">
+            <i class="fas fa-check-circle"></i>
+            Payment confirmed: <strong>MWK ${esc(amount)}</strong> — Booking complete!
+            <small>${fmt(m.created_at)}</small>
+          </div>`;
+      }
+
+      // Standard text bubble
       return `
         <div class="chat-bubble ${mine ? 'chat-bubble--mine' : ''}">
           <span>${esc(m.message)}</span>
@@ -589,28 +818,66 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>`;
     }).join('');
 
-    const canMessage = !['booked','cancelled'].includes(request.status);
-    const canAccept  = me.role === 'client' && request.status === 'negotiating' && Number(request.proposed_amount) > 0;
-    const canPay     = me.role === 'client' && request.status === 'awaiting_payment';
-    const pending    = me.role === 'client' && request.status === 'payment_pending';
+    const isProvider   = me.role === 'provider' && Number(request.provider_id) === userId;
+    const isCustomer   = me.role === 'client'   && Number(request.customer_id) === userId;
+    const canMessage   = !['booked', 'cancelled'].includes(request.status);
+    const canAccept    = isCustomer && request.status === 'negotiating' && Number(request.proposed_amount) > 0;
+    const canPay       = isCustomer && request.status === 'awaiting_payment';
+    const pending      = isCustomer && request.status === 'payment_pending';
+    const agreedAmount = parseFloat(request.agreed_amount || 0)
+                           .toLocaleString('en-MW', { minimumFractionDigits: 2 });
 
-    // Status / action banner shown above the composer (never a second input)
+    // Banner above composer — never a second text input
     let banner = '';
-    if (request.proposed_amount && canMessage) {
-      banner += `<div class="chat-price-banner">
-        <i class="fas fa-tag"></i> Latest offer: <strong>MWK ${esc(request.proposed_amount)}</strong>
-        ${canAccept ? `<button class="btn-accept-offer" data-request-id="${request.id}">Accept</button>` : ''}
-      </div>`;
+
+    if (canAccept) {
+      const offered = parseFloat(request.proposed_amount)
+                        .toLocaleString('en-MW', { minimumFractionDigits: 2 });
+      banner = `
+        <div class="chat-action-banner chat-action-banner--offer">
+          <span><i class="fas fa-tag"></i> Provider is offering <strong>MWK ${esc(offered)}</strong></span>
+          <button class="btn-accept-offer" data-request-id="${request.id}">
+            <i class="fas fa-check"></i> Accept price
+          </button>
+        </div>`;
     }
+
     if (canPay) {
-      banner += `<form class="chat-pay-form" data-request-id="${request.id}">
-        <input name="phone" type="tel" value="${esc(me.phone || '')}" placeholder="Airtel Money +265…" required>
-        <button type="submit">Pay MWK ${esc(request.agreed_amount)}</button>
-      </form>`;
+      banner = `
+        <div class="chat-action-banner chat-action-banner--pay">
+          <span><i class="fas fa-lock"></i> Agreed price: <strong>MWK ${esc(agreedAmount)}</strong></span>
+          <button class="btn-pay-now" data-request-id="${request.id}">
+            <i class="fas fa-credit-card"></i> Pay now
+          </button>
+        </div>`;
     }
-    if (pending)              banner += `<div class="chat-status-banner chat-status-banner--wait"><i class="fas fa-spinner fa-spin"></i> Waiting for payment…</div>`;
-    if (request.status === 'booked')    banner += `<div class="chat-status-banner chat-status-banner--done"><i class="fas fa-check-circle"></i> Payment confirmed — booking complete.</div>`;
-    if (request.status === 'cancelled') banner += `<div class="chat-status-banner chat-status-banner--cancelled"><i class="fas fa-ban"></i> This request was cancelled.</div>`;
+
+    if (pending) {
+      banner = `
+        <div class="chat-action-banner chat-action-banner--pending">
+          <i class="fas fa-spinner fa-spin"></i>
+          <span>Payment processing… <button class="btn-check-payment" data-request-id="${request.id}">Check status</button></span>
+        </div>`;
+    }
+
+    if (request.status === 'booked') {
+      banner = `
+        <div class="chat-action-banner chat-action-banner--done">
+          <i class="fas fa-check-circle"></i> Booking confirmed — payment complete.
+        </div>`;
+    }
+
+    if (request.status === 'cancelled') {
+      banner = `
+        <div class="chat-action-banner chat-action-banner--cancelled">
+          <i class="fas fa-ban"></i> This request was cancelled.
+        </div>`;
+    }
+
+    // Composer placeholder changes based on role
+    const placeholder = isProvider && canMessage
+      ? 'Message… or type /price 5000 to set your price'
+      : 'Message…';
 
     return `
       <section class="chat-window">
@@ -628,7 +895,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ${canMessage ? `
         <form class="chat-composer" data-request-id="${request.id}">
           <textarea name="message" maxlength="2000" rows="1"
-            placeholder="Message" required></textarea>
+            placeholder="${placeholder}" required></textarea>
           <button type="submit" aria-label="Send">
             <i class="fas fa-paper-plane"></i>
           </button>
@@ -721,9 +988,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ── Event delegation ──────────────────────────────────────────────────────
   root.addEventListener('click', async e => {
-    const contact = e.target.closest('.chat-contact');
-    const accept  = e.target.closest('.accept-price-btn, .btn-accept-offer');
-    const refresh = e.target.closest('.chat-refresh');
+    const contact      = e.target.closest('.chat-contact');
+    const accept       = e.target.closest('.btn-accept-offer');
+    const payNow       = e.target.closest('.btn-pay-now');
+    const checkPayment = e.target.closest('.btn-check-payment');
+    const refresh      = e.target.closest('.chat-refresh');
 
     if (refresh) await load();
 
@@ -733,14 +1002,55 @@ document.addEventListener('DOMContentLoaded', async () => {
       render();
     }
 
+    // Customer accepts the provider's price offer
     if (accept) {
       try {
         const res = await apiFetch('engagements.php', {
-          action: 'accept_price', request_id: Number(accept.dataset.requestId),
+          action:     'accept_price',
+          request_id: Number(accept.dataset.requestId),
         });
-        if (!res.ok) return toast(res.error || 'Could not accept offer.', 'error');
+        if (!res.ok) return toast(res.error || 'Could not accept price.', 'error');
         toast(res.message, 'success');
         await load();
+      } catch (err) { toast('Connection error.', 'error'); }
+    }
+
+    // Customer pays — redirected to PayChangu hosted checkout
+    if (payNow) {
+      payNow.disabled = true;
+      payNow.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing payment…';
+      try {
+        const res = await apiFetch('engagements.php', {
+          action:     'start_payment',
+          request_id: Number(payNow.dataset.requestId),
+        });
+        if (!res.ok) {
+          toast(res.error || 'Could not start payment.', 'error');
+          payNow.disabled = false;
+          payNow.innerHTML = '<i class="fas fa-credit-card"></i> Pay now';
+          return;
+        }
+        // Redirect to PayChangu hosted checkout page
+        toast('Redirecting to secure payment…', 'info');
+        setTimeout(() => { window.location.href = res.checkout_url; }, 600);
+      } catch (err) {
+        toast('Connection error. Please try again.', 'error');
+        payNow.disabled = false;
+        payNow.innerHTML = '<i class="fas fa-credit-card"></i> Pay now';
+      }
+    }
+
+    // Check payment status after returning from PayChangu
+    if (checkPayment) {
+      try {
+        const res = await apiFetch('engagements.php', {
+          action:     'check_payment',
+          request_id: Number(checkPayment.dataset.requestId),
+        });
+        if (res.ok) {
+          toast(res.message, res.status === 'successful' ? 'success' : 'info');
+          await load();
+        }
       } catch (err) { toast('Connection error.', 'error'); }
     }
   });
@@ -753,24 +1063,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       const raw = form.message.value.trim();
       if (!raw) return;
 
-      // Allow "/offer 500" syntax to propose a price without a second input box
-      const offerMatch = raw.match(/^\/offer\s+([\d.]+)$/i);
-      if (offerMatch) {
+      // Provider types /price 5000 to propose a price
+      const priceMatch = raw.match(/^\/price\s+([\d,]+(?:\.\d{1,2})?)$/i);
+      if (priceMatch) {
+        const amount = priceMatch[1].replace(/,/g, '');
         try {
           const res = await apiFetch('engagements.php', {
             action:     'propose_price',
             request_id: Number(form.dataset.requestId),
-            amount:     offerMatch[1],
+            amount,
           });
-          if (!res.ok) return toast(res.error || 'Could not send offer.', 'error');
+          if (!res.ok) return toast(res.error || 'Could not send price offer.', 'error');
           form.message.value = '';
           form.message.style.height = 'auto';
-          toast(res.message || 'Offer sent.', 'success');
+          toast('Price offer sent to the customer.', 'success');
           await load();
         } catch (err) { toast('Connection error.', 'error'); }
         return;
       }
 
+      // Plain message
       try {
         const res = await apiFetch('engagements.php', {
           action:     'message',
@@ -780,20 +1092,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!res.ok) return toast(res.error || 'Could not send message.', 'error');
         form.message.value = '';
         form.message.style.height = 'auto';
-        await load();
-      } catch (err) { toast('Connection error.', 'error'); }
-    }
-
-    if (form.matches('.chat-pay-form')) {
-      e.preventDefault();
-      try {
-        const res = await apiFetch('engagements.php', {
-          action:     'start_payment',
-          request_id: Number(form.dataset.requestId),
-          phone:      form.phone.value.trim(),
-        });
-        if (!res.ok) return toast(res.error || 'Could not start payment.', 'error');
-        toast(res.message, 'info');
         await load();
       } catch (err) { toast('Connection error.', 'error'); }
     }
@@ -820,6 +1118,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   await load();
+
+  // Auto-check payment status when customer returns from PayChangu checkout
+  if (params.get('payment') === 'return' && selectedId) {
+    setTimeout(async () => {
+      try {
+        const res = await apiFetch('engagements.php', {
+          action:     'check_payment',
+          request_id: selectedId,
+        });
+        if (res.ok) {
+          toast(res.message, res.status === 'successful' ? 'success' : 'info');
+          await load();
+        }
+      } catch (_) {}
+    }, 1200);
+  }
 });
 </script>
 </body>

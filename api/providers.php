@@ -4,8 +4,9 @@ require_once __DIR__ . '/helpers.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
-    $rows = db()->query(
-        'SELECT u.id, u.full_name, sp.location, sp.service_category, sp.skills, sp.experience_years
+    $pdo = db();
+    $rows = $pdo->query(
+        'SELECT u.id, u.full_name, sp.location, sp.service_category, sp.skills, sp.about, sp.experience_years
            FROM users u
            INNER JOIN service_providers sp ON sp.user_id = u.id
           WHERE u.role = "provider" AND u.status = "active"
@@ -20,6 +21,12 @@ try {
             AND EXISTS (SELECT 1 FROM provider_testimonials pt WHERE pt.provider_id = u.id)
           ORDER BY u.full_name'
     )->fetchAll();
+    foreach ($rows as &$row) {
+        $evidence = provider_evidence($pdo, (int)$row['id']);
+        $row['portfolio'] = $evidence['portfolio'];
+        $row['showcase'] = provider_products($pdo, (int)$row['id']);
+    }
+    unset($row);
     respond(['ok' => true, 'providers' => $rows]);
 } catch (Throwable $e) {
     error_log('QuickGanyu providers list error: ' . $e->getMessage());

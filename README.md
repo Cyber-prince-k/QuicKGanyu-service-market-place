@@ -19,6 +19,7 @@ sql/schema.sql              The single database setup/upgrade file
 css/styles.css              Shared visual styling
 js/api.js                   API calls, sessions, and navigation helpers
 uploads/provider-portfolio/ Provider portfolio media, created on first upload
+uploads/provider-products/  Product/service listing media, created on first upload
 ```
 
 ## Database and identity rules
@@ -35,7 +36,7 @@ uploads/provider-portfolio/ Provider portfolio media, created on first upload
 | Role | What they can do |
 | --- | --- |
 | Customer | Register, manage their profile, and browse eligible providers. |
-| Provider | Complete a professional profile, add testimonials, and upload photos/videos of completed projects. |
+| Provider | Complete a professional profile, add testimonials, upload project proof, and publish service/product details with photos or videos. |
 | Administrator | Review provider applications, approve/decline them, and create providers directly. |
 
 ## Provider availability rule
@@ -82,7 +83,8 @@ Do not open pages directly from the file system: PHP APIs and sessions require a
 3. Sign in with the full name and temporary password, then select a username and permanent password on the setup page.
 4. On the Provider Dashboard, complete all professional fields: location, category, experience, skills, qualifications, and biography.
 5. Add a client testimonial and upload at least one project photo or video.
-6. Once the dashboard reports that the profile is complete, the provider becomes visible in Browse Providers.
+6. Use **Services & work showcase** to publish what you offer, its details, and up to five images/videos of completed work. Prices are not displayed.
+7. Once the dashboard reports that the profile is complete, the provider becomes visible in Browse Providers.
 
 ### Administrator
 
@@ -103,7 +105,9 @@ Do not open pages directly from the file system: PHP APIs and sessions require a
 | `api/setup.php` | Provider first-login setup |
 | `api/profile.php` | Profile updates, testimonials, and evidence retrieval |
 | `api/portfolio.php` | Provider image/video upload |
+| `api/products.php` | Provider product/service listing and media upload |
 | `api/providers.php` | Public list of complete providers only |
+| `api/engagements.php` | Customer/provider negotiation, bookings, and payment status |
 
 ## Troubleshooting
 
@@ -121,3 +125,6 @@ Do not open pages directly from the file system: PHP APIs and sessions require a
 - Server-side validation protects roles, input values, and upload type/size.
 - Use HTTPS, strong database credentials, backups, and a protected SMTP configuration in production.
 - Any future quote, booking, or payment endpoint must check `provider_profile_complete` before accepting a provider.
+- PayChangu Mobile Money payments use the non-redirect Direct Charge flow. Set the server-only
+  `PAYCHANGU_SECRET_KEY` environment variable to your PayChangu secret key before accepting
+  real payments; customers still authorize the charge with their Mobile Money provider.

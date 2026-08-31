@@ -143,6 +143,31 @@ function provider_evidence(PDO $pdo, int $providerId): array {
     }
 }
 
+/** Return a provider's published product/service listings and their media. */
+function provider_products(PDO $pdo, int $providerId): array {
+    try {
+        $products = $pdo->prepare(
+            'SELECT id, title, description, created_at FROM provider_products WHERE provider_id=? ORDER BY created_at DESC'
+        );
+        $products->execute([$providerId]);
+        $items = $products->fetchAll();
+        if (!$items) return [];
+
+        $media = $pdo->prepare(
+            'SELECT id, media_type, file_path FROM provider_product_media WHERE product_id=? ORDER BY created_at ASC'
+        );
+        foreach ($items as &$item) {
+            $media->execute([(int)$item['id']]);
+            $item['media'] = $media->fetchAll();
+        }
+        unset($item);
+        return $items;
+    } catch (Throwable $e) {
+        error_log('QuickGanyu provider_products error: ' . $e->getMessage());
+        return [];
+    }
+}
+
 /** Return the currently logged-in user (merged with child table), or null. */
 function current_user(PDO $pdo): ?array {
     if (empty($_SESSION['user_id'])) {

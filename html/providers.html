@@ -9,148 +9,125 @@
 </head>
 <body>
 <nav class="navbar">
-  <a class="logo" href="../index.html">Quick<span>Ganyu</span> <i class="fas fa-bolt" style="color:#f5c842; font-size:1.2rem;"></i></a>
-  <div class="nav-links">
-    <a href="../index.html"><i class="fas fa-home"></i> Home</a>
-    <a href="providers.html"><i class="fas fa-search"></i> Browse</a>
-    <a href="profile.html"><i class="fas fa-user-tie"></i> Provider</a>
-    <a href="admin.html"><i class="fas fa-clipboard-list"></i> Admin</a>
-  </div>
-  <div class="nav-actions">
-    <a class="btn-outline-light" href="signup.html"><i class="fas fa-user-plus"></i> Sign up</a>
-    <a class="btn-light" href="login.html"><i class="fas fa-sign-in-alt"></i> Log in</a>
-  </div>
+  <a class="logo" href="../index.html">Quick<span>Ganyu</span> <i class="fas fa-bolt" style="color:#f5c842;font-size:1.2rem;"></i></a>
+  <div class="nav-links"><a href="../index.html"><i class="fas fa-home"></i> Home</a><a href="providers.html"><i class="fas fa-search"></i> Browse</a></div>
+  <div class="nav-actions"></div>
 </nav>
-
-<div class="container">
+<main class="container">
   <section class="hero-card hero">
-    <div class="animated-feedback"><i class="fas fa-star" style="color:#f5c842;"></i> Browse trusted professionals by city, category and portfolio strength</div>
+    <div class="animated-feedback"><i class="fas fa-star" style="color:#f5c842;"></i> Find trusted professionals</div>
     <h1>Explore providers in Malawi</h1>
-    <p>Pick a location and category to see providers with complete portfolios, verified skills and clear experience.</p>
-
-    <div class="location-box">
-      <i class="fas fa-location-dot"></i>
-      <select>
-        <option>Blantyre</option>
-        <option selected>Lilongwe</option>
-        <option>Mzuzu</option>
-        <option>Zomba</option>
-        <option>Mangochi</option>
-      </select>
-      <i class="fas fa-chevron-down" style="color:#0b0b0b; font-size:0.8rem;"></i>
-      <span style="background:#0b0b0b; color:white; padding:0.2rem 1rem; border-radius:40px; font-weight:600;">Filter</span>
-    </div>
+    <p>Choose a service type, compare providers' skills and experience, then open a profile to see their completed work.</p>
   </section>
-
   <section class="section-card">
-    <h2 class="section-title"><i class="fas fa-list" style="color:#f5c842;"></i> Available services</h2>
-    <div class="categories">
-      <div class="cat-card"><i class="fas fa-wrench"></i> Repairs</div>
-      <div class="cat-card"><i class="fas fa-paint-roller"></i> Painting</div>
-      <div class="cat-card"><i class="fas fa-plug"></i> Electric</div>
-      <div class="cat-card"><i class="fas fa-toilet"></i> Plumbing</div>
-      <div class="cat-card"><i class="fas fa-camera"></i> Photography</div>
-      <div class="cat-card"><i class="fas fa-laptop"></i> IT/Tech</div>
-      <div class="cat-card"><i class="fas fa-tools"></i> Handyman</div>
-      <div class="cat-card"><i class="fas fa-truck"></i> Moving</div>
-      <div class="cat-card"><i class="fas fa-tshirt"></i> Tailor</div>
-      <div class="cat-card"><i class="fas fa-music"></i> Events</div>
-    </div>
+    <h2 class="section-title"><i class="fas fa-list" style="color:#f5c842;"></i> Choose a service type</h2>
+    <p class="muted">Select a type to show only providers offering that service.</p>
+    <div class="categories" id="category-list"><div class="muted">Loading service types…</div></div>
   </section>
-
   <section class="section-card">
-    <h2 class="section-title"><i class="fas fa-user-tie" style="color:#f5c842;"></i> Providers near you</h2>
-    <div class="provider-grid" id="provider-list">
-      <div class="provider-card">
-        <h3>Chisomo M. <span class="badge"><i class="fas fa-check-circle"></i> verified</span></h3>
-        <div class="meta"><i class="fas fa-map-pin"></i> Lilongwe · 5 km</div>
-        <div class="tags"><span>Plumbing</span><span>Repairs</span><span>5 yrs</span></div>
-        <div class="muted"><i class="fas fa-tools"></i> Services: installation, maintenance, leak repair</div>
-        <div class="muted"><i class="fas fa-star" style="color:#f5c842;"></i> 4.9 rating · 24 reviews</div>
-        <a class="btn-book" href="profile.html"><i class="fas fa-info-circle"></i> View services</a>
-      </div>
-      <div class="provider-card">
-        <h3>Tawonga K. <span class="badge"><i class="fas fa-check-circle"></i> verified</span></h3>
-        <div class="meta"><i class="fas fa-map-pin"></i> Blantyre · 2 km</div>
-        <div class="tags"><span>Electric</span><span>IT</span><span>7 yrs</span></div>
-        <div class="muted"><i class="fas fa-tools"></i> Services: wiring, repairs, network setup</div>
-        <div class="muted"><i class="fas fa-star" style="color:#f5c842;"></i> 4.8 rating · 19 reviews</div>
-        <a class="btn-book" href="profile.html"><i class="fas fa-info-circle"></i> View services</a>
-      </div>
-      <div class="provider-card">
-        <h3>Grace B. <span class="badge"><i class="fas fa-check-circle"></i> verified</span></h3>
-        <div class="meta"><i class="fas fa-map-pin"></i> Mzuzu · 8 km</div>
-        <div class="tags"><span>Photography</span><span>Events</span><span>4 yrs</span></div>
-        <div class="muted"><i class="fas fa-tools"></i> Services: event coverage, portraits, reels</div>
-        <div class="muted"><i class="fas fa-star" style="color:#f5c842;"></i> 5.0 rating · 31 reviews</div>
-        <a class="btn-book" href="profile.html"><i class="fas fa-info-circle"></i> View services</a>
-      </div>
-    </div>
+    <h2 class="section-title"><i class="fas fa-user-tie" style="color:#f5c842;"></i> <span id="provider-heading">Providers near you</span></h2>
+    <div class="provider-grid" id="provider-list"><div class="muted">Loading providers…</div></div>
   </section>
-</div>
-
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div class="footer-col">
-        <h4>QuickGanyu</h4>
-        <a href="../index.html">About</a>
-        <a href="providers.html">Services</a>
-        <a href="profile.html">Providers</a>
-      </div>
-      <div class="footer-col">
-        <h4>Explore</h4>
-        <a href="../index.html">Home</a>
-        <a href="providers.html">Browse</a>
-        <a href="admin.html">Admin</a>
-      </div>
-      <div class="footer-col">
-        <h4>Contact</h4>
-        <span>Malawi</span>
-        <span>Email: info@quickganyu.com</span>
-        <span>Phone: +265 999 000 000</span>
-      </div>
-      <div class="footer-col footer-newsletter">
-        <h4>Newsletter</h4>
-        <div class="newsletter-form">
-          <input type="email" placeholder="Email address">
-          <button type="button">Subscribe</button>
-        </div>
-        <div class="footer-social">
-          <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-          <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-          <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <div class="footer-brand">Quick<span>Ganyu</span></div>
-      <div class="footer-copy">&copy; 2026 QuickGanyu – built for Malawi</div>
-      <a class="footer-backtop" href="#top"><i class="fas fa-arrow-up"></i></a>
-    </div>
-  </div>
-</footer>
-
+</main>
+<footer class="footer"><div class="footer-inner"><div class="footer-top">
+  <div class="footer-col"><h4>QuickGanyu</h4><a href="../index.html">About</a><a href="providers.html">Services</a></div>
+  <div class="footer-col"><h4>Explore</h4><a href="../index.html">Home</a><a href="providers.html">Browse</a></div>
+  <div class="footer-col"><h4>Contact</h4><span>Malawi</span><span>Email: info@quickganyu.com</span><span>Phone: +265 999 000 000</span></div>
+</div><div class="footer-bottom"><div class="footer-brand">Quick<span>Ganyu</span></div><div class="footer-copy">&copy; 2026 QuickGanyu</div></div></div></footer>
 <script src="../js/api.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
   const list = document.getElementById('provider-list');
-  const res = await window.QuickGanyu.apiFetch('providers.php', null);
-  if (!res.ok) { list.innerHTML = '<div class="muted">Could not load providers right now.</div>'; return; }
-  if (!res.providers.length) { list.innerHTML = '<div class="muted">No providers are available yet. Providers appear here after completing their profile and evidence.</div>'; return; }
+  const categoryList = document.getElementById('category-list');
+  const heading = document.getElementById('provider-heading');
   const esc = window.QuickGanyu.esc;
-  list.innerHTML = res.providers.map(provider => `
-    <div class="provider-card">
+  const res = await window.QuickGanyu.apiFetch('providers.php', null);
+  if (!res.ok) {
+    list.innerHTML = '<div class="muted">Could not load providers right now.</div>';
+    return;
+  }
+  if (!res.providers.length) {
+    categoryList.innerHTML = '';
+    list.innerHTML = '<div class="muted">No providers are available yet. Providers appear here after completing their profile and evidence.</div>';
+    return;
+  }
+
+  let selectedCategory = '';
+  const categories = [...new Set(res.providers.map(provider => provider.service_category))].sort();
+  function renderCategories() {
+    const options = [['All services', ''], ...categories.map(category => [category, category])];
+    categoryList.innerHTML = options.map(([label, category]) => `
+      <button class="cat-card ${selectedCategory === category ? 'cat-card--selected' : ''}" type="button" data-category="${encodeURIComponent(category)}">
+        <i class="fas fa-briefcase"></i> ${esc(label)}
+      </button>`
+    ).join('');
+  }
+  function renderProviders() {
+    const providers = selectedCategory ? res.providers.filter(provider => provider.service_category === selectedCategory) : res.providers;
+    heading.textContent = selectedCategory ? selectedCategory + ' providers' : 'Providers near you';
+    if (!providers.length) {
+      list.innerHTML = '<div class="muted">No providers are available for this service type yet.</div>';
+      return;
+    }
+    list.innerHTML = providers.map(provider => `
+      <article class="provider-card provider-card--summary">
+        <h3>${esc(provider.full_name)} <span class="badge"><i class="fas fa-check-circle"></i> verified</span></h3>
+        <div class="meta"><i class="fas fa-map-pin"></i> ${esc(provider.location)}</div>
+        <div class="tags"><span>${esc(provider.service_category)}</span><span>${esc(provider.experience_years)} yrs experience</span></div>
+        <div class="muted"><i class="fas fa-tools"></i> Skills: ${esc(provider.skills)}</div>
+        <button class="btn-book provider-details-btn" type="button" data-provider-id="${provider.id}"><i class="fas fa-info-circle"></i> View provider details</button>
+      </article>`
+    ).join('');
+  }
+  function detailsMarkup(provider) {
+    const workMedia = (provider.portfolio || []).map(item => {
+      const path = esc('../' + item.file_path);
+      const caption = esc(item.caption || 'Completed work');
+      return item.media_type === 'video'
+        ? `<video class="work-gallery__media" controls preload="metadata" aria-label="${caption}"><source src="${path}"></video>`
+        : `<img class="work-gallery__media" src="${path}" alt="${caption}" loading="lazy">`;
+    }).join('');
+    const showcase = (provider.showcase || []).map(item => `<div class="provider-showcase"><strong>${esc(item.title)}</strong><span>${esc(item.description)}</span></div>`).join('');
+    return `
       <h3>${esc(provider.full_name)} <span class="badge"><i class="fas fa-check-circle"></i> profile complete</span></h3>
       <div class="meta"><i class="fas fa-map-pin"></i> ${esc(provider.location)}</div>
       <div class="tags"><span>${esc(provider.service_category)}</span><span>${esc(provider.experience_years)} yrs</span></div>
+      <div class="muted"><i class="fas fa-briefcase"></i> Experience: ${esc(provider.experience_years)} year${Number(provider.experience_years) === 1 ? '' : 's'} in ${esc(provider.service_category)}</div>
       <div class="muted"><i class="fas fa-tools"></i> Skills: ${esc(provider.skills)}</div>
-      <a class="btn-book" href="profile.html"><i class="fas fa-info-circle"></i> View services</a>
-    </div>`).join('');
+      <p class="provider-about">${esc(provider.about)}</p>
+      ${showcase ? `<div class="provider-showcase-list"><strong>Services offered</strong>${showcase}</div>` : ''}
+      <div class="work-gallery-label"><i class="fas fa-images"></i> Completed work</div>
+      <div class="work-gallery">${workMedia}</div>
+      <a class="btn-book" href="messages.html?provider_id=${provider.id}"><i class="fas fa-comments"></i> Contact and negotiate</a>`;
+  }
+  function openDetails(provider) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-backdrop';
+    modal.innerHTML = `<section class="modal-box provider-card--expanded" role="dialog" aria-modal="true" aria-label="Provider details">
+      <button class="modal-close" type="button" aria-label="Close provider details"><i class="fas fa-times"></i></button>
+      ${detailsMarkup(provider)}
+    </section>`;
+    const close = () => modal.remove();
+    modal.querySelector('.modal-close').addEventListener('click', close);
+    modal.addEventListener('click', event => { if (event.target === modal) close(); });
+    document.body.appendChild(modal);
+  }
+  categoryList.addEventListener('click', event => {
+    const button = event.target.closest('[data-category]');
+    if (!button) return;
+    selectedCategory = decodeURIComponent(button.dataset.category);
+    renderCategories();
+    renderProviders();
+  });
+  list.addEventListener('click', event => {
+    const button = event.target.closest('.provider-details-btn');
+    if (!button) return;
+    const provider = res.providers.find(item => String(item.id) === button.dataset.providerId);
+    if (provider) openDetails(provider);
+  });
+  renderCategories();
+  renderProviders();
 });
 </script>
 </body>
 </html>
-

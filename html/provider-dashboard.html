@@ -70,6 +70,8 @@
 
     const evidenceRes = await window.QuickGanyu.apiFetch('profile.php', null);
     const evidence = evidenceRes.ok ? evidenceRes.evidence : { portfolio: [], testimonials: [] };
+    const productsRes = await window.QuickGanyu.apiFetch('products.php', null);
+    const products = productsRes.ok ? productsRes.products : [];
 
     // Profile completeness score
     const fields   = ['phone','location','service_category','skills','qualifications','about','experience_years'];
@@ -119,6 +121,34 @@
           <strong>${pct}%</strong>
         </div>
         ${me.profile_complete ? `<p class="muted" style="margin-top:0.5rem;color:#1a7f4b;"><i class="fas fa-check-circle"></i> Your profile is complete and can be shown to clients.</p>` : `<p class="muted" style="margin-top:0.5rem;"><i class="fas fa-lock"></i> You cannot be booked yet. Add every profile detail, at least one portfolio image/video, and one client testimonial.</p>`}
+      </section>
+
+      <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
+        <h2 class="section-title"><i class="fas fa-store" style="color:#f5c842;"></i> Services &amp; work showcase</h2>
+        <p class="muted" style="margin-bottom:1rem;">Tell customers what you offer and add up to five photos or videos of your completed work. No prices are shown.</p>
+        <div id="product-error" class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
+        <form id="product-form">
+          <div class="add-provider-form">
+            <div class="form-card full-col"><label>Service or product name *<input type="text" name="title" maxlength="140" required placeholder="e.g. Standard kitchen plumbing installation"></label></div>
+            <div class="form-card full-col"><label>Details *<textarea name="description" required minlength="10" placeholder="What you offer and what the completed work involved."></textarea></label></div>
+            <div class="form-card full-col"><label>Images or videos *<input type="file" name="media[]" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple required><small class="muted">JPG, PNG, WEBP, MP4 or WebM; maximum five files, 25 MB each.</small></label></div>
+          </div>
+          <div class="auth-actions" style="margin-top:1rem;"><button type="submit" class="btn-primary" id="product-btn"><i class="fas fa-plus"></i> Publish listing</button></div>
+        </form>
+        <div class="product-list" style="margin-top:1.4rem;">
+          ${products.length ? products.map(product => `
+            <article class="product-card">
+              <div class="product-card__heading"><strong>${esc(product.title)}</strong></div>
+              <p>${esc(product.description)}</p>
+              <div class="product-media-count"><i class="fas fa-photo-film"></i> ${(product.media || []).length} image/video file${(product.media || []).length === 1 ? '' : 's'}</div>
+            </article>`).join('') : '<div class="muted">No products or services published yet.</div>'}
+        </div>
+      </section>
+
+      <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
+        <h2 class="section-title"><i class="fas fa-comments" style="color:#f5c842;"></i> Customer requests</h2>
+        <p class="muted">Reply to customers, discuss the work, and send a price proposal.</p>
+        <a class="btn-primary" href="messages.html" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none;"><i class="fas fa-comments"></i> Open service requests</a>
       </section>
 
       <!-- Edit profile form -->
@@ -287,18 +317,38 @@
       setTimeout(() => window.location.reload(), 500);
     });
 
+    async function readUploadResponse(response) {
+      const body = await response.text();
+      try {
+        return JSON.parse(body);
+      } catch (_) {
+        throw new Error('The server could not process this upload (HTTP ' + response.status + '). Please try again or check the PHP error log.');
+      }
+    }
+
     document.getElementById('portfolio-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const error = document.getElementById('portfolio-error');
       const btn = document.getElementById('portfolio-btn');
+      const file = e.target.media.files[0];
       error.style.display = 'none';
+      if (!file) {
+        error.textContent = 'Choose an image or video to upload.';
+        error.style.display = 'block';
+        return;
+      }
+      if (file.size > 25 * 1024 * 1024) {
+        error.textContent = 'Files must be 25 MB or smaller.';
+        error.style.display = 'block';
+        return;
+      }
       btn.disabled = true;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading…';
       try {
         const response = await fetch(window.QuickGanyu.apiUrl('portfolio.php'), {
           method: 'POST', credentials: 'same-origin', body: new FormData(e.target),
         });
-        const result = await response.json();
+        const result = await readUploadResponse(response);
         if (!result.ok) throw new Error(result.error || 'Upload failed.');
         window.QuickGanyu.toast('Project proof uploaded!', 'success');
         window.location.reload();
@@ -307,6 +357,43 @@
         error.style.display = 'block';
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-upload"></i> Upload project proof';
+      }
+    });
+
+    document.getElementById('product-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const error = document.getElementById('product-error');
+      const btn = document.getElementById('product-btn');
+      const files = Array.from(e.target.querySelector('[name="media[]"]').files);
+      error.style.display = 'none';
+      if (!files.length) {
+        error.textContent = 'Add at least one image or video.';
+        error.style.display = 'block';
+        return;
+      }
+      if (files.some(file => file.size > 25 * 1024 * 1024)) {
+        error.textContent = 'Each file must be 25 MB or smaller.';
+        error.style.display = 'block';
+        return;
+      }
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing…';
+      try {
+        const response = await fetch(window.QuickGanyu.apiUrl('products.php'), {
+          method: 'POST', credentials: 'same-origin', body: new FormData(e.target),
+        });
+        const result = await readUploadResponse(response);
+        if (!result.ok) {
+          const message = result.errors ? Object.values(result.errors)[0] : result.error;
+          throw new Error(message || 'Could not publish the listing.');
+        }
+        window.QuickGanyu.toast('Product/service listing published!', 'success');
+        window.location.reload();
+      } catch (err) {
+        error.textContent = err.message || 'Could not publish the listing.';
+        error.style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-plus"></i> Publish listing';
       }
     });
 

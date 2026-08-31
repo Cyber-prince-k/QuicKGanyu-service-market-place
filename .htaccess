@@ -1,0 +1,6 @@
+# Upload rules match the provider dashboard: up to five 25 MB media files.
+# The request limit must accommodate all selected files plus multipart overhead.
+php_value upload_max_filesize 25M
+php_value post_max_size 130M
+php_flag display_errors Off
+php_flag html_errors Off

@@ -124,6 +124,92 @@ CREATE TABLE IF NOT EXISTS provider_testimonials (
     FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- A provider's sellable services or products. Each listing can have several
+-- images and/or videos so clients can understand exactly what is offered.
+CREATE TABLE IF NOT EXISTS provider_products (
+  id          INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+  provider_id INT UNSIGNED    NOT NULL,
+  title       VARCHAR(140)    NOT NULL,
+  description TEXT            NOT NULL,
+  created_at  TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_product_provider
+    FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS provider_product_media (
+  id          INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+  product_id  INT UNSIGNED    NOT NULL,
+  media_type  ENUM('image','video') NOT NULL,
+  file_path   VARCHAR(255)    NOT NULL,
+  created_at  TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_product_media_product
+    FOREIGN KEY (product_id) REFERENCES provider_products(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Customer/provider negotiations, agreed bookings, and payment records.
+CREATE TABLE IF NOT EXISTS service_requests (
+  id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  customer_id    INT UNSIGNED NOT NULL,
+  provider_id    INT UNSIGNED NOT NULL,
+  service_title  VARCHAR(140) NOT NULL,
+  details        TEXT NULL,
+  proposed_amount DECIMAL(12,2) NULL,
+  agreed_amount  DECIMAL(12,2) NULL,
+  status         ENUM('negotiating','awaiting_payment','payment_pending','booked','cancelled') NOT NULL DEFAULT 'negotiating',
+  created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_request_customer FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_request_provider FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS service_request_messages (
+  id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  request_id   INT UNSIGNED NOT NULL,
+  sender_id    INT UNSIGNED NOT NULL,
+  message      TEXT NOT NULL,
+  message_type ENUM('text','price_offer','price_accepted','payment_confirmed')
+               NOT NULL DEFAULT 'text',
+  created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_request_message_request
+    FOREIGN KEY (request_id) REFERENCES service_requests(id) ON DELETE CASCADE,
+  CONSTRAINT fk_request_message_sender
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Add message_type to existing databases created before this field existed.
+SET @add_msg_type := (
+  SELECT IF(
+    EXISTS(
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = DATABASE()
+        AND table_name   = 'service_request_messages'
+        AND column_name  = 'message_type'
+    ),
+    'SELECT 1',
+    'ALTER TABLE service_request_messages
+       ADD COLUMN message_type
+         ENUM(''text'',''price_offer'',''price_accepted'',''payment_confirmed'')
+         NOT NULL DEFAULT ''text''
+       AFTER message'
+  )
+);
+PREPARE schema_statement FROM @add_msg_type;
+EXECUTE schema_statement;
+DEALLOCATE PREPARE schema_statement;
+
+CREATE TABLE IF NOT EXISTS service_payments (
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  request_id  INT UNSIGNED NOT NULL,
+  charge_id   VARCHAR(120) NOT NULL UNIQUE,
+  amount      DECIMAL(12,2) NOT NULL,
+  phone       VARCHAR(40) NOT NULL,
+  status      ENUM('pending','successful','failed') NOT NULL DEFAULT 'pending',
+  gateway_data JSON NULL,
+  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_payment_request FOREIGN KEY (request_id) REFERENCES service_requests(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- CHILD TABLE: customers
 -- ─────────────────────────────────────────────────────────────────────────────
