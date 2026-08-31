@@ -734,7 +734,30 @@ a {
   .hero { padding: 1.5rem; }
 }
 
-/* ── Form validation states ────────────────────────────────────────────────── */
+/* ── Role-injected nav links ────────────────────────────────────────────────── */
+.nav-messages-link {
+  position: relative;
+  color: #eee !important;
+}
+.nav-messages-link:hover {
+  color: #f5c842 !important;
+}
+/* Pulsing dot when there are unread messages */
+.nav-messages-link.has-unread::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f5c842;
+  animation: navPulse 1.8s infinite;
+}
+@keyframes navPulse {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%       { transform: scale(1.4); opacity: 0.7; }
+}
 .input-error {
   border-color: #b00020 !important;
   box-shadow: 0 0 0 3px rgba(176, 0, 32, 0.12) !important;

@@ -168,6 +168,41 @@
           setTimeout(() => { window.location.href = htmlUrl('login.html'); }, 600);
         });
 
+        // ── Inject role-specific links into .nav-links ──────────────────
+        const navLinks = document.querySelector('.nav-links');
+        if (navLinks) {
+          // Remove any stale injected links from a previous render
+          navLinks.querySelectorAll('.nav-injected').forEach(el => el.remove());
+
+          if (me.role === 'provider' || me.role === 'client') {
+            // Messages link — goes to provider-dashboard#messages for providers
+            // and messages.html for customers
+            const msgHref = me.role === 'provider'
+              ? htmlUrl('provider-dashboard.html') + '#messages'
+              : htmlUrl('messages.html');
+
+            const msgLink = document.createElement('a');
+            msgLink.href      = msgHref;
+            msgLink.className = 'nav-injected nav-messages-link';
+            msgLink.innerHTML = '<i class="fas fa-comments"></i> Messages';
+
+            // Highlight if we're already on the messages page
+            const onMessages = window.location.pathname.includes('messages') ||
+                               (window.location.hash === '#messages');
+            if (onMessages) msgLink.style.color = '#f5c842';
+
+            navLinks.appendChild(msgLink);
+          }
+
+          if (me.role === 'admin') {
+            const adminLink = document.createElement('a');
+            adminLink.href      = htmlUrl('admin.html');
+            adminLink.className = 'nav-injected';
+            adminLink.innerHTML = '<i class="fas fa-user-shield"></i> Dashboard';
+            navLinks.appendChild(adminLink);
+          }
+        }
+
       } else {
         // Not logged in — show sign up / log in links
         navActions.innerHTML = `
