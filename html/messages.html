@@ -675,6 +675,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let selectedId   = Number(params.get('request_id')) || 0;
   let requests     = [];
   let timer;
+  const userId     = me.id; // used in buildWindow role checks
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const fmt = ts => {
