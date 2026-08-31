@@ -1,13 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Provider Dashboard · QuickGanyu</title>
+  <title>Provider Dashboard Â· QuickGanyu</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="../css/styles.css">
   <style>
-    /* ── Dashboard tabs ──────────────────────────────────────────────────── */
+    /* â”€â”€ Dashboard tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .dash-tabs {
       display: flex;
       gap: 0.35rem;
@@ -58,7 +58,7 @@
     .dash-panel { display: none; }
     .dash-panel.active { display: block; }
 
-    /* ── Inline messages panel ───────────────────────────────────────────── */
+    /* â”€â”€ Inline messages panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .msg-shell {
       display: grid;
       grid-template-columns: 260px 1fr;
@@ -306,7 +306,7 @@
 <div class="container" id="page-root">
   <div class="empty-state">
     <i class="fas fa-spinner fa-spin"></i>
-    <p>Loading your dashboard…</p>
+    <p>Loading your dashboardâ€¦</p>
   </div>
 </div>
 
@@ -360,7 +360,7 @@
       `<option value="${esc(c)}" ${me.service_category === c ? 'selected' : ''}>${esc(c)}</option>`
     ).join('');
 
-    // ── Render shell ────────────────────────────────────────────────────────
+    // â”€â”€ Render shell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     root.innerHTML = `
       <section class="hero-card hero" style="margin-bottom:1rem;">
         <div class="animated-feedback"><i class="fas fa-briefcase" style="color:#f5c842;"></i> Provider dashboard</div>
@@ -369,9 +369,9 @@
       </section>
 
       <div class="stats-grid" style="margin-bottom:1rem;">
-        <div class="stat-card"><strong>${esc(me.service_category||'—')}</strong><span>Category</span></div>
-        <div class="stat-card"><strong>${esc(me.location||'—')}</strong><span>Location</span></div>
-        <div class="stat-card"><strong>${me.experience_years?me.experience_years+' yrs':'—'}</strong><span>Experience</span></div>
+        <div class="stat-card"><strong>${esc(me.service_category||'â€”')}</strong><span>Category</span></div>
+        <div class="stat-card"><strong>${esc(me.location||'â€”')}</strong><span>Location</span></div>
+        <div class="stat-card"><strong>${me.experience_years?me.experience_years+' yrs':'â€”'}</strong><span>Experience</span></div>
         <div class="stat-card"><strong>${pct}%</strong><span>Profile complete</span></div>
       </div>
 
@@ -395,7 +395,7 @@
         </button>
       </div>
 
-      <!-- ── OVERVIEW ────────────────────────────────────────────────────── -->
+      <!-- â”€â”€ OVERVIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div class="dash-panel active" id="panel-overview">
         <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
           <h2 class="section-title"><i class="fas fa-chart-line" style="color:#f5c842;"></i> Profile completeness</h2>
@@ -423,12 +423,12 @@
             ${evidence.portfolio.length ? evidence.portfolio.map(i => `<div class="activity-item"><strong><i class="fas fa-${i.media_type==='video'?'video':'image'}"></i> ${esc(i.caption||'Project evidence')}</strong><span>${esc(i.media_type)}</span></div>`).join('') : '<div class="muted">No project evidence yet.</div>'}
           </div>
           <div class="activity-list" style="margin-top:1rem;">
-            ${evidence.testimonials.length ? evidence.testimonials.map(i => `<div class="activity-item"><strong>"${esc(i.testimonial)}"</strong><span>— ${esc(i.client_name)}</span></div>`).join('') : '<div class="muted">Add a client testimonial in the Profile tab.</div>'}
+            ${evidence.testimonials.length ? evidence.testimonials.map(i => `<div class="activity-item"><strong>"${esc(i.testimonial)}"</strong><span>â€” ${esc(i.client_name)}</span></div>`).join('') : '<div class="muted">Add a client testimonial in the Profile tab.</div>'}
           </div>
         </section>
       </div>
 
-      <!-- ── MESSAGES ───────────────────────────────────────────────────── -->
+      <!-- â”€â”€ MESSAGES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div class="dash-panel" id="panel-messages">
         <div class="msg-shell" id="msg-shell">
           <div class="msg-sidebar" id="msg-sidebar">
@@ -437,7 +437,7 @@
               <button class="msg-refresh" id="msg-refresh-btn" aria-label="Refresh"><i class="fas fa-sync-alt"></i></button>
             </div>
             <div class="msg-contact-list" id="msg-contact-list">
-              <p class="msg-empty-list">Loading…</p>
+              <p class="msg-empty-list">Loadingâ€¦</p>
             </div>
           </div>
           <div class="msg-window msg-window--empty" id="msg-window">
@@ -448,7 +448,7 @@
         </div>
       </div>
 
-      <!-- ── SERVICES ───────────────────────────────────────────────────── -->
+      <!-- â”€â”€ SERVICES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div class="dash-panel" id="panel-services">
         <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
           <h2 class="section-title"><i class="fas fa-store" style="color:#f5c842;"></i> Services &amp; work showcase</h2>
@@ -458,7 +458,7 @@
             <div class="add-provider-form">
               <div class="form-card full-col"><label>Service name *<input type="text" name="title" maxlength="140" required placeholder="e.g. Standard kitchen plumbing installation"></label></div>
               <div class="form-card full-col"><label>Details *<textarea name="description" required minlength="10" placeholder="What you offer and what completed work involves."></textarea></label></div>
-              <div class="form-card full-col"><label>Images / videos *<input type="file" name="media[]" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple required><small class="muted">JPG, PNG, WEBP, MP4 or WebM — max 5 files, 25 MB each.</small></label></div>
+              <div class="form-card full-col"><label>Images / videos *<input type="file" name="media[]" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple required><small class="muted">JPG, PNG, WEBP, MP4 or WebM â€” max 5 files, 25 MB each.</small></label></div>
             </div>
             <div class="auth-actions" style="margin-top:1rem;"><button type="submit" class="btn-primary" id="product-btn"><i class="fas fa-plus"></i> Publish listing</button></div>
           </form>
@@ -473,7 +473,7 @@
         </section>
       </div>
 
-      <!-- ── PROFILE ────────────────────────────────────────────────────── -->
+      <!-- â”€â”€ PROFILE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div class="dash-panel" id="panel-profile">
         <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
           <h2 class="section-title"><i class="fas fa-user-edit" style="color:#f5c842;"></i> My provider profile</h2>
@@ -485,11 +485,11 @@
               <div class="form-card"><label>Username *<input type="text" name="username" value="${esc(me.username||'')}" required></label></div>
               <div class="form-card"><label>Phone<input type="tel" name="phone" value="${esc(me.phone||'')}" placeholder="+265 9xx xxx xxx"></label></div>
               <div class="form-card"><label>Location<input type="text" name="location" value="${esc(me.location||'')}" placeholder="City or district"></label></div>
-              <div class="form-card"><label>Service category<select name="service_category"><option value="">— Select —</option>${catOptions}</select></label></div>
+              <div class="form-card"><label>Service category<select name="service_category"><option value="">â€” Select â€”</option>${catOptions}</select></label></div>
               <div class="form-card"><label>Years of experience<input type="number" name="experience_years" value="${esc(me.experience_years||'')}" min="0" max="80" placeholder="e.g. 5"></label></div>
               <div class="form-card full-col"><label>Skills<input type="text" name="skills" value="${esc(me.skills||'')}" placeholder="e.g. Tiling, burst pipes, piping"></label></div>
-              <div class="form-card full-col"><label>Qualifications<textarea name="qualifications" placeholder="Trade certificate, diploma…">${esc(me.qualifications||'')}</textarea></label></div>
-              <div class="form-card full-col"><label>About me<textarea name="about" placeholder="Tell clients about your work…">${esc(me.about||'')}</textarea></label></div>
+              <div class="form-card full-col"><label>Qualifications<textarea name="qualifications" placeholder="Trade certificate, diplomaâ€¦">${esc(me.qualifications||'')}</textarea></label></div>
+              <div class="form-card full-col"><label>About me<textarea name="about" placeholder="Tell clients about your workâ€¦">${esc(me.about||'')}</textarea></label></div>
             </div>
             <div class="add-provider-form" style="margin-top:1rem;">
               <div class="form-card"><label>Client name for testimonial<input type="text" name="testimonial_client" placeholder="e.g. Mary, Lilongwe"></label></div>
@@ -500,7 +500,7 @@
         </section>
       </div>
 
-      <!-- ── SECURITY ───────────────────────────────────────────────────── -->
+      <!-- â”€â”€ SECURITY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div class="dash-panel" id="panel-security">
         <section class="section-card" style="max-width:640px;margin:0 auto 1.4rem;">
           <h2 class="section-title"><i class="fas fa-key" style="color:#f5c842;"></i> Change password</h2>
@@ -517,7 +517,7 @@
       </div>
     `;
 
-    // ── Tab switching ────────────────────────────────────────────────────────
+    // â”€â”€ Tab switching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     let msgLoaded = false;
     document.getElementById('dash-tabs').addEventListener('click', e => {
       const btn = e.target.closest('.dash-tab');
@@ -531,14 +531,14 @@
       }
     });
 
-    // ── Open messages tab programmatically if URL has #messages ─────────────
+    // â”€â”€ Open messages tab programmatically if URL has #messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (window.location.hash === '#messages') {
       document.querySelector('[data-tab="messages"]').click();
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // MESSAGES TAB — full inline chat
-    // ════════════════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // MESSAGES TAB â€” full inline chat
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     let msgRequests   = [];
     let msgSelectedId = 0;
     let msgTimer;
@@ -644,7 +644,7 @@
         }
         if (type === 'payment_confirmed') {
           const amt = parseFloat(m.message).toLocaleString('en-MW',{minimumFractionDigits:2});
-          return `<div class="msg-event msg-event--paid"><i class="fas fa-check-circle"></i> Payment confirmed: <strong>MWK ${esc(amt)}</strong> — Booking complete!</div>`;
+          return `<div class="msg-event msg-event--paid"><i class="fas fa-check-circle"></i> Payment confirmed: <strong>MWK ${esc(amt)}</strong> â€” Booking complete!</div>`;
         }
         return `
           <div class="msg-bubble ${mine?'msg-bubble--mine':''}">
@@ -661,16 +661,16 @@
       // Status banner
       let banner = '';
       if (req.status === 'awaiting_payment') {
-        banner = `<div class="msg-action-banner msg-action-banner--offer"><i class="fas fa-lock"></i> Agreed: <strong>MWK ${esc(agreed)}</strong> — waiting for customer payment.</div>`;
+        banner = `<div class="msg-action-banner msg-action-banner--offer"><i class="fas fa-lock"></i> Agreed: <strong>MWK ${esc(agreed)}</strong> â€” waiting for customer payment.</div>`;
       } else if (pending) {
-        banner = `<div class="msg-action-banner msg-action-banner--pending"><i class="fas fa-spinner fa-spin"></i> Payment processing…</div>`;
+        banner = `<div class="msg-action-banner msg-action-banner--pending"><i class="fas fa-spinner fa-spin"></i> Payment processingâ€¦</div>`;
       } else if (req.status === 'booked') {
-        banner = `<div class="msg-action-banner msg-action-banner--done"><i class="fas fa-check-circle"></i> Booking confirmed — payment complete.</div>`;
+        banner = `<div class="msg-action-banner msg-action-banner--done"><i class="fas fa-check-circle"></i> Booking confirmed â€” payment complete.</div>`;
       } else if (req.status === 'cancelled') {
         banner = `<div class="msg-action-banner msg-action-banner--cancelled"><i class="fas fa-ban"></i> This request was cancelled.</div>`;
       }
 
-      // Price input row — provider sets price here
+      // Price input row â€” provider sets price here
       const priceRow = canMessage ? `
         <div class="msg-price-input-row">
           <label><i class="fas fa-tag"></i> Set price (MWK)</label>
@@ -695,7 +695,7 @@
         ${banner}
         ${canMessage ? `
         <form class="msg-composer" id="msg-compose-form" data-rid="${req.id}">
-          <textarea name="message" maxlength="2000" rows="1" placeholder="Reply to customer…" required></textarea>
+          <textarea name="message" maxlength="2000" rows="1" placeholder="Reply to customerâ€¦" required></textarea>
           <button type="submit" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
         </form>` : ''}
       `;
@@ -760,16 +760,16 @@
 
     document.getElementById('msg-refresh-btn')?.addEventListener('click', () => loadMessages());
 
-    // ════════════════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     // PROFILE FORM
-    // ════════════════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     document.getElementById('profile-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const pErr = document.getElementById('profile-error');
       const pSucc = document.getElementById('profile-success');
       const btn = document.getElementById('save-btn');
       pErr.style.display = pSucc.style.display = 'none';
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Savingâ€¦';
       const form = e.target;
       const res = await apiFetch('profile.php', {
         full_name: form.full_name.value.trim(), username: form.username.value.trim(),
@@ -806,7 +806,7 @@
       err.style.display = 'none';
       if (!file) { err.textContent = 'Choose a file.'; err.style.display = 'block'; return; }
       if (file.size > 25*1024*1024) { err.textContent = 'Max 25 MB.'; err.style.display = 'block'; return; }
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading…';
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploadingâ€¦';
       try {
         const r = await fetch(window.QuickGanyu.apiUrl('portfolio.php'), { method:'POST', credentials:'same-origin', body: new FormData(e.target) });
         const result = await readUploadResponse(r);
@@ -822,8 +822,8 @@
       const files = Array.from(e.target.querySelector('[name="media[]"]').files);
       err.style.display = 'none';
       if (!files.length) { err.textContent = 'Add at least one file.'; err.style.display = 'block'; return; }
-      if (files.some(f => f.size > 25*1024*1024)) { err.textContent = 'Each file must be ≤ 25 MB.'; err.style.display = 'block'; return; }
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing…';
+      if (files.some(f => f.size > 25*1024*1024)) { err.textContent = 'Each file must be â‰¤ 25 MB.'; err.style.display = 'block'; return; }
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishingâ€¦';
       try {
         const r = await fetch(window.QuickGanyu.apiUrl('products.php'), { method:'POST', credentials:'same-origin', body: new FormData(e.target) });
         const result = await readUploadResponse(r);
@@ -832,7 +832,7 @@
       } catch (ex) { err.textContent = ex.message; err.style.display = 'block'; btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Publish listing'; }
     });
 
-    // ── Password ─────────────────────────────────────────────────────────────
+    // â”€â”€ Password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     document.getElementById('pw-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const pwErr = document.getElementById('pw-error');
@@ -842,7 +842,7 @@
       const form = e.target;
       if (form.password.value !== form.confirm_password.value) { pwErr.textContent = 'Passwords do not match.'; pwErr.style.display = 'block'; return; }
       if (form.password.value.length < 8) { pwErr.textContent = 'At least 8 characters.'; pwErr.style.display = 'block'; return; }
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating…';
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updatingâ€¦';
       const res = await apiFetch('profile.php', { password: form.password.value });
       btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Update password';
       if (!res.ok) { pwErr.textContent = res.error||'Could not update.'; pwErr.style.display = 'block'; return; }
@@ -850,441 +850,6 @@
       form.reset(); toast('Password updated!', 'success');
     });
 
-  });
-})();
-</script>
-</body>
-</html>
-<body>
-
-<nav class="navbar">
-  <a class="logo" href="../index.html">Quick<span>Ganyu</span> <i class="fas fa-bolt" style="color:#f5c842;font-size:1.2rem;"></i></a>
-  <div class="nav-links">
-    <a href="../index.html"><i class="fas fa-home"></i> Home</a>
-    <a href="providers.html"><i class="fas fa-search"></i> Browse</a>
-  </div>
-  <div class="nav-actions"><!-- filled by api.js --></div>
-</nav>
-
-<div class="container" id="page-root">
-  <div class="empty-state">
-    <i class="fas fa-spinner fa-spin"></i>
-    <p>Loading your dashboard…</p>
-  </div>
-</div>
-
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div class="footer-col"><h4>QuickGanyu</h4><a href="../index.html">Home</a><a href="providers.html">Browse</a></div>
-      <div class="footer-col"><h4>Contact</h4><span>info@quickganyu.com</span><span>+265 999 000 000</span></div>
-    </div>
-    <div class="footer-bottom">
-      <div class="footer-brand">Quick<span>Ganyu</span></div>
-      <div class="footer-copy">&copy; 2026 QuickGanyu</div>
-      <a class="footer-backtop" href="#top"><i class="fas fa-arrow-up"></i></a>
-    </div>
-  </div>
-</footer>
-
-<script src="../js/api.js"></script>
-<script>
-(function () {
-  const { fetchMe, esc } = window.QuickGanyu;
-  const root = document.getElementById('page-root');
-
-  const CATEGORIES = [
-    'Plumbing','Electrical','Carpentry','Painting','Cleaning',
-    'Photography','Catering','Tutoring','IT / Tech support',
-    'Tailoring','Gardening','Moving / Transport','Events','Other',
-  ];
-
-  document.addEventListener('DOMContentLoaded', async () => {
-    const me = await fetchMe();
-
-    if (!me) {
-      window.location.href = 'login.html';
-      return;
-    }
-    // Redirect to setup if not yet activated
-    if (me.status === 'needs_setup') {
-      window.location.href = 'setup.html';
-      return;
-    }
-    if (me.role !== 'provider') {
-      if (me.role === 'admin')  { window.location.href = 'admin.html'; return; }
-      if (me.role === 'client') { window.location.href = 'customer-dashboard.html'; return; }
-    }
-
-    const evidenceRes = await window.QuickGanyu.apiFetch('profile.php', null);
-    const evidence = evidenceRes.ok ? evidenceRes.evidence : { portfolio: [], testimonials: [] };
-    const productsRes = await window.QuickGanyu.apiFetch('products.php', null);
-    const products = productsRes.ok ? productsRes.products : [];
-
-    // Profile completeness score
-    const fields   = ['phone','location','service_category','skills','qualifications','about','experience_years'];
-    const filled   = fields.filter(f => me[f] && String(me[f]).trim() !== '').length;
-    const evidenceFilled = (evidence.portfolio.length ? 1 : 0) + (evidence.testimonials.length ? 1 : 0);
-    const pct      = Math.round(((filled + evidenceFilled) / (fields.length + 2)) * 100);
-    const catOptions = CATEGORIES.map(c =>
-      `<option value="${esc(c)}" ${me.service_category === c ? 'selected' : ''}>${esc(c)}</option>`
-    ).join('');
-
-    root.innerHTML = `
-      <!-- Welcome hero -->
-      <section class="hero-card hero" style="margin-bottom:1.4rem;">
-        <div class="animated-feedback">
-          <i class="fas fa-briefcase" style="color:#f5c842;"></i> Provider dashboard
-        </div>
-        <h1>Hello, ${esc(me.full_name.split(' ')[0])}!</h1>
-        <p>Manage your profile, showcase your skills, and connect with clients across Malawi.</p>
-      </section>
-
-      <!-- Stats strip -->
-      <div class="stats-grid" style="margin-bottom:1.4rem;">
-        <div class="stat-card">
-          <strong>${esc(me.service_category || '—')}</strong>
-          <span>Service category</span>
-        </div>
-        <div class="stat-card">
-          <strong>${esc(me.location || '—')}</strong>
-          <span>Location</span>
-        </div>
-        <div class="stat-card">
-          <strong>${me.experience_years ? me.experience_years + ' yrs' : '—'}</strong>
-          <span>Experience</span>
-        </div>
-        <div class="stat-card">
-          <strong>${pct}%</strong>
-          <span>Profile completeness</span>
-        </div>
-      </div>
-
-      <!-- Profile completeness bar -->
-      <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
-        <h2 class="section-title"><i class="fas fa-chart-line" style="color:#f5c842;"></i> Profile completeness</h2>
-        <div class="progress-card">
-          <span>Complete your profile to attract more clients</span>
-          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-          <strong>${pct}%</strong>
-        </div>
-        ${me.profile_complete ? `<p class="muted" style="margin-top:0.5rem;color:#1a7f4b;"><i class="fas fa-check-circle"></i> Your profile is complete and can be shown to clients.</p>` : `<p class="muted" style="margin-top:0.5rem;"><i class="fas fa-lock"></i> You cannot be booked yet. Add every profile detail, at least one portfolio image/video, and one client testimonial.</p>`}
-      </section>
-
-      <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
-        <h2 class="section-title"><i class="fas fa-store" style="color:#f5c842;"></i> Services &amp; work showcase</h2>
-        <p class="muted" style="margin-bottom:1rem;">Tell customers what you offer and add up to five photos or videos of your completed work. No prices are shown.</p>
-        <div id="product-error" class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
-        <form id="product-form">
-          <div class="add-provider-form">
-            <div class="form-card full-col"><label>Service or product name *<input type="text" name="title" maxlength="140" required placeholder="e.g. Standard kitchen plumbing installation"></label></div>
-            <div class="form-card full-col"><label>Details *<textarea name="description" required minlength="10" placeholder="What you offer and what the completed work involved."></textarea></label></div>
-            <div class="form-card full-col"><label>Images or videos *<input type="file" name="media[]" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple required><small class="muted">JPG, PNG, WEBP, MP4 or WebM; maximum five files, 25 MB each.</small></label></div>
-          </div>
-          <div class="auth-actions" style="margin-top:1rem;"><button type="submit" class="btn-primary" id="product-btn"><i class="fas fa-plus"></i> Publish listing</button></div>
-        </form>
-        <div class="product-list" style="margin-top:1.4rem;">
-          ${products.length ? products.map(product => `
-            <article class="product-card">
-              <div class="product-card__heading"><strong>${esc(product.title)}</strong></div>
-              <p>${esc(product.description)}</p>
-              <div class="product-media-count"><i class="fas fa-photo-film"></i> ${(product.media || []).length} image/video file${(product.media || []).length === 1 ? '' : 's'}</div>
-            </article>`).join('') : '<div class="muted">No products or services published yet.</div>'}
-        </div>
-      </section>
-
-      <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
-        <h2 class="section-title"><i class="fas fa-comments" style="color:#f5c842;"></i> Customer requests</h2>
-        <p class="muted">Reply to customers, discuss the work, and send a price proposal.</p>
-        <a class="btn-primary" href="messages.html" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none;"><i class="fas fa-comments"></i> Open service requests</a>
-      </section>
-
-      <!-- Edit profile form -->
-      <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
-        <h2 class="section-title"><i class="fas fa-user-edit" style="color:#f5c842;"></i> My provider profile</h2>
-
-        <div id="profile-error"   class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
-        <div id="profile-success" class="form-banner form-banner--info"  style="display:none;margin-bottom:1rem;"></div>
-
-        <form id="profile-form" novalidate>
-          <div class="add-provider-form">
-            <div class="form-card">
-              <label>Full name *
-                <input type="text" name="full_name" value="${esc(me.full_name)}" required>
-              </label>
-            </div>
-            <div class="form-card">
-              <label>Username *
-                <input type="text" name="username" value="${esc(me.username || '')}" required>
-              </label>
-            </div>
-            <div class="form-card">
-              <label>Phone
-                <input type="tel" name="phone" value="${esc(me.phone || '')}" placeholder="+265 9xx xxx xxx">
-              </label>
-            </div>
-            <div class="form-card">
-              <label>Location
-                <input type="text" name="location" value="${esc(me.location || '')}" placeholder="City or district">
-              </label>
-            </div>
-            <div class="form-card">
-              <label>Service category
-                <select name="service_category">
-                  <option value="">— Select —</option>
-                  ${catOptions}
-                </select>
-              </label>
-            </div>
-            <div class="form-card">
-              <label>Years of experience
-                <input type="number" name="experience_years" value="${esc(me.experience_years || '')}" min="0" max="80" placeholder="e.g. 5">
-              </label>
-            </div>
-            <div class="form-card full-col">
-              <label>Skills
-                <input type="text" name="skills" value="${esc(me.skills || '')}" placeholder="e.g. Tiling, burst pipes, piping">
-              </label>
-            </div>
-            <div class="form-card full-col">
-              <label>Qualifications
-                <textarea name="qualifications" placeholder="e.g. Trade certificate, diploma, professional training…">${esc(me.qualifications || '')}</textarea>
-              </label>
-            </div>
-            <div class="form-card full-col">
-              <label>About me
-                <textarea name="about" placeholder="Tell clients about your work…">${esc(me.about || '')}</textarea>
-              </label>
-            </div>
-          </div>
-
-          <div class="add-provider-form" style="margin-top:1rem;">
-            <div class="form-card">
-              <label>Client name for testimonial
-                <input type="text" name="testimonial_client" placeholder="e.g. Mary, Lilongwe">
-              </label>
-            </div>
-            <div class="form-card">
-              <label>Client testimonial
-                <input type="text" name="testimonial" placeholder="What did the client say?">
-              </label>
-            </div>
-          </div>
-
-          <div class="auth-actions" style="margin-top:1.4rem;">
-            <button type="submit" class="btn-primary" id="save-btn">
-              <i class="fas fa-save"></i> Save profile
-            </button>
-          </div>
-        </form>
-      </section>
-
-      <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
-        <h2 class="section-title"><i class="fas fa-images" style="color:#f5c842;"></i> Project proof</h2>
-        <p class="muted" style="margin-bottom:1rem;">Upload photos or videos of completed work. JPG, PNG, WEBP, MP4 and WebM files up to 25 MB are accepted.</p>
-        <div id="portfolio-error" class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
-        <form id="portfolio-form">
-          <div class="add-provider-form">
-            <div class="form-card"><label>Image or video *<input type="file" name="media" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" required></label></div>
-            <div class="form-card"><label>Project caption<input type="text" name="caption" maxlength="180" placeholder="e.g. Kitchen renovation"></label></div>
-          </div>
-          <div class="auth-actions" style="margin-top:1rem;"><button type="submit" class="btn-primary" id="portfolio-btn"><i class="fas fa-upload"></i> Upload project proof</button></div>
-        </form>
-        <div class="activity-list" style="margin-top:1rem;">
-          ${evidence.portfolio.length ? evidence.portfolio.map(item => `<div class="activity-item"><strong><i class="fas fa-${item.media_type === 'video' ? 'video' : 'image'}"></i> ${esc(item.caption || 'Project evidence')}</strong><span>${esc(item.media_type)}</span></div>`).join('') : '<div class="muted">No project evidence uploaded yet.</div>'}
-        </div>
-        <div class="activity-list" style="margin-top:1rem;">
-          ${evidence.testimonials.length ? evidence.testimonials.map(item => `<div class="activity-item"><strong>“${esc(item.testimonial)}”</strong><span>— ${esc(item.client_name)}</span></div>`).join('') : '<div class="muted">Add a client testimonial above to complete this requirement.</div>'}
-        </div>
-      </section>
-
-      <!-- Change password section -->
-      <section class="section-card" style="max-width:640px;margin:0 auto 1.4rem;">
-        <h2 class="section-title"><i class="fas fa-key" style="color:#f5c842;"></i> Change password</h2>
-        <div id="pw-error"   class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
-        <div id="pw-success" class="form-banner form-banner--info"  style="display:none;margin-bottom:1rem;"></div>
-        <form id="pw-form" novalidate>
-          <div class="form-grid" style="grid-template-columns:1fr;">
-            <div class="form-card">
-              <label>New password
-                <input type="password" name="password" placeholder="At least 8 characters" autocomplete="new-password">
-              </label>
-            </div>
-            <div class="form-card">
-              <label>Confirm new password
-                <input type="password" name="confirm_password" placeholder="Repeat new password" autocomplete="new-password">
-              </label>
-            </div>
-          </div>
-          <div class="auth-actions" style="margin-top:1.2rem;">
-            <button type="submit" class="btn-primary" id="pw-btn">
-              <i class="fas fa-lock"></i> Update password
-            </button>
-          </div>
-        </form>
-      </section>
-    `;
-
-    // ── Profile form submit ────────────────────────────────────────────────────
-    document.getElementById('profile-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const pErr  = document.getElementById('profile-error');
-      const pSucc = document.getElementById('profile-success');
-      const btn   = document.getElementById('save-btn');
-      pErr.style.display = pSucc.style.display = 'none';
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
-
-      const form = e.target;
-      const res  = await window.QuickGanyu.apiFetch('profile.php', {
-        full_name:        form.full_name.value.trim(),
-        username:         form.username.value.trim(),
-        phone:            form.phone.value.trim(),
-        location:         form.location.value.trim(),
-        service_category: form.service_category.value,
-        experience_years: parseInt(form.experience_years.value) || 0,
-        skills:           form.skills.value.trim(),
-        qualifications:   form.qualifications.value.trim(),
-        about:            form.about.value.trim(),
-        testimonial_client: form.testimonial_client.value.trim(),
-        testimonial:      form.testimonial.value.trim(),
-      });
-
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-save"></i> Save profile';
-
-      if (!res.ok) {
-        if (res.errors) window.QuickGanyu.showFormErrors(res.errors);
-        pErr.textContent   = res.errors ? Object.values(res.errors)[0] : (res.error || 'Could not save changes.');
-        pErr.style.display = 'block';
-        return;
-      }
-      pSucc.textContent   = 'Profile saved successfully!';
-      pSucc.style.display = 'block';
-      window.QuickGanyu.toast('Profile updated!', 'success');
-      setTimeout(() => window.location.reload(), 500);
-    });
-
-    async function readUploadResponse(response) {
-      const body = await response.text();
-      try {
-        return JSON.parse(body);
-      } catch (_) {
-        throw new Error('The server could not process this upload (HTTP ' + response.status + '). Please try again or check the PHP error log.');
-      }
-    }
-
-    document.getElementById('portfolio-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const error = document.getElementById('portfolio-error');
-      const btn = document.getElementById('portfolio-btn');
-      const file = e.target.media.files[0];
-      error.style.display = 'none';
-      if (!file) {
-        error.textContent = 'Choose an image or video to upload.';
-        error.style.display = 'block';
-        return;
-      }
-      if (file.size > 25 * 1024 * 1024) {
-        error.textContent = 'Files must be 25 MB or smaller.';
-        error.style.display = 'block';
-        return;
-      }
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading…';
-      try {
-        const response = await fetch(window.QuickGanyu.apiUrl('portfolio.php'), {
-          method: 'POST', credentials: 'same-origin', body: new FormData(e.target),
-        });
-        const result = await readUploadResponse(response);
-        if (!result.ok) throw new Error(result.error || 'Upload failed.');
-        window.QuickGanyu.toast('Project proof uploaded!', 'success');
-        window.location.reload();
-      } catch (err) {
-        error.textContent = err.message || 'Upload failed.';
-        error.style.display = 'block';
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-upload"></i> Upload project proof';
-      }
-    });
-
-    document.getElementById('product-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const error = document.getElementById('product-error');
-      const btn = document.getElementById('product-btn');
-      const files = Array.from(e.target.querySelector('[name="media[]"]').files);
-      error.style.display = 'none';
-      if (!files.length) {
-        error.textContent = 'Add at least one image or video.';
-        error.style.display = 'block';
-        return;
-      }
-      if (files.some(file => file.size > 25 * 1024 * 1024)) {
-        error.textContent = 'Each file must be 25 MB or smaller.';
-        error.style.display = 'block';
-        return;
-      }
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing…';
-      try {
-        const response = await fetch(window.QuickGanyu.apiUrl('products.php'), {
-          method: 'POST', credentials: 'same-origin', body: new FormData(e.target),
-        });
-        const result = await readUploadResponse(response);
-        if (!result.ok) {
-          const message = result.errors ? Object.values(result.errors)[0] : result.error;
-          throw new Error(message || 'Could not publish the listing.');
-        }
-        window.QuickGanyu.toast('Product/service listing published!', 'success');
-        window.location.reload();
-      } catch (err) {
-        error.textContent = err.message || 'Could not publish the listing.';
-        error.style.display = 'block';
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-plus"></i> Publish listing';
-      }
-    });
-
-    // ── Password form submit ───────────────────────────────────────────────────
-    document.getElementById('pw-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const pwErr  = document.getElementById('pw-error');
-      const pwSucc = document.getElementById('pw-success');
-      const btn    = document.getElementById('pw-btn');
-      pwErr.style.display = pwSucc.style.display = 'none';
-
-      const form = e.target;
-      if (form.password.value !== form.confirm_password.value) {
-        pwErr.textContent   = 'Passwords do not match.';
-        pwErr.style.display = 'block';
-        return;
-      }
-      if (form.password.value.length < 8) {
-        pwErr.textContent   = 'Password must be at least 8 characters.';
-        pwErr.style.display = 'block';
-        return;
-      }
-
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating…';
-
-      const res = await window.QuickGanyu.apiFetch('profile.php', {
-        password: form.password.value,
-      });
-
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-lock"></i> Update password';
-
-      if (!res.ok) {
-        pwErr.textContent   = res.error || 'Could not update password.';
-        pwErr.style.display = 'block';
-        return;
-      }
-      pwSucc.textContent   = 'Password updated successfully!';
-      pwSucc.style.display = 'block';
-      form.reset();
-      window.QuickGanyu.toast('Password updated!', 'success');
-    });
   });
 })();
 </script>
