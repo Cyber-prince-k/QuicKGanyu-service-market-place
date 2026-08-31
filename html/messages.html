@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages · QuickGanyu</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Chat page reset ─────────────────────────────────────────────────── */
+    body.chat-page {
+      background: #f5e6e8;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    body.chat-page .container {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+      padding: 1.4rem 1.5rem 1.4rem;
+      max-width: 1100px;
+    }
+
+    /* ── Outer shell ─────────────────────────────────────────────────────── */
+    .chat-app {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 0;
+      width: 100%;
+      min-height: 520px;
+      max-height: calc(100vh - 140px);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+    }
+
+    /* ── LEFT SIDEBAR ────────────────────────────────────────────────────── */
+    .chat-sidebar {
+      background: #fffde7;
+      border-right: 1px solid #e8e0c0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-sidebar__header {
+      padding: 1.1rem 1.2rem 0.9rem;
+      border-bottom: 1px solid #e8e0c0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .chat-sidebar__header strong {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0b0b0b;
+      display: block;
+    }
+    .chat-sidebar__header span {
+      font-size: 0.78rem;
+      color: #999;
+    }
+    .chat-refresh {
+      background: none;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #666;
+      transition: background 0.15s;
+    }
+    .chat-refresh:hover { background: #f0e8c0; }
+
+    .chat-contact-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem 0;
+    }
+
+    /* Contact row */
+    .chat-contact {
+      width: 100%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.1rem;
+      border-bottom: 1px solid #f0e8c8;
+      text-align: left;
+      transition: background 0.15s;
+    }
+    .chat-contact:hover { background: #fff9e0; }
+    .chat-contact--active { background: #fff3c4; }
+
+    /* Avatar circle */
+    .chat-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #8b1a1a;
+      color: white;
+      font-size: 0.88rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      letter-spacing: 0.03em;
+    }
+    /* Different shade for "my" messages avatar */
+    .chat-bubble--mine .chat-avatar { background: #8b1a1a; }
+
+    .chat-contact__body {
+      flex: 1;
+      min-width: 0;
+    }
+    .chat-contact__body strong {
+      display: block;
+      font-size: 0.93rem;
+      font-weight: 700;
+      color: #111;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chat-contact__body small {
+      display: block;
+      font-size: 0.78rem;
+      color: #888;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+
+    .chat-contact__meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.35rem;
+      flex-shrink: 0;
+    }
+    .chat-contact__meta time {
+      font-size: 0.72rem;
+      color: #aaa;
+      white-space: nowrap;
+    }
+
+    /* Unread badge */
+    .chat-unread {
+      background: #8b1a1a;
+      color: white;
+      border-radius: 50%;
+      min-width: 20px;
+      height: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
+
+    .chat-empty {
+      padding: 2rem 1.2rem;
+      text-align: center;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+
+    /* ── RIGHT PANEL ─────────────────────────────────────────────────────── */
+    .chat-window {
+      background: #fffde7;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Empty / no-selection state */
+    .chat-window--empty {
+      align-items: center;
+      justify-content: center;
+      color: #aaa;
+      gap: 0.8rem;
+    }
+    .chat-window--empty i {
+      font-size: 3rem;
+      color: #ddd;
+    }
+    .chat-window--empty h2 { color: #bbb; font-size: 1.1rem; }
+    .chat-window--empty p  { font-size: 0.88rem; color: #ccc; }
+
+    /* Window header */
+    .chat-window__header {
+      padding: 1rem 1.2rem 0.9rem;
+      border-bottom: 1px solid #e8e0c0;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-window__header strong {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0b0b0b;
+    }
+    .chat-window__header small {
+      font-size: 0.78rem;
+      color: #999;
+      margin-top: 1px;
+    }
+
+    /* Scrollable messages area */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.2rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      scroll-behavior: smooth;
+    }
+
+    /* Individual bubble */
+    .chat-bubble {
+      display: flex;
+      flex-direction: column;
+      max-width: 68%;
+      align-self: flex-start;
+    }
+    .chat-bubble--mine {
+      align-self: flex-end;
+    }
+
+    .chat-bubble > span {
+      background: white;
+      border: 1px solid #e4dcc8;
+      border-radius: 18px 18px 18px 4px;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.93rem;
+      color: #111;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .chat-bubble--mine > span {
+      background: #8b1a1a;
+      color: white;
+      border: none;
+      border-radius: 18px 18px 4px 18px;
+    }
+
+    .chat-bubble small {
+      font-size: 0.71rem;
+      color: #bbb;
+      margin-top: 3px;
+      padding: 0 4px;
+    }
+    .chat-bubble--mine small {
+      text-align: right;
+    }
+
+    /* Actions row (price offers, accept, pay) */
+    .chat-actions {
+      padding: 0.6rem 1.1rem 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+    }
+    .chat-price {
+      background: #fff9e0;
+      border: 1px solid #e8d890;
+      border-radius: 10px;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.88rem;
+      color: #555;
+    }
+    .chat-booked {
+      background: #e6f9ef;
+      border: 1px solid #a8e6c3;
+      border-radius: 10px;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.88rem;
+      color: #1a7f4b;
+    }
+    .price-form, .payment-form {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .price-form label, .payment-form label {
+      font-size: 0.82rem;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .price-form input, .payment-form input {
+      border: 1px solid #dde1e7;
+      border-radius: 999px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+      width: 130px;
+    }
+
+    /* ── Message composer ────────────────────────────────────────────────── */
+    .chat-composer {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 1.1rem;
+      border-top: 1px solid #e8e0c0;
+      background: #fffde7;
+    }
+    .chat-composer textarea {
+      flex: 1;
+      border: 1px solid #dde1e7;
+      border-radius: 999px;
+      padding: 0.65rem 1.1rem;
+      font-size: 0.93rem;
+      background: white;
+      resize: none;
+      line-height: 1.4;
+      max-height: 120px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      overflow: hidden;
+    }
+    .chat-composer textarea:focus {
+      outline: none;
+      border-color: #8b1a1a;
+    }
+    .chat-composer button[type="submit"] {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: #8b1a1a;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .chat-composer button[type="submit"]:hover {
+      background: #6b1212;
+      transform: scale(1.05);
+    }
+
+    /* ── Start-chat card ─────────────────────────────────────────────────── */
+    .chat-window--start {
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-start-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      gap: 0.8rem;
+    }
+    .chat-start-card__icon i {
+      font-size: 2.5rem;
+      color: #8b1a1a;
+    }
+    .chat-start-card h2 { font-size: 1.15rem; color: #222; }
+    .chat-start-card p  { color: #888; font-size: 0.9rem; max-width: 340px; }
+    #new-request-form {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      text-align: left;
+      margin-top: 0.5rem;
+    }
+    #new-request-form label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #444;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    #new-request-form input,
+    #new-request-form textarea {
+      border: 1px solid #dde1e7;
+      border-radius: 12px;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.9rem;
+      font-family: inherit;
+      background: white;
+    }
+    #new-request-form textarea { min-height: 80px; resize: vertical; }
+
+    /* ── Responsive ──────────────────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      .chat-app { grid-template-columns: 1fr; }
+      .chat-sidebar { display: none; }
+      .chat-sidebar.chat-sidebar--show { display: flex; }
+    }
+  </style>
+</head>
+<body class="chat-page">
+
+<nav class="navbar">
+  <a class="logo" href="../index.html">Quick<span>Ganyu</span> <i class="fas fa-bolt" style="color:#f5c842;font-size:1.2rem;"></i></a>
+  <div class="nav-links">
+    <a href="../index.html"><i class="fas fa-home"></i> Home</a>
+    <a href="providers.html"><i class="fas fa-search"></i> Browse</a>
+  </div>
+  <div class="nav-actions"><!-- filled by api.js --></div>
+</nav>
+
+<main class="container" id="page-root">
+  <div class="empty-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Loading conversations…</p>
+  </div>
+</main>
+
+<script src="../js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const root = document.getElementById('page-root');
+  const { fetchMe, apiFetch, esc, toast } = window.QuickGanyu;
+
+  // ── Auth guard ────────────────────────────────────────────────────────────
+  let me;
+  try {
+    me = await fetchMe();
+  } catch (e) {
+    root.innerHTML = '<div class="form-banner form-banner--error">Could not load session. Please refresh.</div>';
+    return;
+  }
+  if (!me) { location.href = 'login.html'; return; }
+
+  const params     = new URLSearchParams(location.search);
+  const providerId = params.get('provider_id');
+  let selectedId   = Number(params.get('request_id')) || 0;
+  let requests     = [];
+  let timer;
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  const fmt = ts => {
+    const d = new Date((ts || '').replace(' ', 'T'));
+    return isNaN(d) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+  const counterpart  = r => me.role === 'client' ? (r.provider_name  || 'Provider') : (r.customer_name || 'Customer');
+  const statusLabel  = s => (s || '').replaceAll('_', ' ');
+  const avatarOf     = name => esc((name || '?').trim().slice(0, 2).toUpperCase());
+
+  // ── Data load ─────────────────────────────────────────────────────────────
+  async function load(silent = false) {
+    if (silent && document.activeElement?.matches('.chat-composer textarea') &&
+        document.activeElement.value.trim() !== '') {
+      timer = setTimeout(() => load(true), 3000);
+      return;
+    }
+    try {
+      const res = await apiFetch('engagements.php', null);
+      if (!res.ok) {
+        if (!silent) root.innerHTML = '<div class="form-banner form-banner--error">Could not load conversations.</div>';
+        return;
+      }
+      requests = res.requests || [];
+      if (!selectedId || !requests.some(r => Number(r.id) === selectedId)) {
+        selectedId = Number(requests[0]?.id || 0);
+      }
+      render();
+    } catch (err) {
+      if (!silent) root.innerHTML = '<div class="form-banner form-banner--error">Connection error. Please refresh.</div>';
+    }
+  }
+
+  async function providerName() {
+    try {
+      const res = await apiFetch('providers.php', null);
+      const p = (res.providers || []).find(x => String(x.id) === providerId);
+      return p ? esc(p.full_name) : 'this provider';
+    } catch (_) { return 'this provider'; }
+  }
+
+  // ── Sidebar HTML ──────────────────────────────────────────────────────────
+  function buildSidebar() {
+    const items = requests.map(r => {
+      const lastMsg  = r.messages?.slice(-1)[0];
+      const preview  = lastMsg ? esc(lastMsg.message).slice(0, 40) : esc(statusLabel(r.status));
+      const unread   = Number(r.unread_count || 0);
+      const isActive = Number(r.id) === selectedId;
+      return `
+        <button type="button"
+          class="chat-contact ${isActive ? 'chat-contact--active' : ''}"
+          data-request-id="${r.id}">
+          <span class="chat-avatar">${avatarOf(counterpart(r))}</span>
+          <span class="chat-contact__body">
+            <strong>${esc(counterpart(r))}</strong>
+            <small>${preview}</small>
+          </span>
+          <span class="chat-contact__meta">
+            <time>${fmt(r.updated_at)}</time>
+            ${unread > 0 ? `<span class="chat-unread">${unread}</span>` : ''}
+          </span>
+        </button>`;
+    }).join('');
+
+    return `
+      <aside class="chat-sidebar">
+        <div class="chat-sidebar__header">
+          <div>
+            <strong>Chats</strong>
+            <span>${me.role === 'client' ? 'Customer inbox' : 'Provider inbox'}</span>
+          </div>
+          <button class="chat-refresh" type="button" aria-label="Refresh">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+        <div class="chat-contact-list">
+          ${items || '<p class="chat-empty">No conversations yet.</p>'}
+        </div>
+      </aside>`;
+  }
+
+  // ── Chat window HTML ──────────────────────────────────────────────────────
+  function buildWindow(request) {
+    if (!request) {
+      return `
+        <section class="chat-window chat-window--empty">
+          <i class="fas fa-comments"></i>
+          <h2>Select a room</h2>
+          <small>${me.role === 'client' ? 'Guest messaging' : 'Customer requests will appear here.'}</small>
+        </section>`;
+    }
+
+    const bubbles = (request.messages || []).map(m => {
+      const mine = Number(m.sender_id) === Number(me.id);
+      const who  = mine ? 'You' : esc(counterpart(request));
+      return `
+        <div class="chat-bubble ${mine ? 'chat-bubble--mine' : ''}">
+          <span>${esc(m.message)}</span>
+          <small>${who} &bull; ${fmt(m.created_at)}</small>
+        </div>`;
+    }).join('');
+
+    const canOffer  = !['booked','cancelled'].includes(request.status);
+    const canAccept = me.role === 'client' && request.status === 'negotiating' && Number(request.proposed_amount) > 0;
+    const canPay    = me.role === 'client' && request.status === 'awaiting_payment';
+    const pending   = me.role === 'client' && request.status === 'payment_pending';
+
+    return `
+      <section class="chat-window">
+        <div class="chat-window__header">
+          <strong>${esc(counterpart(request))}</strong>
+          <small>${esc(request.service_title)} &middot; ${esc(statusLabel(request.status))}</small>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+          ${bubbles || '<p style="text-align:center;color:#bbb;font-size:0.88rem;padding:2rem 0;">No messages yet. Say hello!</p>'}
+        </div>
+
+        ${canOffer || canAccept || canPay || pending || request.status === 'booked' ? `
+        <div class="chat-actions">
+          ${canOffer ? `
+            <form class="price-form" data-request-id="${request.id}">
+              <label>Offer (MWK)
+                <input name="amount" type="number" min="1" step="0.01"
+                  value="${request.proposed_amount || ''}" placeholder="Amount" required>
+              </label>
+              <button class="btn-secondary" type="submit" style="border-radius:999px;padding:0.4rem 1rem;font-size:0.85rem;">
+                Send offer
+              </button>
+            </form>` : ''}
+          ${request.proposed_amount ? `<div class="chat-price">Latest offer: <strong>MWK ${esc(request.proposed_amount)}</strong></div>` : ''}
+          ${canAccept ? `<button class="btn-primary accept-price-btn" data-request-id="${request.id}" style="font-size:0.88rem;padding:0.5rem 1.1rem;">Accept — MWK ${esc(request.proposed_amount)}</button>` : ''}
+          ${canPay ? `
+            <form class="payment-form" data-request-id="${request.id}">
+              <label>Airtel Money
+                <input name="phone" type="tel" value="${esc(me.phone || '')}" placeholder="+265…" required>
+              </label>
+              <button class="btn-primary" type="submit" style="font-size:0.85rem;padding:0.45rem 1rem;border-radius:999px;">
+                Pay MWK ${esc(request.agreed_amount)}
+              </button>
+            </form>` : ''}
+          ${pending ? '<div class="chat-price"><i class="fas fa-spinner fa-spin"></i> Waiting for payment…</div>' : ''}
+          ${request.status === 'booked' ? '<div class="chat-booked"><i class="fas fa-check-circle"></i> Payment confirmed — booking complete.</div>' : ''}
+        </div>` : ''}
+
+        ${canOffer ? `
+        <form class="chat-composer" data-request-id="${request.id}">
+          <textarea name="message" maxlength="2000" rows="1"
+            placeholder="Message" required></textarea>
+          <button type="submit" aria-label="Send">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </form>` : ''}
+      </section>`;
+  }
+
+  // ── Start-new-chat view ───────────────────────────────────────────────────
+  function buildStartView(recipientName) {
+    return `
+      <section class="chat-window chat-window--start">
+        <div class="chat-window__header">
+          <strong>${recipientName}</strong>
+          <small>Start a new service conversation</small>
+        </div>
+        <div class="chat-start-card">
+          <div class="chat-start-card__icon"><i class="fas fa-comments"></i></div>
+          <h2>Start a conversation</h2>
+          <p>Describe the work you need, then negotiate the price in this chat.</p>
+          <form id="new-request-form">
+            <label>Service needed
+              <input name="service_title" maxlength="140" required placeholder="e.g. Alter two suits">
+            </label>
+            <label>First message
+              <textarea name="message" minlength="3" required placeholder="Hello, I need help with…"></textarea>
+            </label>
+            <button class="btn-primary" type="submit">
+              <i class="fas fa-paper-plane"></i> Start chat
+            </button>
+          </form>
+        </div>
+      </section>`;
+  }
+
+  // ── Main render ───────────────────────────────────────────────────────────
+  async function render() {
+    const starting   = !requests.length && !!providerId && me.role === 'client';
+    const recipient  = starting ? await providerName() : '';
+    const selected   = requests.find(r => Number(r.id) === selectedId);
+    const rightPanel = starting ? buildStartView(recipient) : buildWindow(selected);
+
+    root.innerHTML = `<div class="chat-app">${buildSidebar()}${rightPanel}</div>`;
+
+    // Scroll to bottom of messages
+    const msgEl = root.querySelector('#chat-messages');
+    if (msgEl) msgEl.scrollTop = msgEl.scrollHeight;
+
+    // Wire new-request form
+    root.querySelector('#new-request-form')?.addEventListener('submit', createRequest);
+
+    // Auto-refresh polling
+    clearTimeout(timer);
+    const hasPending = requests.some(r => r.status === 'payment_pending' && me.role === 'client');
+    if (hasPending) {
+      const pendingReq = requests.find(r => r.status === 'payment_pending');
+      timer = setTimeout(() => checkPayment(pendingReq.id), 7000);
+    } else if (requests.length) {
+      timer = setTimeout(() => load(true), 7000);
+    }
+  }
+
+  // ── Actions ───────────────────────────────────────────────────────────────
+  async function createRequest(e) {
+    e.preventDefault();
+    const form = e.target;
+    try {
+      const res = await apiFetch('engagements.php', {
+        action:        'create',
+        provider_id:   Number(providerId),
+        service_title: form.service_title.value.trim(),
+        message:       form.message.value.trim(),
+      });
+      if (!res.ok) return toast(res.error || 'Could not start chat.', 'error');
+      selectedId = Number(res.request_id);
+      history.replaceState({}, '', 'messages.html?request_id=' + selectedId);
+      toast('Conversation started!', 'success');
+      await load();
+    } catch (err) {
+      toast('Connection error. Please try again.', 'error');
+    }
+  }
+
+  async function checkPayment(requestId) {
+    try {
+      const res = await apiFetch('engagements.php', { action: 'check_payment', request_id: requestId });
+      if (res.ok && res.status !== 'pending') toast(res.message, res.status === 'successful' ? 'success' : 'info');
+    } catch (_) {}
+    await load(true);
+  }
+
+  // ── Event delegation ──────────────────────────────────────────────────────
+  root.addEventListener('click', async e => {
+    const contact = e.target.closest('.chat-contact');
+    const accept  = e.target.closest('.accept-price-btn');
+    const refresh = e.target.closest('.chat-refresh');
+
+    if (refresh) await load();
+
+    if (contact) {
+      selectedId = Number(contact.dataset.requestId);
+      history.replaceState({}, '', 'messages.html?request_id=' + selectedId);
+      render();
+    }
+
+    if (accept) {
+      try {
+        const res = await apiFetch('engagements.php', {
+          action: 'accept_price', request_id: Number(accept.dataset.requestId),
+        });
+        if (!res.ok) return toast(res.error || 'Could not accept offer.', 'error');
+        toast(res.message, 'success');
+        await load();
+      } catch (err) { toast('Connection error.', 'error'); }
+    }
+  });
+
+  root.addEventListener('submit', async e => {
+    const form = e.target;
+
+    if (form.matches('.chat-composer')) {
+      e.preventDefault();
+      try {
+        const res = await apiFetch('engagements.php', {
+          action:     'message',
+          request_id: Number(form.dataset.requestId),
+          message:    form.message.value.trim(),
+        });
+        if (!res.ok) return toast(res.error || 'Could not send message.', 'error');
+        await load();
+      } catch (err) { toast('Connection error.', 'error'); }
+    }
+
+    if (form.matches('.price-form')) {
+      e.preventDefault();
+      try {
+        const res = await apiFetch('engagements.php', {
+          action:     'propose_price',
+          request_id: Number(form.dataset.requestId),
+          amount:     form.amount.value,
+        });
+        if (!res.ok) return toast(res.error || 'Could not send offer.', 'error');
+        toast(res.message, 'success');
+        await load();
+      } catch (err) { toast('Connection error.', 'error'); }
+    }
+
+    if (form.matches('.payment-form')) {
+      e.preventDefault();
+      try {
+        const res = await apiFetch('engagements.php', {
+          action:     'start_payment',
+          request_id: Number(form.dataset.requestId),
+          phone:      form.phone.value.trim(),
+        });
+        if (!res.ok) return toast(res.error || 'Could not start payment.', 'error');
+        toast(res.message, 'info');
+        await load();
+      } catch (err) { toast('Connection error.', 'error'); }
+    }
+  });
+
+  // Enter to send (Shift+Enter for newline)
+  root.addEventListener('keydown', e => {
+    if (e.target.matches('.chat-composer textarea') && e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      e.target.closest('.chat-composer').requestSubmit();
+    }
+    // Auto-grow textarea
+    if (e.target.matches('.chat-composer textarea')) {
+      e.target.style.height = 'auto';
+      e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+    }
+  });
+
+  root.addEventListener('input', e => {
+    if (e.target.matches('.chat-composer textarea')) {
+      e.target.style.height = 'auto';
+      e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+    }
+  });
+
+  await load();
+});
+</script>
+</body>
+</html>
