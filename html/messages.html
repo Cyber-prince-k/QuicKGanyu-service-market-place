@@ -465,10 +465,11 @@
       transition: all 0.15s;
       white-space: nowrap;
       flex-shrink: 0;
+      text-decoration: none;
     }
     .btn-accept-offer  { background: #1a7f4b; color: #fff; }
     .btn-accept-offer:hover { background: #155e38; transform: scale(1.02); }
-    .btn-pay-now       { background: #f5c842; color: #0b0b0b; font-weight: 800; }
+    .btn-pay-now       { background: #f5c842; color: #0b0b0b; font-weight: 800; border: none; }
     .btn-pay-now:hover { background: #e6b82e; transform: scale(1.03);
                          box-shadow: 0 4px 14px rgba(245,200,66,0.4); }
     .btn-pay-now:disabled { opacity: 0.6; cursor: not-allowed; transform: none;
@@ -677,10 +678,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const params     = new URLSearchParams(location.search);
   const providerId = params.get('provider_id');
+  // Honour an explicit request_id in the URL; this persists across reloads
   let selectedId   = Number(params.get('request_id')) || 0;
   let requests     = [];
   let timer;
-  const userId     = me.id; // used in buildWindow role checks
+  const userId     = Number(me.id);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const fmt = ts => {
@@ -705,6 +707,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
       requests = res.requests || [];
+      // If a specific provider_id is in the URL, always select that conversation.
+      // Otherwise keep the current selectedId if still valid, or fall back to first.
+      if (providerId) {
+        const match = requests.find(r => String(r.provider_id) === String(providerId));
+        if (match) selectedId = Number(match.id);
+      }
       if (!selectedId || !requests.some(r => Number(r.id) === selectedId)) {
         selectedId = Number(requests[0]?.id || 0);
       }
@@ -824,8 +832,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>`;
     }).join('');
 
-    const isProvider   = me.role === 'provider' && Number(request.provider_id) === userId;
-    const isCustomer   = me.role === 'client'   && Number(request.customer_id) === userId;
+    const isProvider   = me.role === 'provider' && Number(request.provider_id) === Number(userId);
+    const isCustomer   = me.role === 'client'   && Number(request.customer_id) === Number(userId);
+    // Composer stays visible until the booking is fully confirmed or cancelled
     const canMessage   = !['booked', 'cancelled'].includes(request.status);
     const canAccept    = isCustomer && request.status === 'negotiating' && Number(request.proposed_amount) > 0;
     const canPay       = isCustomer && request.status === 'awaiting_payment';
@@ -851,10 +860,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (canPay) {
       banner = `
         <div class="chat-action-banner chat-action-banner--pay">
-          <span><i class="fas fa-lock"></i> Agreed price: <strong>MWK ${esc(agreedAmount)}</strong></span>
-          <button class="btn-pay-now" data-request-id="${request.id}">
+          <span><i class="fas fa-lock"></i> Agreed price: <strong>MWK ${esc(agreedAmount)}</strong> — ready to pay</span>
+          <a class="btn-pay-now" href="payment.html?request_id=${request.id}">
             <i class="fas fa-credit-card"></i> Pay now
-          </button>
+          </a>
         </div>`;
     }
 
@@ -862,7 +871,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       banner = `
         <div class="chat-action-banner chat-action-banner--pending">
           <i class="fas fa-spinner fa-spin"></i>
-          <span>Payment processing… <button class="btn-check-payment" data-request-id="${request.id}">Check status</button></span>
+          <span>Payment in progress…
+            <a href="payment.html?request_id=${request.id}" style="color:inherit;font-weight:700;text-decoration:underline;">
+              Check payment status
+            </a>
+          </span>
         </div>`;
     }
 
@@ -1040,32 +1053,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
-    // Customer pays — redirected to PayChangu hosted checkout
-    if (payNow) {
-      payNow.disabled = true;
-      payNow.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing payment…';
-      try {
-        const res = await apiFetch('engagements.php', {
-          action:     'start_payment',
-          request_id: Number(payNow.dataset.requestId),
-        });
-        if (!res.ok) {
-          toast(res.error || 'Could not start payment.', 'error');
-          payNow.disabled = false;
-          payNow.innerHTML = '<i class="fas fa-credit-card"></i> Pay now';
-          return;
-        }
-        // Redirect to PayChangu hosted checkout page
-        toast('Redirecting to secure payment…', 'info');
-        setTimeout(() => { window.location.href = res.checkout_url; }, 600);
-      } catch (err) {
-        toast('Connection error. Please try again.', 'error');
-        payNow.disabled = false;
-        payNow.innerHTML = '<i class="fas fa-credit-card"></i> Pay now';
-      }
+    // Customer pays — now a direct <a> link to payment.html, no JS needed here
+    // (keeping the selector just in case an old button renders)
+    if (payNow && payNow.tagName === 'BUTTON') {
+      window.location.href = `payment.html?request_id=${payNow.dataset.requestId}`;
     }
 
-    // Check payment status after returning from PayChangu
+    // Check payment status (pending banner link)
     if (checkPayment) {
       try {
         const res = await apiFetch('engagements.php', {
