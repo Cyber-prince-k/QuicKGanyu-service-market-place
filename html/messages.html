@@ -264,49 +264,84 @@
       text-align: right;
     }
 
-    /* Actions row (price offers, accept, pay) */
-    .chat-actions {
-      padding: 0.6rem 1.1rem 0;
+    /* Status / price banners above the composer — NOT a second input */
+    .chat-price-banner {
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem;
       align-items: center;
-    }
-    .chat-price {
+      gap: 0.6rem;
+      flex-wrap: wrap;
       background: #fff9e0;
-      border: 1px solid #e8d890;
-      border-radius: 10px;
-      padding: 0.5rem 0.9rem;
-      font-size: 0.88rem;
+      border-top: 1px solid #e8d890;
+      padding: 0.55rem 1.1rem;
+      font-size: 0.86rem;
       color: #555;
     }
-    .chat-booked {
-      background: #e6f9ef;
-      border: 1px solid #a8e6c3;
-      border-radius: 10px;
-      padding: 0.5rem 0.9rem;
-      font-size: 0.88rem;
-      color: #1a7f4b;
+    .chat-price-banner strong { color: #111; }
+    .btn-accept-offer {
+      background: #1a7f4b;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
     }
-    .price-form, .payment-form {
+    .btn-accept-offer:hover { background: #155e38; }
+
+    /* Payment form — still slim, lives above composer */
+    .chat-pay-form {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      background: #f0f9ff;
+      border-top: 1px solid #bde0f5;
+      padding: 0.55rem 1.1rem;
+    }
+    .chat-pay-form input {
+      flex: 1;
+      min-width: 160px;
+      border: 1px solid #bde0f5;
+      border-radius: 999px;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.86rem;
+      background: white;
+    }
+    .chat-pay-form button {
+      background: #8b1a1a;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      padding: 0.4rem 1rem;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .chat-pay-form button:hover { background: #6b1212; }
+
+    /* Generic status banners */
+    .chat-status-banner {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      flex-wrap: wrap;
+      padding: 0.55rem 1.1rem;
+      font-size: 0.86rem;
+      font-weight: 600;
+      border-top: 1px solid transparent;
     }
-    .price-form label, .payment-form label {
-      font-size: 0.82rem;
-      color: #666;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .price-form input, .payment-form input {
-      border: 1px solid #dde1e7;
-      border-radius: 999px;
-      padding: 0.4rem 0.8rem;
-      font-size: 0.85rem;
-      width: 130px;
+    .chat-status-banner--wait     { background: #fff9e0; border-color: #e8d890; color: #7a5c00; }
+    .chat-status-banner--done     { background: #e6f9ef; border-color: #a8e6c3; color: #1a7f4b; }
+    .chat-status-banner--cancelled{ background: #fff0f2; border-color: #f5c2ca; color: #b00020; }
+
+    /* Empty messages hint */
+    .chat-no-messages {
+      text-align: center;
+      color: #ccc;
+      font-size: 0.88rem;
+      padding: 2rem 0;
+      margin: 0;
     }
 
     /* ── Message composer ────────────────────────────────────────────────── */
@@ -554,10 +589,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>`;
     }).join('');
 
-    const canOffer  = !['booked','cancelled'].includes(request.status);
-    const canAccept = me.role === 'client' && request.status === 'negotiating' && Number(request.proposed_amount) > 0;
-    const canPay    = me.role === 'client' && request.status === 'awaiting_payment';
-    const pending   = me.role === 'client' && request.status === 'payment_pending';
+    const canMessage = !['booked','cancelled'].includes(request.status);
+    const canAccept  = me.role === 'client' && request.status === 'negotiating' && Number(request.proposed_amount) > 0;
+    const canPay     = me.role === 'client' && request.status === 'awaiting_payment';
+    const pending    = me.role === 'client' && request.status === 'payment_pending';
+
+    // Status / action banner shown above the composer (never a second input)
+    let banner = '';
+    if (request.proposed_amount && canMessage) {
+      banner += `<div class="chat-price-banner">
+        <i class="fas fa-tag"></i> Latest offer: <strong>MWK ${esc(request.proposed_amount)}</strong>
+        ${canAccept ? `<button class="btn-accept-offer" data-request-id="${request.id}">Accept</button>` : ''}
+      </div>`;
+    }
+    if (canPay) {
+      banner += `<form class="chat-pay-form" data-request-id="${request.id}">
+        <input name="phone" type="tel" value="${esc(me.phone || '')}" placeholder="Airtel Money +265…" required>
+        <button type="submit">Pay MWK ${esc(request.agreed_amount)}</button>
+      </form>`;
+    }
+    if (pending)              banner += `<div class="chat-status-banner chat-status-banner--wait"><i class="fas fa-spinner fa-spin"></i> Waiting for payment…</div>`;
+    if (request.status === 'booked')    banner += `<div class="chat-status-banner chat-status-banner--done"><i class="fas fa-check-circle"></i> Payment confirmed — booking complete.</div>`;
+    if (request.status === 'cancelled') banner += `<div class="chat-status-banner chat-status-banner--cancelled"><i class="fas fa-ban"></i> This request was cancelled.</div>`;
 
     return `
       <section class="chat-window">
@@ -567,37 +620,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
 
         <div class="chat-messages" id="chat-messages">
-          ${bubbles || '<p style="text-align:center;color:#bbb;font-size:0.88rem;padding:2rem 0;">No messages yet. Say hello!</p>'}
+          ${bubbles || '<p class="chat-no-messages">No messages yet — say hello!</p>'}
         </div>
 
-        ${canOffer || canAccept || canPay || pending || request.status === 'booked' ? `
-        <div class="chat-actions">
-          ${canOffer ? `
-            <form class="price-form" data-request-id="${request.id}">
-              <label>Offer (MWK)
-                <input name="amount" type="number" min="1" step="0.01"
-                  value="${request.proposed_amount || ''}" placeholder="Amount" required>
-              </label>
-              <button class="btn-secondary" type="submit" style="border-radius:999px;padding:0.4rem 1rem;font-size:0.85rem;">
-                Send offer
-              </button>
-            </form>` : ''}
-          ${request.proposed_amount ? `<div class="chat-price">Latest offer: <strong>MWK ${esc(request.proposed_amount)}</strong></div>` : ''}
-          ${canAccept ? `<button class="btn-primary accept-price-btn" data-request-id="${request.id}" style="font-size:0.88rem;padding:0.5rem 1.1rem;">Accept — MWK ${esc(request.proposed_amount)}</button>` : ''}
-          ${canPay ? `
-            <form class="payment-form" data-request-id="${request.id}">
-              <label>Airtel Money
-                <input name="phone" type="tel" value="${esc(me.phone || '')}" placeholder="+265…" required>
-              </label>
-              <button class="btn-primary" type="submit" style="font-size:0.85rem;padding:0.45rem 1rem;border-radius:999px;">
-                Pay MWK ${esc(request.agreed_amount)}
-              </button>
-            </form>` : ''}
-          ${pending ? '<div class="chat-price"><i class="fas fa-spinner fa-spin"></i> Waiting for payment…</div>' : ''}
-          ${request.status === 'booked' ? '<div class="chat-booked"><i class="fas fa-check-circle"></i> Payment confirmed — booking complete.</div>' : ''}
-        </div>` : ''}
+        ${banner}
 
-        ${canOffer ? `
+        ${canMessage ? `
         <form class="chat-composer" data-request-id="${request.id}">
           <textarea name="message" maxlength="2000" rows="1"
             placeholder="Message" required></textarea>
@@ -694,7 +722,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ── Event delegation ──────────────────────────────────────────────────────
   root.addEventListener('click', async e => {
     const contact = e.target.closest('.chat-contact');
-    const accept  = e.target.closest('.accept-price-btn');
+    const accept  = e.target.closest('.accept-price-btn, .btn-accept-offer');
     const refresh = e.target.closest('.chat-refresh');
 
     if (refresh) await load();
@@ -722,32 +750,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (form.matches('.chat-composer')) {
       e.preventDefault();
+      const raw = form.message.value.trim();
+      if (!raw) return;
+
+      // Allow "/offer 500" syntax to propose a price without a second input box
+      const offerMatch = raw.match(/^\/offer\s+([\d.]+)$/i);
+      if (offerMatch) {
+        try {
+          const res = await apiFetch('engagements.php', {
+            action:     'propose_price',
+            request_id: Number(form.dataset.requestId),
+            amount:     offerMatch[1],
+          });
+          if (!res.ok) return toast(res.error || 'Could not send offer.', 'error');
+          form.message.value = '';
+          form.message.style.height = 'auto';
+          toast(res.message || 'Offer sent.', 'success');
+          await load();
+        } catch (err) { toast('Connection error.', 'error'); }
+        return;
+      }
+
       try {
         const res = await apiFetch('engagements.php', {
           action:     'message',
           request_id: Number(form.dataset.requestId),
-          message:    form.message.value.trim(),
+          message:    raw,
         });
         if (!res.ok) return toast(res.error || 'Could not send message.', 'error');
+        form.message.value = '';
+        form.message.style.height = 'auto';
         await load();
       } catch (err) { toast('Connection error.', 'error'); }
     }
 
-    if (form.matches('.price-form')) {
-      e.preventDefault();
-      try {
-        const res = await apiFetch('engagements.php', {
-          action:     'propose_price',
-          request_id: Number(form.dataset.requestId),
-          amount:     form.amount.value,
-        });
-        if (!res.ok) return toast(res.error || 'Could not send offer.', 'error');
-        toast(res.message, 'success');
-        await load();
-      } catch (err) { toast('Connection error.', 'error'); }
-    }
-
-    if (form.matches('.payment-form')) {
+    if (form.matches('.chat-pay-form')) {
       e.preventDefault();
       try {
         const res = await apiFetch('engagements.php', {
