@@ -6,7 +6,855 @@
   <title>Provider Dashboard · QuickGanyu</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Dashboard tabs ──────────────────────────────────────────────────── */
+    .dash-tabs {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+      padding: 0.5rem 0 0;
+      border-bottom: 2px solid #ebebeb;
+      margin-bottom: 1.5rem;
+      max-width: 860px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .dash-tab {
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      padding: 0.55rem 1.15rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #777;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      border-radius: 8px 8px 0 0;
+      transition: color 0.15s, background 0.15s;
+    }
+    .dash-tab:hover { background: #fafafa; color: #0b0b0b; }
+    .dash-tab.active {
+      color: #0b0b0b;
+      border-bottom-color: #f5c842;
+      background: #fffdf8;
+    }
+    .dash-tab .tab-badge {
+      background: #8b1a1a;
+      color: white;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      min-width: 17px;
+      height: 17px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
+
+    .dash-panel { display: none; }
+    .dash-panel.active { display: block; }
+
+    /* ── Inline messages panel ───────────────────────────────────────────── */
+    .msg-shell {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      height: 540px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #e0d8c8;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.07);
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .msg-sidebar {
+      background: #0b0b0b;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: none;
+    }
+    .msg-sidebar__header {
+      padding: 0.9rem 1rem 0.8rem;
+      border-bottom: 1px solid #1e1e1e;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .msg-sidebar__header strong { font-size: 0.95rem; font-weight: 700; color: #f5c842; }
+    .msg-sidebar__header span   { font-size: 0.7rem; color: #555; text-transform: uppercase; letter-spacing: 0.06em; }
+    .msg-refresh {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #888; font-size: 0.8rem;
+      transition: background 0.15s, color 0.15s;
+    }
+    .msg-refresh:hover { background: #f5c842; color: #0b0b0b; border-color: #f5c842; }
+    .msg-contact-list { flex: 1; overflow-y: auto; }
+    .msg-contact-list::-webkit-scrollbar { width: 3px; }
+    .msg-contact-list::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+    .msg-contact {
+      width: 100%; background: transparent; border: none; cursor: pointer;
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.7rem 0.9rem; text-align: left;
+      border-bottom: 1px solid #141414;
+      transition: background 0.15s;
+    }
+    .msg-contact:hover { background: #141414; }
+    .msg-contact.active {
+      background: #1a1a1a;
+      border-left: 3px solid #f5c842;
+      padding-left: calc(0.9rem - 3px);
+    }
+    .msg-contact.active .msg-contact__name { color: #f5c842; }
+    .msg-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #8b1a1a, #5a1010);
+      color: white; font-size: 0.75rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; border: 2px solid #2a2a2a;
+    }
+    .msg-contact.active .msg-avatar { border-color: #f5c842; }
+    .msg-contact__body { flex: 1; min-width: 0; }
+    .msg-contact__name {
+      display: block; font-size: 0.83rem; font-weight: 700; color: #f0f0f0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .msg-contact__preview {
+      display: block; font-size: 0.72rem; color: #555;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;
+    }
+    .msg-contact__meta { display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem; flex-shrink: 0; }
+    .msg-contact__time { font-size: 0.66rem; color: #555; white-space: nowrap; }
+    .msg-unread {
+      background: #f5c842; color: #0b0b0b;
+      border-radius: 50%; min-width: 17px; height: 17px;
+      font-size: 0.62rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; padding: 0 3px;
+    }
+    .msg-empty-list { padding: 1.5rem 0.9rem; text-align: center; color: #444; font-size: 0.82rem; }
+
+    /* Right pane */
+    .msg-window {
+      background: #fffdf8; display: flex; flex-direction: column; height: 100%; overflow: hidden;
+    }
+    .msg-window--empty {
+      align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .msg-window--empty i    { font-size: 2.5rem; color: #e0d8c8; }
+    .msg-window--empty h3   { font-size: 1rem; color: #aaa; margin: 0; }
+    .msg-window--empty small{ font-size: 0.8rem; color: #ccc; }
+
+    .msg-header {
+      background: #0b0b0b; padding: 0.75rem 1.1rem;
+      display: flex; align-items: center; gap: 0.75rem;
+      flex-shrink: 0; border-bottom: 2px solid #f5c842;
+    }
+    .msg-header-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #8b1a1a, #5a1010);
+      color: white; font-size: 0.75rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid #f5c842; flex-shrink: 0;
+    }
+    .msg-header-info strong { display: block; font-size: 0.9rem; font-weight: 700; color: #fff; }
+    .msg-header-info small  { font-size: 0.7rem; color: #888; }
+    .msg-header-status {
+      margin-left: auto; font-size: 0.68rem; font-weight: 700;
+      background: #1e1e1e; color: #f5c842; border: 1px solid #333;
+      border-radius: 999px; padding: 0.18rem 0.65rem;
+      text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0;
+    }
+
+    .msg-messages {
+      flex: 1; overflow-y: auto; padding: 1rem;
+      display: flex; flex-direction: column; gap: 0.5rem; scroll-behavior: smooth;
+    }
+    .msg-messages::-webkit-scrollbar { width: 4px; }
+    .msg-messages::-webkit-scrollbar-thumb { background: #e0d8c8; border-radius: 4px; }
+
+    .msg-bubble {
+      display: flex; flex-direction: column;
+      max-width: 65%; align-self: flex-start; gap: 2px;
+    }
+    .msg-bubble--mine { align-self: flex-end; }
+    .msg-bubble > span {
+      background: #fff; border: 1px solid #e8e0d0;
+      border-radius: 16px 16px 16px 4px;
+      padding: 0.6rem 0.85rem; font-size: 0.88rem; color: #1e1e1e;
+      line-height: 1.5; word-break: break-word;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .msg-bubble--mine > span {
+      background: #8b1a1a; color: #fff; border: none;
+      border-radius: 16px 16px 4px 16px;
+      box-shadow: 0 2px 8px rgba(139,26,26,0.22);
+    }
+    .msg-bubble small { font-size: 0.65rem; color: #bbb; padding: 0 3px; }
+    .msg-bubble--mine small { text-align: right; }
+
+    /* Price offer card inside messages */
+    .msg-price-card { align-self: flex-start; max-width: 65%; display: flex; flex-direction: column; gap: 2px; }
+    .msg-price-card--mine { align-self: flex-end; }
+    .msg-price-card__inner {
+      display: flex; align-items: center; gap: 0.7rem;
+      background: #fffdf0; border: 2px solid #f5c842;
+      border-radius: 14px; padding: 0.7rem 1rem;
+    }
+    .msg-price-card--mine .msg-price-card__inner { background: #0b0b0b; }
+    .msg-price-card__inner > i { color: #f5c842; font-size: 1.1rem; flex-shrink: 0; }
+    .msg-price-card__label { display: block; font-size: 0.65rem; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+    .msg-price-card__amount { display: block; font-size: 1.1rem; font-weight: 800; color: #0b0b0b; }
+    .msg-price-card--mine .msg-price-card__amount { color: #f5c842; }
+    .msg-price-card small { font-size: 0.65rem; color: #bbb; padding: 0 3px; }
+    .msg-price-card--mine small { text-align: right; }
+
+    /* Event pills */
+    .msg-event {
+      align-self: center; display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.77rem; font-weight: 700; border-radius: 999px;
+      padding: 0.35rem 0.9rem; max-width: 85%; text-align: center;
+    }
+    .msg-event--accepted { background: #e8f5ee; border: 1px solid #b2dfc4; color: #1a7f4b; }
+    .msg-event--paid     { background: #fff9e0; border: 2px solid #f5c842; color: #7a5c00; }
+
+    /* Action banner above composer */
+    .msg-action-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.7rem; flex-wrap: wrap; padding: 0.6rem 1rem;
+      font-size: 0.84rem; font-weight: 600; border-top: 2px solid transparent; flex-shrink: 0;
+    }
+    .msg-action-banner--offer   { background: #fffbe6; border-color: #f5c842; color: #5a4a00; }
+    .msg-action-banner--pending { background: #fffbe6; border-color: #e8d890; color: #7a5c00; }
+    .msg-action-banner--done    { background: #e8f5ee; border-color: #b2dfc4; color: #1a7f4b; }
+    .msg-action-banner--cancelled { background: #fff0f2; border-color: #f5c2ca; color: #b00020; }
+    /* Provider-side price input inside banner */
+    .msg-price-input-row {
+      display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+      padding: 0.6rem 1rem; background: #fffbe6; border-top: 2px solid #f5c842;
+      flex-shrink: 0;
+    }
+    .msg-price-input-row label { font-size: 0.8rem; font-weight: 600; color: #5a4a00; white-space: nowrap; }
+    .msg-price-input-row input {
+      flex: 1; min-width: 100px; max-width: 140px;
+      border: 1.5px solid #e8d890; border-radius: 999px;
+      padding: 0.38rem 0.85rem; font-size: 0.85rem; background: white;
+    }
+    .msg-price-input-row input:focus { outline: none; border-color: #f5c842; }
+    .btn-send-price {
+      background: #f5c842; color: #0b0b0b; border: none;
+      border-radius: 999px; padding: 0.4rem 1rem;
+      font-size: 0.82rem; font-weight: 800; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-send-price:hover { background: #e6b82e; transform: scale(1.03); }
+    .btn-send-price:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* Composer */
+    .msg-composer {
+      display: flex; align-items: flex-end; gap: 0.5rem;
+      padding: 0.75rem 0.9rem; background: #fff;
+      border-top: 1px solid #e8e0d0; flex-shrink: 0;
+    }
+    .msg-composer textarea {
+      flex: 1; border: 1.5px solid #e0d8c8; border-radius: 20px;
+      padding: 0.6rem 1rem; font-size: 0.88rem; background: #fffdf8;
+      resize: none; line-height: 1.4; height: 40px; max-height: 110px;
+      font-family: inherit; overflow-y: auto;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .msg-composer textarea:focus {
+      outline: none; border-color: #8b1a1a;
+      box-shadow: 0 0 0 3px rgba(139,26,26,0.09);
+    }
+    .msg-composer textarea::placeholder { color: #bbb; }
+    .msg-composer button[type="submit"] {
+      width: 40px; height: 40px; border-radius: 50%; border: none;
+      background: #8b1a1a; color: white; font-size: 0.95rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      box-shadow: 0 3px 10px rgba(139,26,26,0.28);
+      transition: background 0.2s, transform 0.15s;
+    }
+    .msg-composer button[type="submit"]:hover { background: #6b1212; transform: scale(1.08); }
+    .msg-no-messages { text-align: center; color: #ccc; font-size: 0.82rem; padding: 2rem 0; margin: 0; }
+
+    @media (max-width: 680px) {
+      .msg-shell { grid-template-columns: 1fr; }
+      .msg-sidebar { display: none; }
+    }
+  </style>
 </head>
+<body>
+
+<nav class="navbar">
+  <a class="logo" href="../index.html">Quick<span>Ganyu</span> <i class="fas fa-bolt" style="color:#f5c842;font-size:1.2rem;"></i></a>
+  <div class="nav-links">
+    <a href="../index.html"><i class="fas fa-home"></i> Home</a>
+    <a href="providers.html"><i class="fas fa-search"></i> Browse</a>
+  </div>
+  <div class="nav-actions"><!-- filled by api.js --></div>
+</nav>
+
+<div class="container" id="page-root">
+  <div class="empty-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Loading your dashboard…</p>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-col"><h4>QuickGanyu</h4><a href="../index.html">Home</a><a href="providers.html">Browse</a></div>
+      <div class="footer-col"><h4>Contact</h4><span>info@quickganyu.com</span><span>+265 999 000 000</span></div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-brand">Quick<span>Ganyu</span></div>
+      <div class="footer-copy">&copy; 2026 QuickGanyu</div>
+      <a class="footer-backtop" href="#top"><i class="fas fa-arrow-up"></i></a>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/api.js"></script>
+<script>
+(function () {
+  const { fetchMe, esc, apiFetch, toast } = window.QuickGanyu;
+  const root = document.getElementById('page-root');
+
+  const CATEGORIES = [
+    'Plumbing','Electrical','Carpentry','Painting','Cleaning',
+    'Photography','Catering','Tutoring','IT / Tech support',
+    'Tailoring','Gardening','Moving / Transport','Events','Other',
+  ];
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const me = await fetchMe();
+    if (!me) { window.location.href = 'login.html'; return; }
+    if (me.status === 'needs_setup') { window.location.href = 'setup.html'; return; }
+    if (me.role !== 'provider') {
+      if (me.role === 'admin')  { window.location.href = 'admin.html'; return; }
+      if (me.role === 'client') { window.location.href = 'customer-dashboard.html'; return; }
+    }
+
+    const [evidenceRes, productsRes] = await Promise.all([
+      apiFetch('profile.php', null).catch(() => ({ ok: false })),
+      apiFetch('products.php', null).catch(() => ({ ok: false })),
+    ]);
+    const evidence = evidenceRes.ok ? evidenceRes.evidence : { portfolio: [], testimonials: [] };
+    const products = productsRes.ok ? productsRes.products : [];
+
+    const fields  = ['phone','location','service_category','skills','qualifications','about','experience_years'];
+    const filled  = fields.filter(f => me[f] && String(me[f]).trim() !== '').length;
+    const evFill  = (evidence.portfolio.length ? 1 : 0) + (evidence.testimonials.length ? 1 : 0);
+    const pct     = Math.round(((filled + evFill) / (fields.length + 2)) * 100);
+    const catOptions = CATEGORIES.map(c =>
+      `<option value="${esc(c)}" ${me.service_category === c ? 'selected' : ''}>${esc(c)}</option>`
+    ).join('');
+
+    // ── Render shell ────────────────────────────────────────────────────────
+    root.innerHTML = `
+      <section class="hero-card hero" style="margin-bottom:1rem;">
+        <div class="animated-feedback"><i class="fas fa-briefcase" style="color:#f5c842;"></i> Provider dashboard</div>
+        <h1>Hello, ${esc(me.full_name.split(' ')[0])}!</h1>
+        <p>Manage your profile, showcase your work, and reply to client requests.</p>
+      </section>
+
+      <div class="stats-grid" style="margin-bottom:1rem;">
+        <div class="stat-card"><strong>${esc(me.service_category||'—')}</strong><span>Category</span></div>
+        <div class="stat-card"><strong>${esc(me.location||'—')}</strong><span>Location</span></div>
+        <div class="stat-card"><strong>${me.experience_years?me.experience_years+' yrs':'—'}</strong><span>Experience</span></div>
+        <div class="stat-card"><strong>${pct}%</strong><span>Profile complete</span></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="dash-tabs" id="dash-tabs">
+        <button class="dash-tab active" data-tab="overview">
+          <i class="fas fa-chart-line"></i> Overview
+        </button>
+        <button class="dash-tab" data-tab="messages" id="tab-messages-btn">
+          <i class="fas fa-comments"></i> Messages
+          <span class="tab-badge" id="msg-badge" style="display:none;">0</span>
+        </button>
+        <button class="dash-tab" data-tab="services">
+          <i class="fas fa-store"></i> Services
+        </button>
+        <button class="dash-tab" data-tab="profile">
+          <i class="fas fa-user-edit"></i> Profile
+        </button>
+        <button class="dash-tab" data-tab="security">
+          <i class="fas fa-key"></i> Security
+        </button>
+      </div>
+
+      <!-- ── OVERVIEW ────────────────────────────────────────────────────── -->
+      <div class="dash-panel active" id="panel-overview">
+        <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
+          <h2 class="section-title"><i class="fas fa-chart-line" style="color:#f5c842;"></i> Profile completeness</h2>
+          <div class="progress-card">
+            <span>Complete your profile to attract more clients</span>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <strong>${pct}%</strong>
+          </div>
+          ${me.profile_complete
+            ? `<p class="muted" style="margin-top:0.5rem;color:#1a7f4b;"><i class="fas fa-check-circle"></i> Your profile is visible to clients.</p>`
+            : `<p class="muted" style="margin-top:0.5rem;"><i class="fas fa-lock"></i> Add all profile details, a portfolio item and a testimonial to become bookable.</p>`}
+        </section>
+        <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
+          <h2 class="section-title"><i class="fas fa-images" style="color:#f5c842;"></i> Project proof</h2>
+          <p class="muted" style="margin-bottom:1rem;">Upload photos or videos of completed work.</p>
+          <div id="portfolio-error" class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
+          <form id="portfolio-form">
+            <div class="add-provider-form">
+              <div class="form-card"><label>Image or video *<input type="file" name="media" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" required></label></div>
+              <div class="form-card"><label>Caption<input type="text" name="caption" maxlength="180" placeholder="e.g. Kitchen renovation"></label></div>
+            </div>
+            <div class="auth-actions" style="margin-top:1rem;"><button type="submit" class="btn-primary" id="portfolio-btn"><i class="fas fa-upload"></i> Upload</button></div>
+          </form>
+          <div class="activity-list" style="margin-top:1rem;">
+            ${evidence.portfolio.length ? evidence.portfolio.map(i => `<div class="activity-item"><strong><i class="fas fa-${i.media_type==='video'?'video':'image'}"></i> ${esc(i.caption||'Project evidence')}</strong><span>${esc(i.media_type)}</span></div>`).join('') : '<div class="muted">No project evidence yet.</div>'}
+          </div>
+          <div class="activity-list" style="margin-top:1rem;">
+            ${evidence.testimonials.length ? evidence.testimonials.map(i => `<div class="activity-item"><strong>"${esc(i.testimonial)}"</strong><span>— ${esc(i.client_name)}</span></div>`).join('') : '<div class="muted">Add a client testimonial in the Profile tab.</div>'}
+          </div>
+        </section>
+      </div>
+
+      <!-- ── MESSAGES ───────────────────────────────────────────────────── -->
+      <div class="dash-panel" id="panel-messages">
+        <div class="msg-shell" id="msg-shell">
+          <div class="msg-sidebar" id="msg-sidebar">
+            <div class="msg-sidebar__header">
+              <div><strong>Requests</strong><span>Client inbox</span></div>
+              <button class="msg-refresh" id="msg-refresh-btn" aria-label="Refresh"><i class="fas fa-sync-alt"></i></button>
+            </div>
+            <div class="msg-contact-list" id="msg-contact-list">
+              <p class="msg-empty-list">Loading…</p>
+            </div>
+          </div>
+          <div class="msg-window msg-window--empty" id="msg-window">
+            <i class="fas fa-comments"></i>
+            <h3>Select a request</h3>
+            <small>Client service requests will appear here.</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SERVICES ───────────────────────────────────────────────────── -->
+      <div class="dash-panel" id="panel-services">
+        <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
+          <h2 class="section-title"><i class="fas fa-store" style="color:#f5c842;"></i> Services &amp; work showcase</h2>
+          <p class="muted" style="margin-bottom:1rem;">Publish listings of what you offer with up to five photos or videos.</p>
+          <div id="product-error" class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
+          <form id="product-form">
+            <div class="add-provider-form">
+              <div class="form-card full-col"><label>Service name *<input type="text" name="title" maxlength="140" required placeholder="e.g. Standard kitchen plumbing installation"></label></div>
+              <div class="form-card full-col"><label>Details *<textarea name="description" required minlength="10" placeholder="What you offer and what completed work involves."></textarea></label></div>
+              <div class="form-card full-col"><label>Images / videos *<input type="file" name="media[]" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple required><small class="muted">JPG, PNG, WEBP, MP4 or WebM — max 5 files, 25 MB each.</small></label></div>
+            </div>
+            <div class="auth-actions" style="margin-top:1rem;"><button type="submit" class="btn-primary" id="product-btn"><i class="fas fa-plus"></i> Publish listing</button></div>
+          </form>
+          <div class="product-list" style="margin-top:1.4rem;">
+            ${products.length ? products.map(p => `
+              <article class="product-card">
+                <div class="product-card__heading"><strong>${esc(p.title)}</strong></div>
+                <p>${esc(p.description)}</p>
+                <div class="product-media-count"><i class="fas fa-photo-film"></i> ${(p.media||[]).length} file${(p.media||[]).length===1?'':'s'}</div>
+              </article>`).join('') : '<div class="muted">No services published yet.</div>'}
+          </div>
+        </section>
+      </div>
+
+      <!-- ── PROFILE ────────────────────────────────────────────────────── -->
+      <div class="dash-panel" id="panel-profile">
+        <section class="section-card" style="max-width:860px;margin:0 auto 1.4rem;">
+          <h2 class="section-title"><i class="fas fa-user-edit" style="color:#f5c842;"></i> My provider profile</h2>
+          <div id="profile-error"   class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
+          <div id="profile-success" class="form-banner form-banner--info"  style="display:none;margin-bottom:1rem;"></div>
+          <form id="profile-form" novalidate>
+            <div class="add-provider-form">
+              <div class="form-card"><label>Full name *<input type="text" name="full_name" value="${esc(me.full_name)}" required></label></div>
+              <div class="form-card"><label>Username *<input type="text" name="username" value="${esc(me.username||'')}" required></label></div>
+              <div class="form-card"><label>Phone<input type="tel" name="phone" value="${esc(me.phone||'')}" placeholder="+265 9xx xxx xxx"></label></div>
+              <div class="form-card"><label>Location<input type="text" name="location" value="${esc(me.location||'')}" placeholder="City or district"></label></div>
+              <div class="form-card"><label>Service category<select name="service_category"><option value="">— Select —</option>${catOptions}</select></label></div>
+              <div class="form-card"><label>Years of experience<input type="number" name="experience_years" value="${esc(me.experience_years||'')}" min="0" max="80" placeholder="e.g. 5"></label></div>
+              <div class="form-card full-col"><label>Skills<input type="text" name="skills" value="${esc(me.skills||'')}" placeholder="e.g. Tiling, burst pipes, piping"></label></div>
+              <div class="form-card full-col"><label>Qualifications<textarea name="qualifications" placeholder="Trade certificate, diploma…">${esc(me.qualifications||'')}</textarea></label></div>
+              <div class="form-card full-col"><label>About me<textarea name="about" placeholder="Tell clients about your work…">${esc(me.about||'')}</textarea></label></div>
+            </div>
+            <div class="add-provider-form" style="margin-top:1rem;">
+              <div class="form-card"><label>Client name for testimonial<input type="text" name="testimonial_client" placeholder="e.g. Mary, Lilongwe"></label></div>
+              <div class="form-card"><label>Client testimonial<input type="text" name="testimonial" placeholder="What did they say?"></label></div>
+            </div>
+            <div class="auth-actions" style="margin-top:1.4rem;"><button type="submit" class="btn-primary" id="save-btn"><i class="fas fa-save"></i> Save profile</button></div>
+          </form>
+        </section>
+      </div>
+
+      <!-- ── SECURITY ───────────────────────────────────────────────────── -->
+      <div class="dash-panel" id="panel-security">
+        <section class="section-card" style="max-width:640px;margin:0 auto 1.4rem;">
+          <h2 class="section-title"><i class="fas fa-key" style="color:#f5c842;"></i> Change password</h2>
+          <div id="pw-error"   class="form-banner form-banner--error" style="display:none;margin-bottom:1rem;"></div>
+          <div id="pw-success" class="form-banner form-banner--info"  style="display:none;margin-bottom:1rem;"></div>
+          <form id="pw-form" novalidate>
+            <div class="form-grid" style="grid-template-columns:1fr;">
+              <div class="form-card"><label>New password<input type="password" name="password" placeholder="At least 8 characters" autocomplete="new-password"></label></div>
+              <div class="form-card"><label>Confirm new password<input type="password" name="confirm_password" placeholder="Repeat new password" autocomplete="new-password"></label></div>
+            </div>
+            <div class="auth-actions" style="margin-top:1.2rem;"><button type="submit" class="btn-primary" id="pw-btn"><i class="fas fa-lock"></i> Update password</button></div>
+          </form>
+        </section>
+      </div>
+    `;
+
+    // ── Tab switching ────────────────────────────────────────────────────────
+    let msgLoaded = false;
+    document.getElementById('dash-tabs').addEventListener('click', e => {
+      const btn = e.target.closest('.dash-tab');
+      if (!btn) return;
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.dash-tab').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.dash-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+      if (tab === 'messages' && !msgLoaded) {
+        msgLoaded = true;
+        loadMessages();
+      }
+    });
+
+    // ── Open messages tab programmatically if URL has #messages ─────────────
+    if (window.location.hash === '#messages') {
+      document.querySelector('[data-tab="messages"]').click();
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // MESSAGES TAB — full inline chat
+    // ════════════════════════════════════════════════════════════════════════
+    let msgRequests   = [];
+    let msgSelectedId = 0;
+    let msgTimer;
+
+    const fmt = ts => {
+      const d = new Date((ts||'').replace(' ','T'));
+      return isNaN(d) ? '' : d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    };
+    const avatarOf = name => esc((name||'?').trim().slice(0,2).toUpperCase());
+    const statusLbl = s => (s||'').replaceAll('_',' ');
+
+    async function loadMessages(silent = false) {
+      try {
+        const res = await apiFetch('engagements.php', null);
+        if (!res.ok) {
+          if (!silent) document.getElementById('msg-contact-list').innerHTML =
+            '<p class="msg-empty-list" style="color:#b00020;">Could not load messages.</p>';
+          return;
+        }
+        msgRequests = res.requests || [];
+
+        // Unread badge
+        const unread = msgRequests.reduce((n, r) => n + Number(r.unread_count||0), 0);
+        const badge  = document.getElementById('msg-badge');
+        if (badge) { badge.textContent = unread; badge.style.display = unread > 0 ? 'inline-flex' : 'none'; }
+
+        if (!msgSelectedId && msgRequests.length) msgSelectedId = Number(msgRequests[0].id);
+        renderMsgSidebar();
+        renderMsgWindow();
+      } catch (err) {
+        if (!silent) document.getElementById('msg-contact-list').innerHTML =
+          '<p class="msg-empty-list" style="color:#b00020;">Connection error.</p>';
+      }
+      clearTimeout(msgTimer);
+      if (msgRequests.length) msgTimer = setTimeout(() => loadMessages(true), 6000);
+    }
+
+    function renderMsgSidebar() {
+      const list = document.getElementById('msg-contact-list');
+      if (!list) return;
+      if (!msgRequests.length) { list.innerHTML = '<p class="msg-empty-list">No client requests yet.</p>'; return; }
+      list.innerHTML = msgRequests.map(r => {
+        const last    = r.messages?.slice(-1)[0];
+        const preview = last ? esc(last.message).slice(0,38) : esc(statusLbl(r.status));
+        const unread  = Number(r.unread_count||0);
+        return `
+          <button class="msg-contact ${Number(r.id)===msgSelectedId?'active':''}"
+            data-rid="${r.id}" type="button">
+            <span class="msg-avatar">${avatarOf(r.customer_name)}</span>
+            <span class="msg-contact__body">
+              <span class="msg-contact__name">${esc(r.customer_name||'Customer')}</span>
+              <span class="msg-contact__preview">${preview}</span>
+            </span>
+            <span class="msg-contact__meta">
+              <span class="msg-contact__time">${fmt(r.updated_at)}</span>
+              ${unread>0?`<span class="msg-unread">${unread}</span>`:''}
+            </span>
+          </button>`;
+      }).join('');
+
+      list.querySelectorAll('.msg-contact').forEach(btn => {
+        btn.addEventListener('click', () => {
+          msgSelectedId = Number(btn.dataset.rid);
+          renderMsgSidebar();
+          renderMsgWindow();
+        });
+      });
+    }
+
+    function renderMsgWindow() {
+      const win = document.getElementById('msg-window');
+      if (!win) return;
+      const req = msgRequests.find(r => Number(r.id) === msgSelectedId);
+      if (!req) {
+        win.className = 'msg-window msg-window--empty';
+        win.innerHTML = `<i class="fas fa-comments"></i><h3>Select a request</h3><small>Client service requests will appear here.</small>`;
+        return;
+      }
+      win.className = 'msg-window';
+
+      const bubbles = (req.messages||[]).map(m => {
+        const mine = Number(m.sender_id) === Number(me.id);
+        const who  = mine ? 'You' : esc(req.customer_name||'Customer');
+        const type = m.message_type || 'text';
+
+        if (type === 'price_offer') {
+          const amt = parseFloat(m.message).toLocaleString('en-MW',{minimumFractionDigits:2});
+          return `
+            <div class="msg-price-card ${mine?'msg-price-card--mine':''}">
+              <div class="msg-price-card__inner">
+                <i class="fas fa-tag"></i>
+                <div>
+                  <span class="msg-price-card__label">Price offer</span>
+                  <span class="msg-price-card__amount">MWK ${esc(amt)}</span>
+                </div>
+              </div>
+              <small>${who} &bull; ${fmt(m.created_at)}</small>
+            </div>`;
+        }
+        if (type === 'price_accepted') {
+          const amt = parseFloat(m.message).toLocaleString('en-MW',{minimumFractionDigits:2});
+          return `<div class="msg-event msg-event--accepted"><i class="fas fa-handshake"></i> Price agreed: <strong>MWK ${esc(amt)}</strong></div>`;
+        }
+        if (type === 'payment_confirmed') {
+          const amt = parseFloat(m.message).toLocaleString('en-MW',{minimumFractionDigits:2});
+          return `<div class="msg-event msg-event--paid"><i class="fas fa-check-circle"></i> Payment confirmed: <strong>MWK ${esc(amt)}</strong> — Booking complete!</div>`;
+        }
+        return `
+          <div class="msg-bubble ${mine?'msg-bubble--mine':''}">
+            <span>${esc(m.message)}</span>
+            <small>${who} &bull; ${fmt(m.created_at)}</small>
+          </div>`;
+      }).join('') || '<p class="msg-no-messages">No messages yet.</p>';
+
+      const canMessage = !['booked','cancelled'].includes(req.status);
+      const proposed   = parseFloat(req.proposed_amount||0);
+      const agreed     = parseFloat(req.agreed_amount||0).toLocaleString('en-MW',{minimumFractionDigits:2});
+      const pending    = req.status === 'payment_pending';
+
+      // Status banner
+      let banner = '';
+      if (req.status === 'awaiting_payment') {
+        banner = `<div class="msg-action-banner msg-action-banner--offer"><i class="fas fa-lock"></i> Agreed: <strong>MWK ${esc(agreed)}</strong> — waiting for customer payment.</div>`;
+      } else if (pending) {
+        banner = `<div class="msg-action-banner msg-action-banner--pending"><i class="fas fa-spinner fa-spin"></i> Payment processing…</div>`;
+      } else if (req.status === 'booked') {
+        banner = `<div class="msg-action-banner msg-action-banner--done"><i class="fas fa-check-circle"></i> Booking confirmed — payment complete.</div>`;
+      } else if (req.status === 'cancelled') {
+        banner = `<div class="msg-action-banner msg-action-banner--cancelled"><i class="fas fa-ban"></i> This request was cancelled.</div>`;
+      }
+
+      // Price input row — provider sets price here
+      const priceRow = canMessage ? `
+        <div class="msg-price-input-row">
+          <label><i class="fas fa-tag"></i> Set price (MWK)</label>
+          <input type="number" id="price-input-${req.id}" min="1" step="0.01"
+            placeholder="${proposed > 0 ? proposed : 'e.g. 5000'}" value="${proposed > 0 ? proposed : ''}">
+          <button class="btn-send-price" id="send-price-btn-${req.id}" type="button">
+            <i class="fas fa-paper-plane"></i> Send price
+          </button>
+        </div>` : '';
+
+      win.innerHTML = `
+        <div class="msg-header">
+          <span class="msg-header-avatar">${avatarOf(req.customer_name||'C')}</span>
+          <div class="msg-header-info">
+            <strong>${esc(req.customer_name||'Customer')}</strong>
+            <small>${esc(req.service_title)}</small>
+          </div>
+          <span class="msg-header-status">${esc(statusLbl(req.status))}</span>
+        </div>
+        <div class="msg-messages" id="msg-messages">${bubbles}</div>
+        ${priceRow}
+        ${banner}
+        ${canMessage ? `
+        <form class="msg-composer" id="msg-compose-form" data-rid="${req.id}">
+          <textarea name="message" maxlength="2000" rows="1" placeholder="Reply to customer…" required></textarea>
+          <button type="submit" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
+        </form>` : ''}
+      `;
+
+      // Scroll to bottom
+      const msgs = win.querySelector('#msg-messages');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+
+      // Send price handler
+      const priceBtn = win.querySelector(`#send-price-btn-${req.id}`);
+      if (priceBtn) {
+        priceBtn.addEventListener('click', async () => {
+          const input  = win.querySelector(`#price-input-${req.id}`);
+          const amount = parseFloat(input?.value);
+          if (!amount || amount <= 0) { toast('Enter a valid price amount.', 'error'); return; }
+          priceBtn.disabled = true;
+          priceBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+          try {
+            const res = await apiFetch('engagements.php', {
+              action: 'propose_price', request_id: Number(req.id), amount: String(amount),
+            });
+            if (!res.ok) { toast(res.error || 'Could not send price.', 'error'); }
+            else { toast('Price offer sent to the customer!', 'success'); await loadMessages(true); }
+          } catch (_) { toast('Connection error.', 'error'); }
+          priceBtn.disabled = false;
+          priceBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send price';
+        });
+      }
+
+      // Send message handler
+      const composeForm = win.querySelector('#msg-compose-form');
+      if (composeForm) {
+        composeForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const raw = composeForm.message.value.trim();
+          if (!raw) return;
+          composeForm.message.value = '';
+          composeForm.message.style.height = 'auto';
+          try {
+            const res = await apiFetch('engagements.php', {
+              action: 'message', request_id: Number(composeForm.dataset.rid), message: raw,
+            });
+            if (!res.ok) toast(res.error || 'Could not send message.', 'error');
+            else await loadMessages(true);
+          } catch (_) { toast('Connection error.', 'error'); }
+        });
+
+        // Enter to send, Shift+Enter for newline; auto-grow textarea
+        composeForm.addEventListener('keydown', e => {
+          if (e.target.matches('textarea') && e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault(); composeForm.requestSubmit();
+          }
+        });
+        composeForm.addEventListener('input', e => {
+          if (e.target.matches('textarea')) {
+            e.target.style.height = 'auto';
+            e.target.style.height = Math.min(e.target.scrollHeight, 110) + 'px';
+          }
+        });
+      }
+    }
+
+    document.getElementById('msg-refresh-btn')?.addEventListener('click', () => loadMessages());
+
+    // ════════════════════════════════════════════════════════════════════════
+    // PROFILE FORM
+    // ════════════════════════════════════════════════════════════════════════
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pErr = document.getElementById('profile-error');
+      const pSucc = document.getElementById('profile-success');
+      const btn = document.getElementById('save-btn');
+      pErr.style.display = pSucc.style.display = 'none';
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+      const form = e.target;
+      const res = await apiFetch('profile.php', {
+        full_name: form.full_name.value.trim(), username: form.username.value.trim(),
+        phone: form.phone.value.trim(), location: form.location.value.trim(),
+        service_category: form.service_category.value,
+        experience_years: parseInt(form.experience_years.value)||0,
+        skills: form.skills.value.trim(), qualifications: form.qualifications.value.trim(),
+        about: form.about.value.trim(),
+        testimonial_client: form.testimonial_client.value.trim(),
+        testimonial: form.testimonial.value.trim(),
+      });
+      btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save profile';
+      if (!res.ok) {
+        if (res.errors) window.QuickGanyu.showFormErrors(res.errors);
+        pErr.textContent = res.errors ? Object.values(res.errors)[0] : (res.error||'Could not save.');
+        pErr.style.display = 'block'; return;
+      }
+      pSucc.textContent = 'Profile saved!'; pSucc.style.display = 'block';
+      toast('Profile updated!', 'success');
+      setTimeout(() => window.location.reload(), 500);
+    });
+
+    async function readUploadResponse(r) {
+      const body = await r.text();
+      try { return JSON.parse(body); }
+      catch (_) { throw new Error('Server error (HTTP ' + r.status + ')'); }
+    }
+
+    document.getElementById('portfolio-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = document.getElementById('portfolio-error');
+      const btn = document.getElementById('portfolio-btn');
+      const file = e.target.media.files[0];
+      err.style.display = 'none';
+      if (!file) { err.textContent = 'Choose a file.'; err.style.display = 'block'; return; }
+      if (file.size > 25*1024*1024) { err.textContent = 'Max 25 MB.'; err.style.display = 'block'; return; }
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading…';
+      try {
+        const r = await fetch(window.QuickGanyu.apiUrl('portfolio.php'), { method:'POST', credentials:'same-origin', body: new FormData(e.target) });
+        const result = await readUploadResponse(r);
+        if (!result.ok) throw new Error(result.error||'Upload failed.');
+        toast('Uploaded!', 'success'); window.location.reload();
+      } catch (ex) { err.textContent = ex.message; err.style.display = 'block'; btn.disabled = false; btn.innerHTML = '<i class="fas fa-upload"></i> Upload'; }
+    });
+
+    document.getElementById('product-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = document.getElementById('product-error');
+      const btn = document.getElementById('product-btn');
+      const files = Array.from(e.target.querySelector('[name="media[]"]').files);
+      err.style.display = 'none';
+      if (!files.length) { err.textContent = 'Add at least one file.'; err.style.display = 'block'; return; }
+      if (files.some(f => f.size > 25*1024*1024)) { err.textContent = 'Each file must be ≤ 25 MB.'; err.style.display = 'block'; return; }
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing…';
+      try {
+        const r = await fetch(window.QuickGanyu.apiUrl('products.php'), { method:'POST', credentials:'same-origin', body: new FormData(e.target) });
+        const result = await readUploadResponse(r);
+        if (!result.ok) { const msg = result.errors ? Object.values(result.errors)[0] : result.error; throw new Error(msg||'Failed.'); }
+        toast('Published!', 'success'); window.location.reload();
+      } catch (ex) { err.textContent = ex.message; err.style.display = 'block'; btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Publish listing'; }
+    });
+
+    // ── Password ─────────────────────────────────────────────────────────────
+    document.getElementById('pw-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pwErr = document.getElementById('pw-error');
+      const pwSucc = document.getElementById('pw-success');
+      const btn = document.getElementById('pw-btn');
+      pwErr.style.display = pwSucc.style.display = 'none';
+      const form = e.target;
+      if (form.password.value !== form.confirm_password.value) { pwErr.textContent = 'Passwords do not match.'; pwErr.style.display = 'block'; return; }
+      if (form.password.value.length < 8) { pwErr.textContent = 'At least 8 characters.'; pwErr.style.display = 'block'; return; }
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating…';
+      const res = await apiFetch('profile.php', { password: form.password.value });
+      btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Update password';
+      if (!res.ok) { pwErr.textContent = res.error||'Could not update.'; pwErr.style.display = 'block'; return; }
+      pwSucc.textContent = 'Password updated!'; pwSucc.style.display = 'block';
+      form.reset(); toast('Password updated!', 'success');
+    });
+
+  });
+})();
+</script>
+</body>
+</html>
 <body>
 
 <nav class="navbar">
