@@ -6,7 +6,8 @@ define('DB_NAME', 'quickganyu');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 // Set this as an Apache environment variable in production; never expose it to the browser.
-define('PAYCHANGU_SECRET_KEY', getenv('PAYCHANGU_SECRET_KEY') ?: 'pub-test-MsLkFUoCgX9Bk3FhXHkqb8tLyUNpHWAk');
+define('PAYCHANGU_PUBLIC_KEY', 'pub-test-L3S2JjdWc0nDz1wJxSXv2UlLdYrqPCT5');
+define('PAYCHANGU_SECRET_KEY', 'sec-test-d0L8BN0fYzB0GsKA3dPI0uUWJb5kZ0gM');
 
 /**
  * Return a singleton PDO connection.
