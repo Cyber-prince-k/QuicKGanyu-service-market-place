@@ -1,17 +1,17 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Messages · QuickGanyu</title>
+  <title>Messages Â· QuickGanyu</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="../css/styles.css">
   <style>
-    /* ═══════════════════════════════════════════════════════════════════════
-       QuickGanyu – Messages page
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       QuickGanyu â€“ Messages page
        Brand colours: #0b0b0b (dark), #f5c842 (yellow), #8b1a1a (deep red)
        Background:    #fffdf8 (warm off-white, matches rest of site)
-    ═══════════════════════════════════════════════════════════════════════ */
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
     body.chat-page {
       background: #fffdf8;
@@ -31,7 +31,7 @@
       box-sizing: border-box;
     }
 
-    /* ── Outer shell ──────────────────────────────────────────────────────── */
+    /* â”€â”€ Outer shell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .chat-app {
       display: grid;
       grid-template-columns: 300px 1fr;
@@ -44,9 +44,9 @@
       border: 1px solid #e8e0d0;
     }
 
-    /* ══════════════════════════════════════════════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        LEFT SIDEBAR
-    ══════════════════════════════════════════════════════════════════════ */
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     .chat-sidebar {
       background: #0b0b0b;
       display: flex;
@@ -199,9 +199,9 @@
       font-size: 0.85rem;
     }
 
-    /* ══════════════════════════════════════════════════════════════════════
-       RIGHT PANEL — full height flex column
-    ══════════════════════════════════════════════════════════════════════ */
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       RIGHT PANEL â€” full height flex column
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     .chat-window {
       background: #fffdf8;
       display: flex;
@@ -222,7 +222,7 @@
     .chat-window--empty h2    { font-size: 1.1rem; color: #aaa; margin: 0; }
     .chat-window--empty small { font-size: 0.82rem; color: #ccc; }
 
-    /* Window header — dark strip */
+    /* Window header â€” dark strip */
     .chat-window__header {
       background: #0b0b0b;
       padding: 0.9rem 1.3rem;
@@ -271,7 +271,7 @@
       letter-spacing: 0.05em;
     }
 
-    /* Scrollable messages area — flex: 1 takes all remaining space */
+    /* Scrollable messages area â€” flex: 1 takes all remaining space */
     .chat-messages {
       flex: 1;
       overflow-y: auto;
@@ -286,7 +286,7 @@
     .chat-messages::-webkit-scrollbar-track { background: transparent; }
     .chat-messages::-webkit-scrollbar-thumb { background: #e0d8c8; border-radius: 4px; }
 
-    /* ── Text bubbles ─────────────────────────────────────────────────────── */
+    /* â”€â”€ Text bubbles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .chat-bubble {
       display: flex;
       flex-direction: column;
@@ -321,7 +321,7 @@
     }
     .chat-bubble--mine small { text-align: right; }
 
-    /* ── Price-offer card ─────────────────────────────────────────────────── */
+    /* â”€â”€ Price-offer card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .chat-price-card {
       align-self: flex-start;
       max-width: 68%;
@@ -375,7 +375,7 @@
     }
     .chat-price-card--mine small { text-align: right; }
 
-    /* ── Event pills (accepted, paid) ────────────────────────────────────── */
+    /* â”€â”€ Event pills (accepted, paid) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .chat-event-bubble {
       align-self: center;
       display: flex;
@@ -410,7 +410,7 @@
       color: #7a5c00;
     }
 
-    /* ── Action banners above the composer ───────────────────────────────── */
+    /* â”€â”€ Action banners above the composer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .chat-action-banner {
       display: flex;
       align-items: center;
@@ -487,7 +487,7 @@
       margin: 0;
     }
 
-    /* ── Composer — always at bottom, never overflows ─────────────────────── */
+    /* â”€â”€ Composer â€” always at bottom, never overflows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .chat-composer {
       display: flex;
       align-items: flex-end;
@@ -540,7 +540,7 @@
       box-shadow: 0 5px 16px rgba(139,26,26,0.4);
     }
 
-    /* ── Start-chat card ─────────────────────────────────────────────────── */
+    /* â”€â”€ Start-chat card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     .chat-window--start { display: flex; flex-direction: column; height: 100%; }
     .chat-start-card {
       flex: 1;
@@ -589,7 +589,7 @@
     }
     #new-request-form textarea { min-height: 80px; resize: vertical; }
 
-    /* ── Responsive ──────────────────────────────────────────────────────── */
+    /* â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     @media (max-width: 760px) {
       .chat-app { grid-template-columns: 1fr; height: calc(100vh - 80px); }
       .chat-sidebar { display: none; }
@@ -614,7 +614,7 @@
 <main class="container" id="page-root">
   <div class="empty-state">
     <i class="fas fa-spinner fa-spin"></i>
-    <p>Loading conversations…</p>
+    <p>Loading conversationsâ€¦</p>
   </div>
 </main>
 
@@ -654,7 +654,7 @@
     </div>
     <div class="footer-bottom">
       <div class="footer-brand">Quick<span>Ganyu</span></div>
-      <div class="footer-copy">&copy; 2026 QuickGanyu – built for Malawi</div>
+      <div class="footer-copy">&copy; 2026 QuickGanyu â€“ built for Malawi</div>
       <a class="footer-backtop" href="#top"><i class="fas fa-arrow-up"></i></a>
     </div>
   </div>
@@ -666,66 +666,70 @@ document.addEventListener('DOMContentLoaded', async () => {
   const root = document.getElementById('page-root');
   const { fetchMe, apiFetch, esc, toast } = window.QuickGanyu;
 
-  // ── Auth guard ────────────────────────────────────────────────────────────
+  // â”€â”€ Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let me;
-  try {
-    me = await fetchMe();
-  } catch (e) {
-    root.innerHTML = '<div class="form-banner form-banner--error">Could not load session. Please refresh.</div>';
-    return;
-  }
+  try { me = await fetchMe(); }
+  catch (e) { root.innerHTML = '<div class="form-banner form-banner--error">Could not load session. Please refresh.</div>'; return; }
   if (!me) { location.href = 'login.html'; return; }
 
+  // â”€â”€ URL params â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const params     = new URLSearchParams(location.search);
-  const providerId = params.get('provider_id');
-  // request_id from URL takes first priority
-  let selectedId   = Number(params.get('request_id')) || 0;
-  let requests     = [];
-  let timer;
-  let initialised  = false;   // true after the first load completes
-  const userId     = Number(me.id);
+  const urlProvider = params.get('provider_id');   // set when coming from a provider profile
+  const urlRequest  = Number(params.get('request_id')) || 0; // set when returning to a known conversation
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // selectedId: the conversation currently open in the right panel
+  // 0 = none selected / show start screen
+  let selectedId = urlRequest;
+  let requests   = [];
+  let timer;
+  const userId   = Number(me.id);
+
+  // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const fmt = ts => {
     const d = new Date((ts || '').replace(' ', 'T'));
     return isNaN(d) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
-  const counterpart  = r => me.role === 'client' ? (r.provider_name  || 'Provider') : (r.customer_name || 'Customer');
-  const statusLabel  = s => (s || '').replaceAll('_', ' ');
-  const avatarOf     = name => esc((name || '?').trim().slice(0, 2).toUpperCase());
+  const counterpart = r => me.role === 'client'
+    ? (r.provider_name  || 'Provider')
+    : (r.customer_name  || 'Customer');
+  const statusLabel = s => (s || '').replaceAll('_', ' ');
+  const avatarOf    = name => esc((name || '?').trim().slice(0, 2).toUpperCase());
 
-  // ── Data load ─────────────────────────────────────────────────────────────
+  // â”€â”€ Load conversations from server â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function load(silent = false) {
+    // Don't reload while the user is actively typing
     if (silent && document.activeElement?.matches('.chat-composer textarea') &&
         document.activeElement.value.trim() !== '') {
       timer = setTimeout(() => load(true), 3000);
       return;
     }
+
     try {
       const res = await apiFetch('engagements.php', null);
       if (!res.ok) {
         if (!silent) root.innerHTML = '<div class="form-banner form-banner--error">Could not load conversations.</div>';
         return;
       }
+
       requests = res.requests || [];
 
-      // Auto-select logic runs on first load only.
-      // On background polls we never move the user to a different conversation.
-      if (!initialised) {
-        initialised = true;
-
-        if (selectedId && requests.some(r => Number(r.id) === selectedId)) {
-          // URL had a valid request_id — keep it, nothing to do
-        } else if (providerId) {
-          // URL has a provider_id — find the existing request with that provider
-          const match = requests.find(r => String(r.provider_id) === String(providerId));
+      // Only auto-set selectedId on first (non-silent) load.
+      // After that the user controls what is selected by clicking contacts.
+      if (!silent) {
+        if (urlRequest && requests.some(r => Number(r.id) === urlRequest)) {
+          // Explicit request_id in URL and it exists â€” use it
+          selectedId = urlRequest;
+        } else if (urlProvider) {
+          // provider_id in URL â€” find existing conversation with that provider
+          const match = requests.find(r => String(r.provider_id) === String(urlProvider));
+          // If match found, open it. If not, selectedId stays 0 so we show start-chat screen.
           selectedId = match ? Number(match.id) : 0;
-          // selectedId = 0 means no request exists yet → show start-conversation screen
-        } else if (!selectedId) {
-          // No hints in URL — default to most recent conversation
+        } else if (!selectedId || !requests.some(r => Number(r.id) === selectedId)) {
+          // No URL hints â€” default to most recent conversation
           selectedId = Number(requests[0]?.id || 0);
         }
       }
+
       render();
     } catch (err) {
       if (!silent) root.innerHTML = '<div class="form-banner form-banner--error">Connection error. Please refresh.</div>';
@@ -735,21 +739,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function providerName() {
     try {
       const res = await apiFetch('providers.php', null);
-      const p = (res.providers || []).find(x => String(x.id) === providerId);
+      const p = (res.providers || []).find(x => String(x.id) === urlProvider);
       return p ? esc(p.full_name) : 'this provider';
     } catch (_) { return 'this provider'; }
   }
 
-  // ── Sidebar HTML ──────────────────────────────────────────────────────────
+  // â”€â”€ Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function buildSidebar() {
     const items = requests.map(r => {
-      const lastMsg  = r.messages?.slice(-1)[0];
-      const preview  = lastMsg ? esc(lastMsg.message).slice(0, 40) : esc(statusLabel(r.status));
+      const last   = r.messages?.slice(-1)[0];
+      const preview = last
+        ? (last.message_type === 'price_offer'
+            ? 'ðŸ’° Price offer: MWK ' + parseFloat(last.message).toLocaleString()
+            : esc(last.message).slice(0, 38))
+        : esc(statusLabel(r.status));
       const unread   = Number(r.unread_count || 0);
       const isActive = Number(r.id) === selectedId;
       return `
-        <button type="button"
-          class="chat-contact ${isActive ? 'chat-contact--active' : ''}"
+        <button type="button" class="chat-contact ${isActive ? 'chat-contact--active' : ''}"
           data-request-id="${r.id}">
           <span class="chat-avatar">${avatarOf(counterpart(r))}</span>
           <span class="chat-contact__body">
@@ -780,61 +787,54 @@ document.addEventListener('DOMContentLoaded', async () => {
       </aside>`;
   }
 
-  // ── Chat window HTML ──────────────────────────────────────────────────────
+  // â”€â”€ Chat window â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function buildWindow(request) {
+    // No request selected â€” show empty state
     if (!request) {
       return `
         <section class="chat-window chat-window--empty">
           <i class="fas fa-comments"></i>
-          <h2>Select a room</h2>
-          <small>${me.role === 'client' ? 'Guest messaging' : 'Customer requests will appear here.'}</small>
+          <h2>Select a conversation</h2>
+          <small>${me.role === 'client' ? 'Pick a chat from the left or browse providers.' : 'Client requests appear here.'}</small>
         </section>`;
     }
 
-    // Render each message bubble — special types get special styling
+    // Render bubbles
     const bubbles = (request.messages || []).map(m => {
-      const mine = Number(m.sender_id) === Number(me.id);
+      const mine = Number(m.sender_id) === userId;
       const who  = mine ? 'You' : esc(counterpart(request));
       const type = m.message_type || 'text';
 
       if (type === 'price_offer') {
-        // Special price-offer card — shown to both sides
-        const amount = parseFloat(m.message).toLocaleString('en-MW', { minimumFractionDigits: 2 });
-        const isProvider = Number(m.sender_id) === Number(request.provider_id);
+        const amt = parseFloat(m.message).toLocaleString('en-MW', { minimumFractionDigits: 2 });
         return `
           <div class="chat-price-card ${mine ? 'chat-price-card--mine' : ''}">
             <div class="chat-price-card__inner">
               <i class="fas fa-tag"></i>
               <div>
-                <span class="chat-price-card__label">${isProvider ? 'Price offer' : 'Counter-offer'}</span>
-                <span class="chat-price-card__amount">MWK ${esc(amount)}</span>
+                <span class="chat-price-card__label">${Number(m.sender_id) === Number(request.provider_id) ? 'Price offer' : 'Counter-offer'}</span>
+                <span class="chat-price-card__amount">MWK ${esc(amt)}</span>
               </div>
             </div>
             <small>${who} &bull; ${fmt(m.created_at)}</small>
           </div>`;
       }
-
       if (type === 'price_accepted') {
-        const amount = parseFloat(m.message).toLocaleString('en-MW', { minimumFractionDigits: 2 });
+        const amt = parseFloat(m.message).toLocaleString('en-MW', { minimumFractionDigits: 2 });
         return `
           <div class="chat-event-bubble chat-event-bubble--accepted">
-            <i class="fas fa-handshake"></i>
-            Price agreed: <strong>MWK ${esc(amount)}</strong>
+            <i class="fas fa-handshake"></i> Price agreed: <strong>MWK ${esc(amt)}</strong>
             <small>${fmt(m.created_at)}</small>
           </div>`;
       }
-
       if (type === 'payment_confirmed') {
-        const amount = parseFloat(m.message).toLocaleString('en-MW', { minimumFractionDigits: 2 });
+        const amt = parseFloat(m.message).toLocaleString('en-MW', { minimumFractionDigits: 2 });
         return `
           <div class="chat-event-bubble chat-event-bubble--paid">
-            <i class="fas fa-check-circle"></i>
-            Payment confirmed: <strong>MWK ${esc(amount)}</strong> — Booking complete!
+            <i class="fas fa-check-circle"></i> Payment confirmed: <strong>MWK ${esc(amt)}</strong> â€” Booking complete!
             <small>${fmt(m.created_at)}</small>
           </div>`;
       }
-
-      // Standard text bubble
       return `
         <div class="chat-bubble ${mine ? 'chat-bubble--mine' : ''}">
           <span>${esc(m.message)}</span>
@@ -842,22 +842,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>`;
     }).join('');
 
-    const isProvider   = me.role === 'provider' && Number(request.provider_id) === Number(userId);
-    const isCustomer   = me.role === 'client'   && Number(request.customer_id) === Number(userId);
-    // Composer stays visible until the booking is fully confirmed or cancelled
-    const canMessage   = !['booked', 'cancelled'].includes(request.status);
-    const canAccept    = isCustomer && request.status === 'negotiating' && Number(request.proposed_amount) > 0;
-    const canPay       = isCustomer && request.status === 'awaiting_payment';
-    const pending      = isCustomer && request.status === 'payment_pending';
-    const agreedAmount = parseFloat(request.agreed_amount || 0)
-                           .toLocaleString('en-MW', { minimumFractionDigits: 2 });
+    const isProvider = me.role === 'provider';
+    const isCustomer = me.role === 'client';
 
-    // Banner above composer — never a second text input
-    let banner = '';
-
-    if (canAccept) {
-      const offered = parseFloat(request.proposed_amount)
+    // Composer is visible for every status EXCEPT booked and cancelled
+    const closed   = ['booked', 'cancelled'].includes(request.status);
+    const canAccept = isCustomer && request.status === 'negotiating' && Number(request.proposed_amount) > 0;
+    const canPay    = isCustomer && request.status === 'awaiting_payment';
+    const pending   = isCustomer && request.status === 'payment_pending';
+    const agreed    = parseFloat(request.agreed_amount || 0)
                         .toLocaleString('en-MW', { minimumFractionDigits: 2 });
+    const offered   = parseFloat(request.proposed_amount || 0)
+                        .toLocaleString('en-MW', { minimumFractionDigits: 2 });
+
+    let banner = '';
+    if (canAccept) {
       banner = `
         <div class="chat-action-banner chat-action-banner--offer">
           <span><i class="fas fa-tag"></i> Provider is offering <strong>MWK ${esc(offered)}</strong></span>
@@ -865,48 +864,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             <i class="fas fa-check"></i> Accept price
           </button>
         </div>`;
-    }
-
-    if (canPay) {
+    } else if (canPay) {
       banner = `
         <div class="chat-action-banner chat-action-banner--pay">
-          <span><i class="fas fa-lock"></i> Agreed price: <strong>MWK ${esc(agreedAmount)}</strong> — ready to pay</span>
+          <span><i class="fas fa-lock"></i> Agreed: <strong>MWK ${esc(agreed)}</strong></span>
           <a class="btn-pay-now" href="payment.html?request_id=${request.id}">
             <i class="fas fa-credit-card"></i> Pay now
           </a>
         </div>`;
-    }
-
-    if (pending) {
+    } else if (pending) {
       banner = `
         <div class="chat-action-banner chat-action-banner--pending">
           <i class="fas fa-spinner fa-spin"></i>
-          <span>Payment in progress…
-            <a href="payment.html?request_id=${request.id}" style="color:inherit;font-weight:700;text-decoration:underline;">
-              Check payment status
+          <span>Payment in progressâ€¦
+            <a href="payment.html?request_id=${request.id}"
+               style="color:inherit;font-weight:700;text-decoration:underline;">
+              Check status
             </a>
           </span>
         </div>`;
-    }
-
-    if (request.status === 'booked') {
+    } else if (request.status === 'booked') {
       banner = `
         <div class="chat-action-banner chat-action-banner--done">
-          <i class="fas fa-check-circle"></i> Booking confirmed — payment complete.
+          <i class="fas fa-check-circle"></i> Booking confirmed â€” payment complete.
         </div>`;
-    }
-
-    if (request.status === 'cancelled') {
+    } else if (request.status === 'cancelled') {
       banner = `
         <div class="chat-action-banner chat-action-banner--cancelled">
           <i class="fas fa-ban"></i> This request was cancelled.
         </div>`;
     }
 
-    // Composer placeholder changes based on role
-    const placeholder = isProvider && canMessage
-      ? 'Message… or type /price 5000 to set your price'
-      : 'Message…';
+    const placeholder = isProvider
+      ? 'Messageâ€¦ or type /price 5000 to set your price'
+      : 'Messageâ€¦';
 
     return `
       <section class="chat-window">
@@ -920,12 +911,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
 
         <div class="chat-messages" id="chat-messages">
-          ${bubbles || '<p class="chat-no-messages">No messages yet — say hello!</p>'}
+          ${bubbles || '<p class="chat-no-messages">No messages yet â€” say hello!</p>'}
         </div>
 
         ${banner}
 
-        ${canMessage ? `
+        ${!closed ? `
         <form class="chat-composer" data-request-id="${request.id}">
           <textarea name="message" maxlength="2000" rows="1"
             placeholder="${placeholder}" required></textarea>
@@ -936,7 +927,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       </section>`;
   }
 
-  // ── Start-new-chat view ───────────────────────────────────────────────────
+  // â”€â”€ Start new conversation view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function buildStartView(recipientName) {
     return `
       <section class="chat-window chat-window--start">
@@ -953,7 +944,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               <input name="service_title" maxlength="140" required placeholder="e.g. Alter two suits">
             </label>
             <label>First message
-              <textarea name="message" minlength="3" required placeholder="Hello, I need help with…"></textarea>
+              <textarea name="message" minlength="3" required placeholder="Hello, I need help withâ€¦"></textarea>
             </label>
             <button class="btn-primary" type="submit">
               <i class="fas fa-paper-plane"></i> Start chat
@@ -963,57 +954,57 @@ document.addEventListener('DOMContentLoaded', async () => {
       </section>`;
   }
 
-  // ── Main render ───────────────────────────────────────────────────────────
+  // â”€â”€ Main render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function render() {
-    const starting   = !requests.length && !!providerId && me.role === 'client';
-    const recipient  = starting ? await providerName() : '';
+    // Show start-chat screen when:
+    // - there is a provider_id in the URL (coming from a provider profile)
+    // - AND there is no existing conversation with that provider (selectedId = 0)
+    // This works regardless of how many other conversations exist
+    const needsStartScreen = !!urlProvider && selectedId === 0 && me.role === 'client';
+    const recipient  = needsStartScreen ? await providerName() : '';
     const selected   = requests.find(r => Number(r.id) === selectedId);
-    const rightPanel = starting ? buildStartView(recipient) : buildWindow(selected);
+    const rightPanel = needsStartScreen ? buildStartView(recipient) : buildWindow(selected);
 
     root.innerHTML = `<div class="chat-app">${buildSidebar()}${rightPanel}</div>`;
 
-    // Scroll to bottom of messages
     const msgEl = root.querySelector('#chat-messages');
     if (msgEl) msgEl.scrollTop = msgEl.scrollHeight;
 
-    // Wire new-request form
     root.querySelector('#new-request-form')?.addEventListener('submit', createRequest);
 
-    // Auto-refresh polling
     clearTimeout(timer);
     const hasPending = requests.some(r => r.status === 'payment_pending' && me.role === 'client');
     if (hasPending) {
-      const pendingReq = requests.find(r => r.status === 'payment_pending');
-      timer = setTimeout(() => checkPayment(pendingReq.id), 7000);
+      const pReq = requests.find(r => r.status === 'payment_pending');
+      timer = setTimeout(() => checkPaymentStatus(Number(pReq.id)), 7000);
     } else if (requests.length) {
       timer = setTimeout(() => load(true), 7000);
     }
   }
 
-  // ── Actions ───────────────────────────────────────────────────────────────
+  // â”€â”€ Create request â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function createRequest(e) {
     e.preventDefault();
     const form = e.target;
     try {
       const res = await apiFetch('engagements.php', {
         action:        'create',
-        provider_id:   Number(providerId),
+        provider_id:   Number(urlProvider),
         service_title: form.service_title.value.trim(),
         message:       form.message.value.trim(),
       });
       if (!res.ok) return toast(res.error || 'Could not start chat.', 'error');
-      selectedId  = Number(res.request_id);
-      initialised = true; // don't reset selection on next poll
-      // Replace URL with request_id — removes provider_id to avoid confusion
+      selectedId = Number(res.request_id);
+      // Switch URL to request_id â€” no more provider_id, prevents start-screen showing again
       history.replaceState({}, '', 'messages.html?request_id=' + selectedId);
       toast('Conversation started!', 'success');
-      await load();
+      await load(true); // silent so auto-select doesn't overwrite selectedId we just set
     } catch (err) {
       toast('Connection error. Please try again.', 'error');
     }
   }
 
-  async function checkPayment(requestId) {
+  async function checkPaymentStatus(requestId) {
     try {
       const res = await apiFetch('engagements.php', { action: 'check_payment', request_id: requestId });
       if (res.ok && res.status !== 'pending') toast(res.message, res.status === 'successful' ? 'success' : 'info');
@@ -1021,28 +1012,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     await load(true);
   }
 
-  // ── Event delegation ──────────────────────────────────────────────────────
+  // â”€â”€ Event delegation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   root.addEventListener('click', async e => {
-    const contact      = e.target.closest('.chat-contact');
-    const accept       = e.target.closest('.btn-accept-offer');
-    const payNow       = e.target.closest('.btn-pay-now');
-    const checkPayment = e.target.closest('.btn-check-payment');
-    const refresh      = e.target.closest('.chat-refresh');
+    const contact = e.target.closest('.chat-contact');
+    const accept  = e.target.closest('.btn-accept-offer');
+    const refresh = e.target.closest('.chat-refresh');
 
     if (refresh) await load();
 
     if (contact) {
       selectedId = Number(contact.dataset.requestId);
-      // Update URL to use request_id only — drop provider_id so polling
-      // doesn't try to re-select a different conversation.
       history.replaceState({}, '', 'messages.html?request_id=' + selectedId);
       render();
     }
 
-    // Customer accepts the provider's price offer — redirects to payment page
     if (accept) {
       accept.disabled = true;
-      accept.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Accepting…';
+      accept.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Acceptingâ€¦';
       try {
         const res = await apiFetch('engagements.php', {
           action:     'accept_price',
@@ -1055,91 +1041,58 @@ document.addEventListener('DOMContentLoaded', async () => {
           return;
         }
         toast(res.message, 'success');
-        // Redirect to the dedicated payment page
         setTimeout(() => {
           window.location.href = res.redirect_url ||
             `payment.html?request_id=${accept.dataset.requestId}`;
         }, 500);
       } catch (err) {
-        toast('Connection error. Please try again.', 'error');
+        toast('Connection error.', 'error');
         accept.disabled = false;
         accept.innerHTML = '<i class="fas fa-check"></i> Accept price';
       }
-    }
-
-    // Customer pays — now a direct <a> link to payment.html, no JS needed here
-    // (keeping the selector just in case an old button renders)
-    if (payNow && payNow.tagName === 'BUTTON') {
-      window.location.href = `payment.html?request_id=${payNow.dataset.requestId}`;
-    }
-
-    // Check payment status (pending banner link)
-    if (checkPayment) {
-      try {
-        const res = await apiFetch('engagements.php', {
-          action:     'check_payment',
-          request_id: Number(checkPayment.dataset.requestId),
-        });
-        if (res.ok) {
-          toast(res.message, res.status === 'successful' ? 'success' : 'info');
-          await load();
-        }
-      } catch (err) { toast('Connection error.', 'error'); }
     }
   });
 
   root.addEventListener('submit', async e => {
     const form = e.target;
+    if (!form.matches('.chat-composer')) return;
+    e.preventDefault();
+    const raw = form.message.value.trim();
+    if (!raw) return;
 
-    if (form.matches('.chat-composer')) {
-      e.preventDefault();
-      const raw = form.message.value.trim();
-      if (!raw) return;
-
-      // Provider types /price 5000 to propose a price
-      const priceMatch = raw.match(/^\/price\s+([\d,]+(?:\.\d{1,2})?)$/i);
-      if (priceMatch) {
-        const amount = priceMatch[1].replace(/,/g, '');
-        try {
-          const res = await apiFetch('engagements.php', {
-            action:     'propose_price',
-            request_id: Number(form.dataset.requestId),
-            amount,
-          });
-          if (!res.ok) return toast(res.error || 'Could not send price offer.', 'error');
-          form.message.value = '';
-          form.message.style.height = 'auto';
-          toast('Price offer sent to the customer.', 'success');
-          await load();
-        } catch (err) { toast('Connection error.', 'error'); }
-        return;
-      }
-
-      // Plain message
+    // Provider: /price 5000 to set a price
+    const priceMatch = raw.match(/^\/price\s+([\d,]+(?:\.\d{1,2})?)$/i);
+    if (priceMatch) {
+      const amount = priceMatch[1].replace(/,/g, '');
       try {
         const res = await apiFetch('engagements.php', {
-          action:     'message',
-          request_id: Number(form.dataset.requestId),
-          message:    raw,
+          action: 'propose_price', request_id: Number(form.dataset.requestId), amount,
         });
-        if (!res.ok) return toast(res.error || 'Could not send message.', 'error');
+        if (!res.ok) return toast(res.error || 'Could not send price.', 'error');
         form.message.value = '';
         form.message.style.height = 'auto';
-        await load();
-      } catch (err) { toast('Connection error.', 'error'); }
+        toast('Price offer sent!', 'success');
+        await load(true);
+      } catch (_) { toast('Connection error.', 'error'); }
+      return;
     }
+
+    // Plain message
+    try {
+      const res = await apiFetch('engagements.php', {
+        action: 'message', request_id: Number(form.dataset.requestId), message: raw,
+      });
+      if (!res.ok) return toast(res.error || 'Could not send message.', 'error');
+      form.message.value = '';
+      form.message.style.height = 'auto';
+      await load(true);
+    } catch (_) { toast('Connection error.', 'error'); }
   });
 
-  // Enter to send (Shift+Enter for newline)
   root.addEventListener('keydown', e => {
     if (e.target.matches('.chat-composer textarea') && e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       e.target.closest('.chat-composer').requestSubmit();
-    }
-    // Auto-grow textarea
-    if (e.target.matches('.chat-composer textarea')) {
-      e.target.style.height = 'auto';
-      e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
     }
   });
 
@@ -1150,19 +1103,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  await load();
+  // â”€â”€ Boot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  await load(); // non-silent so auto-select runs once
 
-  // Auto-check payment status when customer returns from PayChangu checkout
+  // Auto-check payment when returning from PayChangu
   if (params.get('payment') === 'return' && selectedId) {
     setTimeout(async () => {
       try {
-        const res = await apiFetch('engagements.php', {
-          action:     'check_payment',
-          request_id: selectedId,
-        });
+        const res = await apiFetch('engagements.php', { action: 'check_payment', request_id: selectedId });
         if (res.ok) {
           toast(res.message, res.status === 'successful' ? 'success' : 'info');
-          await load();
+          await load(true);
         }
       } catch (_) {}
     }, 1200);
