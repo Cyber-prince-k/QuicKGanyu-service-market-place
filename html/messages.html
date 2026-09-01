@@ -666,68 +666,79 @@ document.addEventListener('DOMContentLoaded', async () => {
   const root = document.getElementById('page-root');
   const { fetchMe, apiFetch, esc, toast } = window.QuickGanyu;
 
-  // â”€â”€ Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Auth
   let me;
   try { me = await fetchMe(); }
-  catch (e) { root.innerHTML = '<div class="form-banner form-banner--error">Could not load session. Please refresh.</div>'; return; }
+  catch (e) {
+    root.innerHTML = '<div class="form-banner form-banner--error">Could not load session. Please refresh.</div>';
+    return;
+  }
   if (!me) { location.href = 'login.html'; return; }
 
-  // â”€â”€ URL params â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const params     = new URLSearchParams(location.search);
-  const urlProvider = params.get('provider_id');   // set when coming from a provider profile
-  const urlRequest  = Number(params.get('request_id')) || 0; // set when returning to a known conversation
+  // URL params â€” read once, never change
+  const params      = new URLSearchParams(location.search);
+  const urlProvider = params.get('provider_id');
+  const urlRequest  = Number(params.get('request_id')) || 0;
 
-  // selectedId: the conversation currently open in the right panel
-  // 0 = none selected / show start screen
-  let selectedId = urlRequest;
-  let requests   = [];
-  let timer;
-  const userId   = Number(me.id);
+  // State
+  let selectedId         = urlRequest; // 0 = no conversation selected
+  let requests           = [];
+  let timer              = null;
+  let providerNameCache  = null; // fetched once when needed
+  const userId           = Number(me.id);
 
-  // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Helpers
   const fmt = ts => {
     const d = new Date((ts || '').replace(' ', 'T'));
     return isNaN(d) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
   const counterpart = r => me.role === 'client'
-    ? (r.provider_name  || 'Provider')
-    : (r.customer_name  || 'Customer');
+    ? (r.provider_name || 'Provider')
+    : (r.customer_name || 'Customer');
   const statusLabel = s => (s || '').replaceAll('_', ' ');
   const avatarOf    = name => esc((name || '?').trim().slice(0, 2).toUpperCase());
 
-  // â”€â”€ Load conversations from server â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Fetch provider name once and cache it (only needed for start-screen)
+  async function getProviderName() {
+    if (providerNameCache !== null) return providerNameCache;
+    try {
+      const res = await apiFetch('providers.php', null);
+      const p = (res.providers || []).find(x => String(x.id) === String(urlProvider));
+      providerNameCache = p ? esc(p.full_name) : 'this provider';
+    } catch (_) {
+      providerNameCache = 'this provider';
+    }
+    return providerNameCache;
+  }
+
+  // Load all conversations
   async function load(silent = false) {
-    // Don't reload while the user is actively typing
     if (silent && document.activeElement?.matches('.chat-composer textarea') &&
         document.activeElement.value.trim() !== '') {
       timer = setTimeout(() => load(true), 3000);
       return;
     }
-
     try {
       const res = await apiFetch('engagements.php', null);
       if (!res.ok) {
         if (!silent) root.innerHTML = '<div class="form-banner form-banner--error">Could not load conversations.</div>';
         return;
       }
-
       requests = res.requests || [];
 
-      // Only auto-set selectedId on first (non-silent) load.
-      // After that the user controls what is selected by clicking contacts.
+      // Auto-select only on first (non-silent) load
       if (!silent) {
         if (urlRequest && requests.some(r => Number(r.id) === urlRequest)) {
-          // Explicit request_id in URL and it exists â€” use it
           selectedId = urlRequest;
         } else if (urlProvider) {
-          // provider_id in URL â€” find existing conversation with that provider
           const match = requests.find(r => String(r.provider_id) === String(urlProvider));
-          // If match found, open it. If not, selectedId stays 0 so we show start-chat screen.
           selectedId = match ? Number(match.id) : 0;
+          // selectedId=0 means no conversation yet â€” show start-chat screen
         } else if (!selectedId || !requests.some(r => Number(r.id) === selectedId)) {
-          // No URL hints â€” default to most recent conversation
           selectedId = Number(requests[0]?.id || 0);
         }
+        // Prefetch provider name in the background so render() is instant
+        if (urlProvider && selectedId === 0) getProviderName();
       }
 
       render();
@@ -736,27 +747,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  async function providerName() {
-    try {
-      const res = await apiFetch('providers.php', null);
-      const p = (res.providers || []).find(x => String(x.id) === urlProvider);
-      return p ? esc(p.full_name) : 'this provider';
-    } catch (_) { return 'this provider'; }
-  }
-
-  // â”€â”€ Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Build sidebar â€” shows ALL past conversations so user can switch between them
   function buildSidebar() {
+    if (!requests.length) {
+      return `
+        <aside class="chat-sidebar">
+          <div class="chat-sidebar__header">
+            <div><strong>Chats</strong><span>${me.role === 'client' ? 'Customer inbox' : 'Provider inbox'}</span></div>
+            <button class="chat-refresh" type="button" aria-label="Refresh"><i class="fas fa-sync-alt"></i></button>
+          </div>
+          <div class="chat-contact-list">
+            <p class="chat-empty">No conversations yet.</p>
+          </div>
+        </aside>`;
+    }
+
     const items = requests.map(r => {
-      const last   = r.messages?.slice(-1)[0];
+      const last    = r.messages?.slice(-1)[0];
       const preview = last
         ? (last.message_type === 'price_offer'
-            ? 'ðŸ’° Price offer: MWK ' + parseFloat(last.message).toLocaleString()
+            ? 'Price offer: MWK ' + parseFloat(last.message).toLocaleString()
             : esc(last.message).slice(0, 38))
         : esc(statusLabel(r.status));
       const unread   = Number(r.unread_count || 0);
       const isActive = Number(r.id) === selectedId;
       return `
-        <button type="button" class="chat-contact ${isActive ? 'chat-contact--active' : ''}"
+        <button type="button"
+          class="chat-contact ${isActive ? 'chat-contact--active' : ''}"
           data-request-id="${r.id}">
           <span class="chat-avatar">${avatarOf(counterpart(r))}</span>
           <span class="chat-contact__body">
@@ -781,25 +798,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             <i class="fas fa-sync-alt"></i>
           </button>
         </div>
-        <div class="chat-contact-list">
-          ${items || '<p class="chat-empty">No conversations yet.</p>'}
-        </div>
+        <div class="chat-contact-list">${items}</div>
       </aside>`;
   }
 
-  // â”€â”€ Chat window â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Build chat window for a selected conversation
   function buildWindow(request) {
-    // No request selected â€” show empty state
     if (!request) {
       return `
         <section class="chat-window chat-window--empty">
           <i class="fas fa-comments"></i>
           <h2>Select a conversation</h2>
-          <small>${me.role === 'client' ? 'Pick a chat from the left or browse providers.' : 'Client requests appear here.'}</small>
+          <small>Pick a chat from the left panel.</small>
         </section>`;
     }
 
-    // Render bubbles
     const bubbles = (request.messages || []).map(m => {
       const mine = Number(m.sender_id) === userId;
       const who  = mine ? 'You' : esc(counterpart(request));
@@ -842,24 +855,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>`;
     }).join('');
 
-    const isProvider = me.role === 'provider';
+    const closed    = ['booked', 'cancelled'].includes(request.status);
     const isCustomer = me.role === 'client';
-
-    // Composer is visible for every status EXCEPT booked and cancelled
-    const closed   = ['booked', 'cancelled'].includes(request.status);
-    const canAccept = isCustomer && request.status === 'negotiating' && Number(request.proposed_amount) > 0;
-    const canPay    = isCustomer && request.status === 'awaiting_payment';
-    const pending   = isCustomer && request.status === 'payment_pending';
-    const agreed    = parseFloat(request.agreed_amount || 0)
-                        .toLocaleString('en-MW', { minimumFractionDigits: 2 });
-    const offered   = parseFloat(request.proposed_amount || 0)
-                        .toLocaleString('en-MW', { minimumFractionDigits: 2 });
+    const canAccept  = isCustomer && request.status === 'negotiating' && Number(request.proposed_amount) > 0;
+    const canPay     = isCustomer && request.status === 'awaiting_payment';
+    const pending    = isCustomer && request.status === 'payment_pending';
+    const agreed     = parseFloat(request.agreed_amount || 0).toLocaleString('en-MW', { minimumFractionDigits: 2 });
+    const offered    = parseFloat(request.proposed_amount || 0).toLocaleString('en-MW', { minimumFractionDigits: 2 });
 
     let banner = '';
     if (canAccept) {
       banner = `
         <div class="chat-action-banner chat-action-banner--offer">
-          <span><i class="fas fa-tag"></i> Provider is offering <strong>MWK ${esc(offered)}</strong></span>
+          <span><i class="fas fa-tag"></i> Provider offering <strong>MWK ${esc(offered)}</strong></span>
           <button class="btn-accept-offer" data-request-id="${request.id}">
             <i class="fas fa-check"></i> Accept price
           </button>
@@ -876,28 +884,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       banner = `
         <div class="chat-action-banner chat-action-banner--pending">
           <i class="fas fa-spinner fa-spin"></i>
-          <span>Payment in progressâ€¦
-            <a href="payment.html?request_id=${request.id}"
-               style="color:inherit;font-weight:700;text-decoration:underline;">
-              Check status
-            </a>
-          </span>
+          <span>Payment in progress â€” <a href="payment.html?request_id=${request.id}" style="color:inherit;font-weight:700;text-decoration:underline;">check status</a></span>
         </div>`;
     } else if (request.status === 'booked') {
-      banner = `
-        <div class="chat-action-banner chat-action-banner--done">
-          <i class="fas fa-check-circle"></i> Booking confirmed â€” payment complete.
-        </div>`;
+      banner = `<div class="chat-action-banner chat-action-banner--done"><i class="fas fa-check-circle"></i> Booking confirmed â€” payment complete.</div>`;
     } else if (request.status === 'cancelled') {
-      banner = `
-        <div class="chat-action-banner chat-action-banner--cancelled">
-          <i class="fas fa-ban"></i> This request was cancelled.
-        </div>`;
+      banner = `<div class="chat-action-banner chat-action-banner--cancelled"><i class="fas fa-ban"></i> This request was cancelled.</div>`;
     }
 
-    const placeholder = isProvider
-      ? 'Messageâ€¦ or type /price 5000 to set your price'
-      : 'Messageâ€¦';
+    const placeholder = me.role === 'provider'
+      ? 'Message... or type /price 5000 to set your price'
+      : 'Message...';
 
     return `
       <section class="chat-window">
@@ -909,25 +906,19 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
           <span class="chat-header-status">${esc(statusLabel(request.status))}</span>
         </div>
-
         <div class="chat-messages" id="chat-messages">
           ${bubbles || '<p class="chat-no-messages">No messages yet â€” say hello!</p>'}
         </div>
-
         ${banner}
-
         ${!closed ? `
         <form class="chat-composer" data-request-id="${request.id}">
-          <textarea name="message" maxlength="2000" rows="1"
-            placeholder="${placeholder}" required></textarea>
-          <button type="submit" aria-label="Send">
-            <i class="fas fa-paper-plane"></i>
-          </button>
+          <textarea name="message" maxlength="2000" rows="1" placeholder="${placeholder}" required></textarea>
+          <button type="submit" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
         </form>` : ''}
       </section>`;
   }
 
-  // â”€â”€ Start new conversation view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Build start-new-conversation view (only when provider_id in URL and no existing chat)
   function buildStartView(recipientName) {
     return `
       <section class="chat-window chat-window--start">
@@ -941,10 +932,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           <p>Describe the work you need, then negotiate the price in this chat.</p>
           <form id="new-request-form">
             <label>Service needed
-              <input name="service_title" maxlength="140" required placeholder="e.g. Alter two suits">
+              <input name="service_title" maxlength="140" required placeholder="e.g. Fix bathroom plumbing">
             </label>
             <label>First message
-              <textarea name="message" minlength="3" required placeholder="Hello, I need help withâ€¦"></textarea>
+              <textarea name="message" minlength="3" required placeholder="Hello, I need help with..."></textarea>
             </label>
             <button class="btn-primary" type="submit">
               <i class="fas fa-paper-plane"></i> Start chat
@@ -954,16 +945,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       </section>`;
   }
 
-  // â”€â”€ Main render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  async function render() {
-    // Show start-chat screen when:
-    // - there is a provider_id in the URL (coming from a provider profile)
-    // - AND there is no existing conversation with that provider (selectedId = 0)
-    // This works regardless of how many other conversations exist
-    const needsStartScreen = !!urlProvider && selectedId === 0 && me.role === 'client';
-    const recipient  = needsStartScreen ? await providerName() : '';
-    const selected   = requests.find(r => Number(r.id) === selectedId);
-    const rightPanel = needsStartScreen ? buildStartView(recipient) : buildWindow(selected);
+  // Render â€” always synchronous, no awaits
+  function render() {
+    // Show start-chat screen only when:
+    // a) provider_id is in the URL (from a provider profile page)
+    // b) no existing conversation with that provider was found
+    // c) current user is a customer
+    const showStartScreen = !!urlProvider && selectedId === 0 && me.role === 'client';
+    const selected   = requests.find(r => Number(r.id) === selectedId) || null;
+    const rightPanel = showStartScreen
+      ? buildStartView(providerNameCache || '...')
+      : buildWindow(selected);
 
     root.innerHTML = `<div class="chat-app">${buildSidebar()}${rightPanel}</div>`;
 
@@ -973,7 +965,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     root.querySelector('#new-request-form')?.addEventListener('submit', createRequest);
 
     clearTimeout(timer);
-    const hasPending = requests.some(r => r.status === 'payment_pending' && me.role === 'client');
+    const hasPending = me.role === 'client' && requests.some(r => r.status === 'payment_pending');
     if (hasPending) {
       const pReq = requests.find(r => r.status === 'payment_pending');
       timer = setTimeout(() => checkPaymentStatus(Number(pReq.id)), 7000);
@@ -982,7 +974,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // â”€â”€ Create request â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Create a new service request
   async function createRequest(e) {
     e.preventDefault();
     const form = e.target;
@@ -995,10 +987,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
       if (!res.ok) return toast(res.error || 'Could not start chat.', 'error');
       selectedId = Number(res.request_id);
-      // Switch URL to request_id â€” no more provider_id, prevents start-screen showing again
+      // Remove provider_id from URL â€” prevents start-screen showing again
       history.replaceState({}, '', 'messages.html?request_id=' + selectedId);
       toast('Conversation started!', 'success');
-      await load(true); // silent so auto-select doesn't overwrite selectedId we just set
+      await load(true);
     } catch (err) {
       toast('Connection error. Please try again.', 'error');
     }
@@ -1007,28 +999,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function checkPaymentStatus(requestId) {
     try {
       const res = await apiFetch('engagements.php', { action: 'check_payment', request_id: requestId });
-      if (res.ok && res.status !== 'pending') toast(res.message, res.status === 'successful' ? 'success' : 'info');
+      if (res.ok && res.status !== 'pending') {
+        toast(res.message, res.status === 'successful' ? 'success' : 'info');
+      }
     } catch (_) {}
     await load(true);
   }
 
-  // â”€â”€ Event delegation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Event delegation â€” all clicks on the chat-app go through here
   root.addEventListener('click', async e => {
     const contact = e.target.closest('.chat-contact');
     const accept  = e.target.closest('.btn-accept-offer');
     const refresh = e.target.closest('.chat-refresh');
 
-    if (refresh) await load();
+    if (refresh) { await load(); return; }
 
     if (contact) {
       selectedId = Number(contact.dataset.requestId);
+      // Always update URL to request_id only â€” removes provider_id so start-screen never shows again
       history.replaceState({}, '', 'messages.html?request_id=' + selectedId);
       render();
+      return;
     }
 
     if (accept) {
       accept.disabled = true;
-      accept.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Acceptingâ€¦';
+      accept.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Accepting...';
       try {
         const res = await apiFetch('engagements.php', {
           action:     'accept_price',
@@ -1042,8 +1038,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         toast(res.message, 'success');
         setTimeout(() => {
-          window.location.href = res.redirect_url ||
-            `payment.html?request_id=${accept.dataset.requestId}`;
+          window.location.href = res.redirect_url || `payment.html?request_id=${accept.dataset.requestId}`;
         }, 500);
       } catch (err) {
         toast('Connection error.', 'error');
@@ -1053,6 +1048,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // Message and price-offer submission
   root.addEventListener('submit', async e => {
     const form = e.target;
     if (!form.matches('.chat-composer')) return;
@@ -1060,7 +1056,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const raw = form.message.value.trim();
     if (!raw) return;
 
-    // Provider: /price 5000 to set a price
+    // Provider types /price 5000 to propose a price
     const priceMatch = raw.match(/^\/price\s+([\d,]+(?:\.\d{1,2})?)$/i);
     if (priceMatch) {
       const amount = priceMatch[1].replace(/,/g, '');
@@ -1077,7 +1073,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // Plain message
+    // Plain text message
     try {
       const res = await apiFetch('engagements.php', {
         action: 'message', request_id: Number(form.dataset.requestId), message: raw,
@@ -1089,6 +1085,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (_) { toast('Connection error.', 'error'); }
   });
 
+  // Enter to send (Shift+Enter = newline)
   root.addEventListener('keydown', e => {
     if (e.target.matches('.chat-composer textarea') && e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -1096,6 +1093,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // Auto-grow textarea
   root.addEventListener('input', e => {
     if (e.target.matches('.chat-composer textarea')) {
       e.target.style.height = 'auto';
@@ -1103,10 +1101,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // â”€â”€ Boot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  await load(); // non-silent so auto-select runs once
+  // Initial load â€” non-silent so auto-select runs once
+  await load();
 
-  // Auto-check payment when returning from PayChangu
+  // If returning from PayChangu payment page, verify payment status
   if (params.get('payment') === 'return' && selectedId) {
     setTimeout(async () => {
       try {
