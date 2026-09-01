@@ -678,10 +678,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const params     = new URLSearchParams(location.search);
   const providerId = params.get('provider_id');
-  // Honour an explicit request_id in the URL; this persists across reloads
+  // request_id from URL takes first priority
   let selectedId   = Number(params.get('request_id')) || 0;
   let requests     = [];
   let timer;
+  let initialised  = false;   // true after the first load completes
   const userId     = Number(me.id);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
@@ -707,14 +708,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
       requests = res.requests || [];
-      // If a specific provider_id is in the URL, always select that conversation.
-      // Otherwise keep the current selectedId if still valid, or fall back to first.
-      if (providerId) {
-        const match = requests.find(r => String(r.provider_id) === String(providerId));
-        if (match) selectedId = Number(match.id);
-      }
-      if (!selectedId || !requests.some(r => Number(r.id) === selectedId)) {
-        selectedId = Number(requests[0]?.id || 0);
+
+      // Auto-select logic runs on first load only.
+      // On background polls we never move the user to a different conversation.
+      if (!initialised) {
+        initialised = true;
+
+        if (selectedId && requests.some(r => Number(r.id) === selectedId)) {
+          // URL had a valid request_id — keep it, nothing to do
+        } else if (providerId) {
+          // URL has a provider_id — find the existing request with that provider
+          const match = requests.find(r => String(r.provider_id) === String(providerId));
+          selectedId = match ? Number(match.id) : 0;
+          // selectedId = 0 means no request exists yet → show start-conversation screen
+        } else if (!selectedId) {
+          // No hints in URL — default to most recent conversation
+          selectedId = Number(requests[0]?.id || 0);
+        }
       }
       render();
     } catch (err) {
@@ -992,7 +1002,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         message:       form.message.value.trim(),
       });
       if (!res.ok) return toast(res.error || 'Could not start chat.', 'error');
-      selectedId = Number(res.request_id);
+      selectedId  = Number(res.request_id);
+      initialised = true; // don't reset selection on next poll
+      // Replace URL with request_id — removes provider_id to avoid confusion
       history.replaceState({}, '', 'messages.html?request_id=' + selectedId);
       toast('Conversation started!', 'success');
       await load();
@@ -1021,6 +1033,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (contact) {
       selectedId = Number(contact.dataset.requestId);
+      // Update URL to use request_id only — drop provider_id so polling
+      // doesn't try to re-select a different conversation.
       history.replaceState({}, '', 'messages.html?request_id=' + selectedId);
       render();
     }
